@@ -4,31 +4,54 @@
 ## 1. 예시 폴더 구조
 
 ```
-📦 frontend/
-┣ 📂public/
-┣ 📂src/
-┃ ┣ 📂pages/
-┃ ┃ ┣ 📂MainPage/
-┃ ┃ ┣ 📂MyPage/
-┃ ┃ ┗ 📂CommunityPage/
-┃ ┃    ┗ 📂components/
-┃ ┣ 📂features/
-┃ ┃ ┣ 📂wiki/
-┃ ┃ ┃ ┣ 📂components/
-┃ ┃ ┃ ┗ 📂hooks/
-┃ ┃ ┣ 📂search/
-┃ ┣ 📂components/
-┃ ┣ 📂hooks/
-┃ ┣ 📂stores/
-┃ ┣ 📂utils/
-┃ ┣ 📂styles/
-┃ ┣ 📂types/
-┃ ┗ 📜main.tsx
-┣ 📜index.html
-┣ 📜vite.config.ts
-┗ 📜tsconfig.json
+📦src
+ ┣ 📂assets
+ ┃ ┗ 📜lpick-icon.svg
+ ┃   - 프로젝트에서 사용하는 정적 파일(SVG, 이미지 등)을 저장
+ ┣ 📂components
+ ┃ ┣ 📂Button
+ ┃ ┃ ┣ 📜Button.tsx
+ ┃ ┃ ┗ 📜index.ts
+ ┃ ┣ 📂Input
+ ┃ ┃ ┣ 📜Input.tsx
+ ┃ ┃ ┗ 📜index.ts
+ ┃ ┗ 📂Modal
+ ┃     ┣ 📜Modal.tsx
+ ┃     ┗ 📜index.ts
+ ┃   - 공통으로 사용되는 UI 컴포넌트
+ ┣ 📂hooks
+ ┃ ┗ 📂api
+ ┃     ┗ 📜useApi.ts
+ ┃   - 커스텀 훅을 정의하는 공간
+ ┣ 📂modules
+ ┃ ┗ 📂comment
+ ┃     ┗ 📂feature
+ ┃   - 기능 단위 비즈니스 로직을 구성하는 공간
+ ┣ 📂pages
+ ┃ ┣ 📂LplayerPage
+ ┃ ┣ 📂MainPage
+ ┃ ┗ 📂WikiPage
+ ┃     ┣ 📂EditPage
+ ┃     ┣ 📂ViewPage
+ ┃     ┃ ┣ 📂api
+ ┃     ┃ ┣ 📂components
+ ┃     ┃ ┣ 📂hooks
+ ┃     ┃ ┣ 📂types
+ ┃     ┃ ┗ 📜WikiViewPage.tsx
+ ┃     ┗ 📜index.tsx
+ ┃   - 실제 라우팅되는 페이지 단위 폴더. 페이지별로 하위 모듈을 세분화
+ ┣ 📂store
+ ┃   - 전역 상태 관리 관련 코드(zustand)를 저장
+ ┣ 📂styles
+ ┃ ┣ 📜GlobalStyle.tsx
+ ┃ ┗ 📜theme.ts
+ ┃   - 전역 스타일 설정 및 테마 설정
+ ┣ 📂types
+ ┃ ┗ 📜user.types.ts
+ ┃   - 전역에서 사용되는 타입들을 정의
+ ┣ 📜App.tsx
+ ┗ 📜main.tsx
 ```
-
 ---
 
 ## 2. 커밋 메시지 규칙
@@ -38,7 +61,19 @@
 ```
 <타입>: #<이슈번호> <작업 내용 요약>
 
-<본문>
+<선택 - 본문>
+```
+
+```
+✅
+feat: #13 앨범 검색 기능 구현 
+
+- 이미지 업로드 후 검색 요청 API 호출 기능 추가
+- 검색 결과 리스트 컴포넌트 생성 및 mock 데이터로 테스트
+
+
+🚫
+feat, fix: #15 댓글 기능 개발 및 검색 기능 수정
 ```
 
 ### 자주 사용하는 타입
@@ -90,9 +125,11 @@
 
 - 파일명: 컴포넌트는 `PascalCase`, 유틸은 `camelCase`
 - 폴더명: 디렉터리 폴더명은 `camelCase`, 직접적으로 바로 컴포넌트들이 들어있는 컴포넌트 폴더명은 `PascalCase`
-- `any` 사용 시 주석으로 사용 이유 적어두기
-- `console.log` 는 테스트용,
+- `console.log` 는 테스트용, commit 할 때 지우기
 - asset 파일 이름은 소문자
+- hook은 기능명 앞에 `use` 붙이기 (`useComment.tsx`)
+- api는 뒤에 `.api` 붙이기 (`comment.api.ts`)
+- `any` 사용 금지 (막아둠)
 
 ---
 
