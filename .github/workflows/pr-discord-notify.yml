@@ -13,15 +13,19 @@ jobs:
         run: |
           AUTHOR="${{ github.actor }}"
           if [ "$AUTHOR" = "c1vera" ]; then
-            echo "content=<@370855858260672512> 님! 채원님이 PR을 열었어요 🔔\n👉 ${{ github.event.pull_request.html_url }}" >> $GITHUB_OUTPUT
+            MESSAGE="<@370855858260672512> 님! 채원님이 PR을 열었어요! 리뷰 부탁드려요 👉 ${{ github.event.pull_request.html_url }}"
           elif [ "$AUTHOR" = "ckdduf138" ]; then
-            echo "content=<@287923007425478668> 님! 창열님이 PR을 열었어요 🔔\n👉 ${{ github.event.pull_request.html_url }}" >> $GITHUB_OUTPUT
+            MESSAGE="<@287923007425478668> 님! 창열님이 PR을 열었어요! 리뷰 부탁드려요 👉 ${{ github.event.pull_request.html_url }}"
           else
-            echo "content=새로운 PR이 생성되었습니다: ${{ github.event.pull_request.html_url }}" >> $GITHUB_OUTPUT
+            MESSAGE="새로운 PR이 생성되었습니다! 리뷰 부탁드려요 👉 ${{ github.event.pull_request.html_url }}"
+          fi
+          echo "message=$MESSAGE" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: 디스코드로 메시지 전송
-        uses: Ilshidur/action-discord@master
+        uses: tsickert/discord-webhook@v1.0.0
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-          message: ${{ steps.set-message.outputs.content }}
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          content: ${{ steps.set-message.outputs.message }}
+          username: "LPick PR Bot"
+          avatar-url: "https://i.pinimg.com/736x/f9/b0/31/f9b031356a9b2199651d3672aa5a4643.jpg"
