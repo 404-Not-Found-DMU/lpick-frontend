@@ -2,7 +2,7 @@ name: Push to Personal Repo for Vercel Deploy
 
 on:
   push:
-    branches: [refactor/app-router-migration] # ✅ 자동 푸시 트리거 브랜치 (필요 시 변경)
+    branches: [develop] # ✅ 자동 푸시 트리거 브랜치 (필요 시 변경)
 
 jobs:
   deploy:
