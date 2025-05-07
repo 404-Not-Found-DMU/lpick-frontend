@@ -1,0 +1,28 @@
+name: Push to Personal Repo for Vercel Deploy
+
+on:
+  push:
+    branches: [develop] # ✅ 자동 푸시 트리거 브랜치 (필요 시 변경)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Run build script
+        run: sh ./build.sh
+
+      - name: Push to personal repo
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.AUTO_ACTIONS }}
+        with:
+          source-directory: "output"
+          destination-github-username: c1vera       # ✅ 너의 GitHub 계정명
+          destination-repository-name: lpick-frontend-deploy   # ✅ 개인 배포용 레포 이름
+          user-email: ${{ secrets.EMAIL }}
+          commit-message: ${{ github.event.head_commit.message }}
+          target-branch: main                                   # ✅ 개인 레포 브랜치 (대부분 main)
