@@ -1,18 +1,23 @@
-// app/layout.tsx
-import { ReactNode } from 'react';
+// src/app/layout.tsx
 
-export const metadata = {
-  title: 'LPick',
-  description: 'LP 및 음향 커뮤니티 플랫폼',
-};
+import { ThemeProvider } from 'next-themes';
+import '../styles/globals.css';
+import { Header } from '@/components/Layout/Header';
+import { Footer } from '@/components/Layout/Footer';
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
+      <head></head>
       <body>
-        <h1>헤더</h1>
-        {children}
-        <h1>푸터</h1>
+        <ThemeProvider attribute="class">
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <div className="flex-1">{children}</div>
+
+            <Footer />
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

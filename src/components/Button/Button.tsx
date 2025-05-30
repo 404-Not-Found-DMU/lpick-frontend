@@ -1,15 +1,21 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import clsx from 'clsx';
-import React from 'react';
+// src/components/Button.tsx
+'use client'
+import React from 'react'
+import clsx from 'clsx'
+import { cva, type VariantProps } from 'class-variance-authority'
+
+
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none',
+  'inline-flex items-center justify-center rounded-md font-normal transition-colors focus:outline-none  disabled:opacity-50 disabled:pointer-events-none',
   {
     variants: {
       variant: {
-        fill: 'bg-primary text-white hover:bg-primary/90',
-        outline: 'border border-primary text-primary hover:bg-primary/10',
-        ghost: 'text-primary hover:bg-primary/10',
+        fill:    'hover:opacity-90 bg-violet-500 text-white hover:bg-violet-700',
+        outline: 'border hover:bg-opacity-10 border-violet-500 text-violet-500 hover:bg-violet-100',
+        ghost:   'hover:bg-opacity-10 text-violet-500 hover:text-violet-700',
+        themeToggle: 'bg-black text-white dark:bg-white dark:text-black dark:border-white ',
+        light: 'bg-white text-black border-black',
       },
       size: {
         sm: 'h-8 px-3 text-sm',
@@ -19,29 +25,33 @@ const buttonVariants = cva(
     },
     defaultVariants: {
       variant: 'fill',
-      size: 'md',
+      size:    'md',
     },
   }
-);
+)
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  children: React.ReactNode;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, children, ...props }, ref) => {
+  ({ variant, size, className, children, ...props }, ref) => {
+
+
     return (
       <button
-        className={clsx(buttonVariants({ variant, size }), className)}
         ref={ref}
+        className={clsx(
+          buttonVariants({ variant, size }),
+          className,
+        )}
         {...props}
       >
         {children}
       </button>
-    );
+    )
   }
-);
+)
 
-Button.displayName = 'Button';
+Button.displayName = 'Button'
