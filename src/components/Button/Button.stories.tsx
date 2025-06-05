@@ -11,15 +11,15 @@ const meta: Meta<ButtonProps> = {
     children: 'Button',
     variant: 'primary',
     size: 'md',
-    disabled: false,  
+    disabled: false,
   },
   argTypes: {
     variant: {
       control: { type: 'select' },
-      options: ['primary', 'outline', 'ghost', 'themeToggle', 'light'],
+      options: ['primary', 'outline', 'ghost', 'danger', 'success', 'themeToggle', 'light', 'dark'],
       description: '버튼 스타일 종류',
       table: {
-        type: { summary: `'primary' | 'outline' | 'ghost' | 'themeToggle' | 'light'` },
+        type: { summary: `'primary' | 'outline' | 'ghost' | 'danger' | 'success' | 'themeToggle' | 'light' | 'dark'` },
         defaultValue: { summary: 'primary' },
       },
     },
@@ -87,6 +87,13 @@ export const Danger: Story = {
   },
 };
 
+export const Success: Story = {
+  args: {
+    variant: 'success',
+    children: 'Success Button',
+  },
+};
+
 export const ThemeToggle: Story = {
   args: {
     variant: 'themeToggle',
@@ -98,6 +105,13 @@ export const Light: Story = {
   args: {
     variant: 'light',
     children: 'Light Button',
+  },
+};
+
+export const Dark: Story = {
+  args: {
+    variant: 'dark',
+    children: 'Dark Button',
   },
 };
 
@@ -119,7 +133,6 @@ export const Sizes: Story = {
     variant: 'primary',
   },
 };
-
 
 export const Disabled: Story = {
   args: {
