@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { LPickLogo } from '@/assets/images/LPickLogo';
 
-export const Footer = () => {
+const Footer = () => {
   const serviceLinks = [
     { href: '/about', label: 'LPick 소개' },
     { href: '/terms', label: '이용약관' },
@@ -56,3 +56,5 @@ export const Footer = () => {
     </footer>
   );
 };
+
+export default Footer;

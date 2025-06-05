@@ -8,7 +8,7 @@ export const AuthButton = () => {
   const router = useRouter();
 
   return (
-    <Button variant="fill" size="sm" onClick={() => router.push('/login')}>
+    <Button variant="primary" size="sm" onClick={() => router.push('/login')}>
       로그인
     </Button>
   );

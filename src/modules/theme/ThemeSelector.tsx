@@ -3,7 +3,7 @@ import { useTheme } from 'next-themes';
 import { Button } from '@/components';
 import { Moon, Sun } from 'lucide-react';
 
-export const ThemeSelector = () => {
+const ThemeSelector = () => {
   const { theme, setTheme } = useTheme();
 
   return (
@@ -15,3 +15,5 @@ export const ThemeSelector = () => {
     </div>
   );
 };
+
+export default ThemeSelector;

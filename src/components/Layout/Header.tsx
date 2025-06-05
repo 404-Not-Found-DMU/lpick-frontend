@@ -4,11 +4,11 @@ import { usePathname } from 'next/navigation';
 import { Search, Bell } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { LPickLogo } from '@/assets/images/LPickLogo';
-import { ThemeSelector } from '@/modules/theme/ThemeSelector';
+import { ThemeSelector } from '@/modules';
 import { UserAvatarWithAuth } from '@/components/Layout/UserAvatar';
 import clsx from 'clsx';
 
-export const Header = () => {
+const Header = () => {
   const NAV_ITEMS = [
     { href: '/wiki', label: '위키' },
     { href: '/community', label: '커뮤니티' },
@@ -68,3 +68,4 @@ export const Header = () => {
     </header>
   );
 };
+export default Header;
