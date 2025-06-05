@@ -1,7 +1,7 @@
 import { Button } from "@/components";
 
 // app/wiki/page.tsx
-export default function WikiRootPage() {
+export const WikiRootPage = () => {
   return (
     <main>
       <h2>위키 메인</h2>

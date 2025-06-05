@@ -2,7 +2,7 @@
 
 import { useWiki } from '../hooks/useWiki';
 
-export default function WikiDetail() {
+export const WikiDetail = () => {
   const { data, isLoading } = useWiki();
 
   if (isLoading) return <p>로딩 중...</p>;

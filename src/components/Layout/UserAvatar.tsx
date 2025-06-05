@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/Button/Button';
 import Link from 'next/link';
 
-export function AuthButton() {
+export const AuthButton = () => {
   const router = useRouter();
 
   return (
@@ -14,7 +14,7 @@ export function AuthButton() {
   );
 }
 
-export function UserAvatar() {
+export const UserAvatar = () => {
   return (
     <Link href="/mypage">
       😎

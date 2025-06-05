@@ -5,7 +5,7 @@ import '../styles/globals.css';
 import { Header } from '@/components/Layout/Header';
 import { Footer } from '@/components/Layout/Footer';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="ko">
       <head></head>

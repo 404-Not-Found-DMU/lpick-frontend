@@ -1,7 +1,7 @@
 // app/wiki/view/page.tsx
-import WikiDetail from './components/WikiDetail';
+import { WikiDetail } from './components/WikiDetail';
 
-export default function WikiViewPage() {
+export const WikiViewPage = () => {
   return (
     <main>
       <WikiDetail />

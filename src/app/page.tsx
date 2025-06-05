@@ -1,6 +1,6 @@
 const containerClass = 'flex flex-col items-center justify-center space-y-8 min-h-full';
 
-export default function Home() {
+export const Home = () => {
   return (
     <div className={containerClass}>
    

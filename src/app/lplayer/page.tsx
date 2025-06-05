@@ -1,7 +1,7 @@
 import { Button } from "@/components";
 
 // app/lplayer/page.tsx
-export default function LPlayerPage() {
+export const LPlayerPage = () =>{
   return (
     <main>
       <h2>LP 플레이어 페이지</h2>

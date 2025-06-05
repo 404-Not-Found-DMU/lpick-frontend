@@ -2,7 +2,7 @@ import Link from "next/link"
 import { LPickLogo } from "@/components/Icon/LPickLogo"
 
 
-export function Footer() {
+export const Footer = () => {
   return (
     <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-12">
       <div className="container mx-auto px-4">

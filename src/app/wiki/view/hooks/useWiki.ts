@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Wiki } from '../types/wiki.types';
 
-export function useWiki() {
+export const useWiki = () => {
   const [data, setData] = useState<Wiki | null>(null);
   const [isLoading, setLoading] = useState(true);
 
