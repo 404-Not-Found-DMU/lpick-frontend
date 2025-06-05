@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 
-export default function WikiEditPage() {
+export const WikiEditPage = () => {
   const [content, setContent] = useState('');
 
   return (
@@ -12,4 +12,4 @@ export default function WikiEditPage() {
       <textarea value={content} onChange={(e) => setContent(e.target.value)} />
     </main>
   );
-}
+};

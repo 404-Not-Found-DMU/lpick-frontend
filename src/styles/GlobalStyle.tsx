@@ -2,6 +2,6 @@
 
 import { GlobalStyles } from 'twin.macro';
 
-export default function GlobalStyle() {
+export const GlobalStyle = () => {
   return <GlobalStyles />;
-}
+};
