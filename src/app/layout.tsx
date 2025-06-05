@@ -6,9 +6,9 @@ import { Header, Footer } from '@/components';
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <body>
-      <ThemeProvider>
+        <ThemeProvider>
           <div className="flex min-h-screen flex-col">
             <Header />
             <div className="flex-1">{children}</div>

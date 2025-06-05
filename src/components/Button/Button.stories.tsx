@@ -19,7 +19,9 @@ const meta: Meta<ButtonProps> = {
       options: ['primary', 'outline', 'ghost', 'danger', 'success', 'themeToggle', 'light', 'dark'],
       description: '버튼 스타일 종류',
       table: {
-        type: { summary: `'primary' | 'outline' | 'ghost' | 'danger' | 'success' | 'themeToggle' | 'light' | 'dark'` },
+        type: {
+          summary: `'primary' | 'outline' | 'ghost' | 'danger' | 'success' | 'themeToggle' | 'light' | 'dark'`,
+        },
         defaultValue: { summary: 'primary' },
       },
     },
