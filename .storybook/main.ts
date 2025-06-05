@@ -14,5 +14,11 @@ const config: StorybookConfig = {
     options: {},
   },
   staticDirs: ['../public'],
+   babel: async (options) => {
+    return {
+      ...options,
+      plugins: ['babel-plugin-macros'],
+    };
+  },
 };
 export default config;
