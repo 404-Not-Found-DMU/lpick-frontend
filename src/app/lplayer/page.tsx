@@ -1,7 +1,7 @@
-import { Button } from "@/components";
+import { Button } from '@/components';
 
 // app/lplayer/page.tsx
-export const LPlayerPage = () =>{
+export const LPlayerPage = () => {
   return (
     <main>
       <h2>LP 플레이어 페이지</h2>
@@ -9,4 +9,4 @@ export const LPlayerPage = () =>{
       <Button>LP 플레이어 시작하기</Button>
     </main>
   );
-}
+};

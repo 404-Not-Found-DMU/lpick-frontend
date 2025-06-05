@@ -12,4 +12,4 @@ export const WikiEditPage = () => {
       <textarea value={content} onChange={(e) => setContent(e.target.value)} />
     </main>
   );
-}
+};

@@ -12,23 +12,15 @@ export const AuthButton = () => {
       로그인
     </Button>
   );
-}
+};
 
 export const UserAvatar = () => {
-  return (
-    <Link href="/mypage">
-      😎
-    </Link>
-  );
-}
+  return <Link href="/mypage">😎</Link>;
+};
 
 export const UserAvatarWithAuth = () => {
-    const isAuthenticated = false; // 로그인 관련 로직 작성 필요
-    
-    return isAuthenticated ? (
-        <UserAvatar />
-    ) : (
-        <AuthButton />
-    );
-}
+  const isAuthenticated = false; // 로그인 관련 로직 작성 필요
+
+  return isAuthenticated ? <UserAvatar /> : <AuthButton />;
+};
 export default UserAvatarWithAuth;

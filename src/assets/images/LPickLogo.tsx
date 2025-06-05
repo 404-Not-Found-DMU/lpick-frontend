@@ -1,4 +1,4 @@
-export const  LPickLogo = ({ className = 'w-8 h-8' }: { className?: string }) => {
+export const LPickLogo = ({ className = 'w-8 h-8' }: { className?: string }) => {
   return (
     <svg
       viewBox="0 0 3000 3000"
@@ -154,4 +154,4 @@ export const  LPickLogo = ({ className = 'w-8 h-8' }: { className?: string }) =>
       </g>
     </svg>
   );
-}
+};

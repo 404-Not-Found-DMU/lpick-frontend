@@ -14,4 +14,4 @@ export const WikiDetail = () => {
       <p>{data.content}</p>
     </section>
   );
-}
+};

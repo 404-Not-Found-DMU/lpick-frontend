@@ -3,7 +3,6 @@
 // import { usePathname } from "next/navigation"
 // import clsx from "clsx"
 
-
 // export const MainNav = () => {
 //   const pathname = usePathname()
 

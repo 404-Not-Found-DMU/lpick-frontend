@@ -38,7 +38,7 @@ export const Footer = () => {
                     href={href}
                     className="text-sm text-gray-500 transition-colors hover:text-violet-500 dark:text-gray-400 dark:hover:text-violet-400"
                   >
-                    {label} 
+                    {label}
                   </Link>
                 </li>
               ))}

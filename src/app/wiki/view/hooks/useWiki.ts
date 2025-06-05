@@ -15,4 +15,4 @@ export const useWiki = () => {
   }, []);
 
   return { data, isLoading };
-}
+};

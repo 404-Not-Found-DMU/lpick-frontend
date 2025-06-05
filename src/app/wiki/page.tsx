@@ -1,4 +1,4 @@
-import { Button } from "@/components";
+import { Button } from '@/components';
 
 // app/wiki/page.tsx
 export const WikiRootPage = () => {
@@ -8,4 +8,4 @@ export const WikiRootPage = () => {
       <Button>위키 시작하기</Button>
     </main>
   );
-}
+};
