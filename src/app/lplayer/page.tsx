@@ -1,7 +1,7 @@
 import { Button } from '@/components';
 
 // app/lplayer/page.tsx
-export const LPlayerPage = () => {
+const LPlayerPage = () => {
   return (
     <main>
       <h2>LP 플레이어 페이지</h2>
@@ -10,3 +10,4 @@ export const LPlayerPage = () => {
     </main>
   );
 };
+export default LPlayerPage;

@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 
-export const WikiEditPage = () => {
+const WikiEditPage = () => {
   const [content, setContent] = useState('');
 
   return (
@@ -13,3 +13,5 @@ export const WikiEditPage = () => {
     </main>
   );
 };
+
+export default WikiEditPage;
