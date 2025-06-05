@@ -1,4 +1,4 @@
-/* globals.css */
+/* 글로벌 스타일 */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,9 +13,6 @@ body {
 
 button {
   cursor: pointer;
-  focus: {
-    outline: none;
-  }
 }
 
 button:focus {
