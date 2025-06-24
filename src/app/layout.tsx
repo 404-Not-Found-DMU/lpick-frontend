@@ -9,9 +9,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     <html lang="ko" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          <div className="flex min-h-screen flex-col">
+          <div className="flex min-h-screen h-screen flex-col">
             <Header />
-            <div className="flex-1">{children}</div>
+            <div className="flex-1 flex flex-col items-center justify-center w-screen h-full">{children}</div>
             <Footer />
           </div>
         </ThemeProvider>

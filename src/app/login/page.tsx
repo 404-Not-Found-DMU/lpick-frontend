@@ -239,7 +239,7 @@ const LoginPage = () => {
                     <div className="text-2xl font-bold text-violet-500 dark:text-violet-400">
                       10K+
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">LP 정보</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">LP 정보</div> 
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-indigo-500 dark:text-indigo-400">
@@ -252,6 +252,7 @@ const LoginPage = () => {
                       50K+
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">커뮤니티 글</div>
+
                   </div>
                 </div>
               </div>
