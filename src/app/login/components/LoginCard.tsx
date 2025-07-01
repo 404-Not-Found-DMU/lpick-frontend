@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import KakaoIcon from '@/assets/icons/KakaoIcon';
 
 const LoginCard = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +36,7 @@ const LoginCard = () => {
                     </div>
                   </div>
                   {/* 반짝이는 효과 */}
-                  <div className="absolute right-4 top-4 h-1.5 w-1.5 animate-ping rounded-full bg-white opacity-60 sm:right-6 sm:top-6 sm:h-2 sm:w-2 lg:right-8 lg:top-8 lg:h-3 lg:w-3"></div>
+                  <div className="absolute right-4 top-4 h-1.5 w-1.5 animate-ping rounded-full bg-white opacity-100 sm:right-6 sm:top-6 sm:h-2 sm:w-2 lg:right-8 lg:top-8 lg:h-3 lg:w-3"></div>
                   <div className="absolute bottom-6 left-3 h-1 w-1 animate-pulse rounded-full bg-violet-300 sm:bottom-8 sm:left-4 sm:h-1.5 sm:w-1.5 lg:bottom-12 lg:left-6 lg:h-2 lg:w-2"></div>
                 </div>
               </div>
@@ -53,9 +53,9 @@ const LoginCard = () => {
             <button
               onClick={handleKakaoLogin}
               disabled={isLoading}
-              className="flex h-10 w-full transform items-center justify-center space-x-2 rounded-xl bg-[#FEE500] font-semibold text-black shadow-lg transition-all hover:scale-105 hover:bg-[#FDD835] hover:shadow-xl sm:h-12 lg:h-14"
+              className="flex h-10 w-full transform items-center justify-center space-x-2 rounded-xl bg-[#FEE500] font-medium text-black shadow-lg transition-all hover:scale-105 hover:bg-[#FDD835] hover:shadow-xl sm:h-12 lg:h-14"
             >
-              <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
+              <KakaoIcon className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
               <span className="text-sm sm:text-base lg:text-lg">카카오로 시작하기</span>
             </button>
           </div>
