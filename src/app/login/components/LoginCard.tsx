@@ -21,7 +21,7 @@ const LoginCard = () => {
     <div className="flex justify-center lg:justify-end">
       <div className="w-full max-w-[320px] sm:max-w-[360px] lg:max-w-[420px]">
         {/* 로그인 카드 */}
-        <div className="animate-fade-in animation-delay-300 rounded-2xl border border-white/20 bg-white/80 p-5 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-800/80 sm:p-6 lg:p-8">
+        <div className="animate-fade-in animation-delay-300 rounded-2xl border border-white/20 bg-white/80 p-5 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-800/80 sm:p-6 lg:p-8 mb-10 lg:mb-0">
           <div className="mb-4 text-center sm:mb-6 lg:mb-8">
             <div className="inline-flex h-10 w-10 items-center justify-center rounded-full shadow-lg sm:h-12 sm:w-12 lg:h-16 lg:w-16">
               {/* LP 레코드 배경 */}
