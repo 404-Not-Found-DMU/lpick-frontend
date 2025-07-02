@@ -10,14 +10,12 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-gray-100 dark:bg-gray-900 py-6 border-t border-gray-200 dark:border-gray-800">
-      <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+    <footer className="border-t border-gray-200 bg-gray-100 py-6 dark:border-gray-800 dark:bg-gray-900">
+      <div className="container mx-auto flex flex-col items-center justify-between space-y-4 px-4 md:flex-row md:space-y-0">
         {/* 왼쪽: 로고 */}
         <div className="flex items-center space-x-2">
           <LPickLogo className="h-6 w-6 text-lavender-500 dark:text-lavender-400" />
-          <span className="text-md font-bold text-lavender-500 dark:text-lavender-400">
-            LPick
-          </span>
+          <span className="text-md font-bold text-lavender-500 dark:text-lavender-400">LPick</span>
         </div>
 
         {/* 가운데: 링크 */}
@@ -27,7 +25,7 @@ const Footer = () => {
               <li key={href}>
                 <Link
                   href={href}
-                  className="hover:text-lavender-500 dark:hover:text-lavender-300 transition-colors"
+                  className="transition-colors hover:text-lavender-500 dark:hover:text-lavender-300"
                 >
                   {label}
                 </Link>

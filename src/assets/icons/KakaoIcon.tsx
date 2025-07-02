@@ -16,4 +16,4 @@ const KakaoIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export default KakaoIcon; 
+export default KakaoIcon;
