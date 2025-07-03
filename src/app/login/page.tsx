@@ -99,7 +99,7 @@ const LoginPage = () => {
             </div>
 
             {/* 오른쪽 섹션: 데스크탑 전용 로그인 카드 */}
-            <div className="hidden justify-center lg:flex lg:justify-end">
+            <div className="hidden justify-center lg:flex lg:justify-end h-full items-center">
               <LoginCard />
             </div>
           </div>
