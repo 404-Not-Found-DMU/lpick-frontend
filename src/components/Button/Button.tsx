@@ -10,9 +10,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-violet-500 text-white hover:bg-violet-700',
-        outline: 'border border-violet-500 text-violet-500 hover:bg-violet-100',
-        ghost: 'text-violet-500 hover:bg-violet-100',
+        primary: 'bg-lavender-500 text-white hover:bg-lavender-700',
+        outline: 'border border-lavender-500 text-lavender-500 hover:bg-lavender-100',
+        ghost: 'text-lavender-500 hover:bg-lavender-100',
         danger: 'bg-red-500 text-white hover:bg-red-700',
         success: 'bg-green-500 text-white hover:bg-green-700',
         themeToggle: 'bg-black text-white dark:bg-white dark:text-black dark:border-white',

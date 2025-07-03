@@ -10,45 +10,33 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="border-t border-gray-200 bg-gray-100 py-12 dark:border-gray-800 dark:bg-gray-900">
-      <div className="container mx-auto px-4">
-        <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3">
-          {/* 로고 및 설명 */}
-          <div>
-            <Link href="/" className="mb-4 inline-flex items-center">
-              <LPickLogo className="mr-2 h-8 w-8 text-violet-500 dark:text-violet-400" />
-              <span className="text-2xl font-medium text-violet-500 dark:text-violet-400">
-                LPick
-              </span>
-            </Link>
-            <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-              LP 컬렉션을 관리하고 음악 애호가들과 소통하는 공간
-            </p>
-          </div>
-
-          {/* 서비스 안내 */}
-          <div>
-            <h3 className="mb-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-              서비스 안내
-            </h3>
-            <ul className="space-y-3">
-              {serviceLinks.map(({ href, label }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className="text-sm text-gray-500 transition-colors hover:text-violet-500 dark:text-gray-400 dark:hover:text-violet-400"
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+    <footer className="border-t border-gray-200 bg-gray-100 py-6 dark:border-gray-800 dark:bg-gray-900">
+      <div className="container mx-auto flex flex-col items-center justify-between space-y-4 px-4 md:flex-row md:space-y-0">
+        {/* 왼쪽: 로고 */}
+        <div className="flex items-center space-x-2">
+          <LPickLogo className="h-6 w-6 text-lavender-500 dark:text-lavender-400" />
+          <span className="text-md font-bold text-lavender-500 dark:text-lavender-400">LPick</span>
         </div>
 
-        {/* 저작권 */}
-        <div className="border-t border-gray-200 pt-8 text-center dark:border-gray-800">
-          <p className="text-sm text-gray-400 dark:text-gray-500">
+        {/* 가운데: 링크 */}
+        <nav>
+          <ul className="flex flex-wrap items-center justify-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+            {serviceLinks.map(({ href, label }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className="transition-colors hover:text-lavender-500 dark:hover:text-lavender-300"
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* 오른쪽: 저작권 */}
+        <div>
+          <p className="text-xs text-gray-500 dark:text-gray-600">
             © 2025 LPick. All rights reserved.
           </p>
         </div>
