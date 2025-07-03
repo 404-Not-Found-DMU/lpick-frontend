@@ -18,11 +18,11 @@ const LoginPage = () => {
       {/* 메인 콘텐츠 */}
       <main className="relative z-10 flex flex-1 items-center justify-center">
         <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto grid grid-cols-1 items-center gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16">
-            {/* 왼쪽 섹션: 브랜딩 및 기능 소개 */}
-            <div className="animate-fade-in space-y-6 opacity-0 sm:space-y-8">
+          <div className="mx-auto grid grid-cols-1 items-start gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16">
+            {/* 왼쪽 섹션 */}
+            <div className="flex flex-col space-y-8">
               {/* 메인 타이틀 */}
-              <div className="text-center lg:text-left">
+              <div className="order-1 text-center lg:order-1 lg:text-left">
                 <div className="animate-slide-up mb-4 inline-flex items-center rounded-full bg-violet-100 px-3 py-1.5 text-xs font-medium text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 sm:px-4 sm:py-2 sm:text-sm">
                   <Sparkles className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                   LP 음악의 새로운 경험
@@ -41,8 +41,13 @@ const LoginPage = () => {
                 </p>
               </div>
 
-              {/* 기능 카드들 */}
-              <div className="animate-slide-up grid grid-cols-1 gap-2 delay-300 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 lg:gap-4">
+              {/* 로그인 카드: 모바일에서는 2번째, 데스크탑에서는 오른쪽 */}
+              <div className="order-2 flex justify-center lg:hidden">
+                <LoginCard />
+              </div>
+
+              {/* 기능 카드 */}
+              <div className="animate-slide-up order-3 grid grid-cols-1 gap-2 delay-300 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 lg:gap-4">
                 <FeatureCard
                   icon={
                     <Disc className="h-4 w-4 text-violet-500 dark:text-violet-400 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
@@ -67,7 +72,7 @@ const LoginPage = () => {
               </div>
 
               {/* 통계 정보 */}
-              <div className="animate-slide-up delay-400 flex items-center justify-center space-x-3 sm:space-x-4 md:space-x-6 lg:justify-start">
+              <div className="animate-slide-up delay-400 order-4 flex items-center justify-center space-x-3 sm:space-x-4 md:space-x-6 lg:justify-start">
                 <div className="text-center">
                   <div className="text-lg font-bold text-violet-500 dark:text-violet-400 sm:text-xl lg:text-2xl">
                     10K+
@@ -93,8 +98,10 @@ const LoginPage = () => {
               </div>
             </div>
 
-            {/* 오른쪽 섹션: 로그인 폼 */}
-            <LoginCard />
+            {/* 오른쪽 섹션: 데스크탑 전용 로그인 카드 */}
+            <div className="hidden justify-center lg:flex lg:justify-end">
+              <LoginCard />
+            </div>
           </div>
         </div>
       </main>
