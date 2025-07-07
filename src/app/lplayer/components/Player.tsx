@@ -25,7 +25,7 @@ const Player = () => {
 
   return (
     <div className="animate-slide-up mx-auto flex w-full min-w-0 max-w-[95vw] flex-col items-center justify-center rounded-2xl bg-white px-6 py-8 shadow-lg dark:bg-gray-900 sm:max-w-[700px] md:max-w-[900px] md:px-12 md:py-10 xl:max-w-[1200px] xl:px-32 xl:py-20 2xl:max-w-[1400px]">
-      <audio ref={audioRef} controls className="w-full">
+      <audio ref={audioRef} controls className="hidden">
         {currentTrack && (
           <>
             <source src={currentTrack.mp3} type="audio/mpeg" />
