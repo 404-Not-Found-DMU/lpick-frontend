@@ -43,5 +43,20 @@ export const useAudio = () => {
     };
   }, [isShuffle]);
 
-  return { audioRef };
+  const handlePrev = () => {
+    if (!playlist.length) return;
+
+    const prevIndex = currentTrackIndex > 0 ? currentTrackIndex - 1 : 0;
+    setCurrentTrackId(playlist[prevIndex].id);
+  };
+
+  const handleNext = () => {
+    if (!playlist.length) return;
+
+    const nextIndex =
+      currentTrackIndex < playlist.length - 1 ? currentTrackIndex + 1 : playlist.length - 1;
+    setCurrentTrackId(playlist[nextIndex].id);
+  };
+
+  return { audioRef, handlePrev, handleNext };
 };

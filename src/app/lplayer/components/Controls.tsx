@@ -1,12 +1,31 @@
 'use client';
 
+import React from 'react';
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 import clsx from 'clsx';
 import { Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward } from 'lucide-react';
 
-const Controls = () => {
-  const { loopMode, isPlaying, isShuffle, togglePlay, cycleLoopMode, toggleShuffle } =
+interface ControlsProps {
+  audioRef: React.RefObject<HTMLAudioElement>;
+  playlist: { id: string }[];
+  currentTrackIndex: number;
+}
+
+const Controls = ({ audioRef, playlist, currentTrackIndex }: ControlsProps) => {
+  const { loopMode, isPlaying, isShuffle, cycleLoopMode, toggleShuffle, setIsPlaying } =
     useAudioPlayerStore();
+
+  const handlePlayPause = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      audio.play();
+      setIsPlaying(true);
+    }
+  };
 
   return (
     <div className="mt-4 flex items-center justify-center gap-8">
@@ -28,11 +47,11 @@ const Controls = () => {
           onClick={cycleLoopMode}
         />
       )}
-      <SkipBack size={24} className="cursor-pointer text-gray-700" />
+      <SkipBack onClick={handlePrev} size={24} className="cursor-pointer text-gray-700" />
 
       <button
         className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-500 text-lg text-white"
-        onClick={togglePlay}
+        onClick={handlePlayPause}
       >
         {isPlaying ? (
           <Pause size={24} strokeWidth={0.5} fill={'#ffffff'} className="text-white" />
@@ -41,13 +60,13 @@ const Controls = () => {
         )}
       </button>
 
-      <SkipForward size={24} className="cursor-pointer text-gray-700" />
+      <SkipForward onClick={handleNext} size={24} className="cursor-pointer text-gray-700" />
       <Shuffle
         size={24}
-        strokeWidth={isShuffle ? 2 : 3}
+        strokeWidth={isShuffle ? 3 : 2}
         className={clsx(
           'cursor-pointer transition-all',
-          isShuffle ? 'text-gray-700' : 'text-purple-600',
+          isShuffle ? 'text-purple-600' : 'text-gray-700',
         )}
         onClick={toggleShuffle}
       />

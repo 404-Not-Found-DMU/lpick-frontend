@@ -3,10 +3,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import styled from 'styled-components';
-import albumImg from '@/app/lplayer/temp/album.jpg';
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 
-const RecordPlayer = () => {
+interface RecordPlayerProps {
+  cover?: string;
+}
+
+const RecordPlayer = ({ cover }: RecordPlayerProps) => {
   const { isPlaying } = useAudioPlayerStore();
 
   const [rotation, setRotation] = useState(0);
@@ -50,20 +53,19 @@ const RecordPlayer = () => {
         }}
       >
         <Image
-          src={albumImg}
+          src={cover || '/lplayer/temp/images/album1.png'}
           alt="Album Cover"
-          width={0}
-          height={0}
+          width={400}
+          height={400}
           className="h-[180px] w-[180px] rounded-full object-cover sm:h-[240px] sm:w-[240px] md:h-[280px] md:w-[280px] xl:h-[400px] xl:w-[400px]"
           sizes="(max-width: 640px) 180px, (max-width: 768px) 240px, (max-width: 1280px) 280px, 400px"
+          unoptimized
         />
         <CenterPin />
         <InnerRing1 />
         <InnerRing2 />
       </LPDisc>
 
-      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-      {/* @ts-ignore */}
       <ToneArm $isPlaying={isPlaying}>
         <Needle />
         <NeedleGlow />
@@ -192,7 +194,7 @@ const InnerRing2 = styled.div`
   }
 `;
 
-const ToneArm = styled.div<{ isPlaying: boolean }>`
+const ToneArm = styled.div<{ $isPlaying: boolean }>`
   position: absolute;
   z-index: 30;
   border-radius: 6px;
@@ -207,31 +209,31 @@ const ToneArm = styled.div<{ isPlaying: boolean }>`
   transform-origin: top left;
   filter: drop-shadow(2px 4px 2px rgba(0, 0, 0, 0.3));
   transition: all 0.7s ease-in-out;
-  transform: ${({ isPlaying }) =>
-    isPlaying ? 'rotate(45deg) translateZ(12px)' : 'rotate(10deg) translateZ(0)'};
+  transform: ${({ $isPlaying }) =>
+    $isPlaying ? 'rotate(45deg) translateZ(12px)' : 'rotate(10deg) translateZ(0)'};
   @media (min-width: 640px) {
     height: 110px;
     width: 9px;
     right: -32px;
     top: 44px;
-    transform: ${({ isPlaying }) =>
-      isPlaying ? 'rotate(45deg) translateZ(18px)' : 'rotate(10deg) translateZ(0)'};
+    transform: ${({ $isPlaying }) =>
+      $isPlaying ? 'rotate(45deg) translateZ(18px)' : 'rotate(10deg) translateZ(0)'};
   }
   @media (min-width: 768px) {
     height: 130px;
     width: 10px;
     right: -40px;
     top: 52px;
-    transform: ${({ isPlaying }) =>
-      isPlaying ? 'rotate(45deg) translateZ(22px)' : 'rotate(10deg) translateZ(0)'};
+    transform: ${({ $isPlaying }) =>
+      $isPlaying ? 'rotate(45deg) translateZ(22px)' : 'rotate(10deg) translateZ(0)'};
   }
   @media (min-width: 1280px) {
     height: 180px;
     width: 14px;
     right: -60px;
     top: 72px;
-    transform: ${({ isPlaying }) =>
-      isPlaying ? 'rotate(45deg) translateZ(32px)' : 'rotate(10deg) translateZ(0)'};
+    transform: ${({ $isPlaying }) =>
+      $isPlaying ? 'rotate(45deg) translateZ(32px)' : 'rotate(10deg) translateZ(0)'};
   }
 `;
 

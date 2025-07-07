@@ -1,24 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
 import TabMenu from './TabMenu';
 
-const playlist = [
-  {
-    id: 1,
-    title: 'Pink Floyd - The Dark Side of the Moon',
-    artist: 'Pink Floyd',
-    duration: '3:45',
-  },
-  { id: 2, title: 'Miles Davis - Kind of Blue', artist: 'Miles Davis', duration: '4:12' },
-  { id: 3, title: 'Fleetwood Mac - Rumours', artist: 'Fleetwood Mac', duration: '3:58' },
-  { id: 4, title: 'The Beatles - Abbey Road', artist: 'The Beatles', duration: '4:30' },
-  { id: 5, title: 'Radiohead - OK Computer', artist: 'Radiohead', duration: '5:15' },
-];
+import { useAudioPlayerStore } from '@/store/audioPlayerStore';
+
+import { fetchPlaylist } from '../api/playlist.api';
+
+import type { TempTrack } from '../temp/playlist.temp';
+import PlaylistDuration from './PlaylistDuration';
 
 const Playlist = () => {
   const [selected, setSelected] = useState<'playlist' | 'collection'>('playlist');
-  const [selectedTrackId, setSelectedTrackId] = useState<number>(1);
+  const { currentTrackId, setCurrentTrackId } = useAudioPlayerStore();
+  const [playlist, setPlaylist] = useState<TempTrack[]>([]);
+  useEffect(() => {
+    fetchPlaylist().then((data) => setPlaylist(data));
+  }, []);
 
   return (
     <div className="animate-slide-up mx-auto flex max-h-[70vh] w-full min-w-[260px] max-w-[400px] flex-col gap-8 overflow-y-auto sm:mx-0 md:max-w-[500px] lg:min-w-[400px] xl:max-w-[400px]">
@@ -29,11 +28,11 @@ const Playlist = () => {
         </h3>
         <ul className="space-y-2">
           {playlist.map((item, i) => {
-            const isActive = item.id === selectedTrackId;
+            const isActive = item.id === currentTrackId;
             return (
               <li
                 key={item.id}
-                onClick={() => setSelectedTrackId(item.id)}
+                onClick={() => setCurrentTrackId(item.id)}
                 className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg p-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
                   isActive ? 'bg-purple-100 font-semibold text-purple-700' : ''
                 }`}
@@ -51,9 +50,13 @@ const Playlist = () => {
                     <p className="text-xs text-gray-500">{item.artist}</p>
                   </div>
                 </div>
-                <span className={`${isActive ? 'font-semibold text-purple-700' : 'text-gray-500'}`}>
-                  {item.duration}
-                </span>
+                {/* duration은 Player에서 동적으로 관리되므로, 현재 곡만 표시 */}
+                {isActive && (
+                  <span className="font-semibold text-purple-700">
+                    {/* ProgressBar에서 보여주는 duration과 동일하게 표시 */}
+                    <PlaylistDuration />
+                  </span>
+                )}
               </li>
             );
           })}

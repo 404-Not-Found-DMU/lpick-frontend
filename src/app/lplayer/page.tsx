@@ -1,3 +1,7 @@
+'use client';
+
+import React from 'react';
+
 import Player from './components/Player';
 import Playlist from './components/Playlist';
 

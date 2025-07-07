@@ -12,6 +12,9 @@ interface AudioPlayerState {
   currentTime: number;
   duration: number;
 
+  currentTrackId: number;
+  setCurrentTrackId: (id: number) => void;
+
   togglePlay: () => void;
   toggleMute: () => void;
   cycleLoopMode: () => void;
@@ -31,6 +34,8 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   currentTime: 0,
   duration: 225,
 
+  currentTrackId: 1,
+
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
   toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
   cycleLoopMode: () => {
@@ -46,4 +51,5 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   setCurrentTime: (t) => set({ currentTime: t }),
   setDuration: (t) => set({ duration: t }),
   setIsPlaying: (b) => set({ isPlaying: b }),
+  setCurrentTrackId: (id) => set({ currentTrackId: id }),
 }));
