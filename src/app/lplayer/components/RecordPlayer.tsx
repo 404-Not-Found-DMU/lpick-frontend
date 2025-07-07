@@ -41,7 +41,6 @@ const RecordPlayer = () => {
       }
     };
   }, [isPlaying]);
-
   return (
     <LPContainer>
       <LPDisc
@@ -53,17 +52,19 @@ const RecordPlayer = () => {
         <Image
           src={albumImg}
           alt="Album Cover"
-          width={320}
-          height={320}
-          className="rounded-full object-cover"
-          sizes="320px"
+          width={0}
+          height={0}
+          className="h-[180px] w-[180px] rounded-full object-cover sm:h-[240px] sm:w-[240px] md:h-[280px] md:w-[280px] xl:h-[400px] xl:w-[400px]"
+          sizes="(max-width: 640px) 180px, (max-width: 768px) 240px, (max-width: 1280px) 280px, 400px"
         />
         <CenterPin />
         <InnerRing1 />
         <InnerRing2 />
       </LPDisc>
 
-      <ToneArm isPlaying={isPlaying}>
+      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+      {/* @ts-ignore */}
+      <ToneArm $isPlaying={isPlaying}>
         <Needle />
         <NeedleGlow />
       </ToneArm>
@@ -73,12 +74,28 @@ const RecordPlayer = () => {
 
 const LPContainer = styled.div`
   perspective: 800px;
-  width: 320px;
-  height: 320px;
+  width: 180px;
+  height: 180px;
   border-radius: 9999px;
   background: linear-gradient(to bottom right, #2b2b2b, #1a1a1a);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  @media (min-width: 640px) {
+    width: 240px;
+    height: 240px;
+  }
+  @media (min-width: 768px) {
+    width: 280px;
+    height: 280px;
+  }
+  @media (min-width: 1280px) {
+    width: 400px;
+    height: 400px;
+  }
 `;
 
 const LPDisc = styled.div`
@@ -92,9 +109,22 @@ const LPDisc = styled.div`
   transform-style: preserve-3d;
   transform-origin: 50% 50%;
   position: relative;
-  width: 320px;
-  height: 320px;
+  margin: 0 auto;
+  width: 180px;
+  height: 180px;
   transition: transform 0.7s ease-out;
+  @media (min-width: 640px) {
+    width: 240px;
+    height: 240px;
+  }
+  @media (min-width: 768px) {
+    width: 280px;
+    height: 280px;
+  }
+  @media (min-width: 1280px) {
+    width: 400px;
+    height: 400px;
+  }
 `;
 
 const CenterPin = styled.div`
@@ -102,45 +132,74 @@ const CenterPin = styled.div`
   left: 50%;
   top: 50%;
   z-index: 20;
-  width: 80px;
-  height: 80px;
-  margin-left: -40px;
-  margin-top: -40px;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  margin-top: -20px;
   border-radius: 9999px;
   background: radial-gradient(circle at center, #9c6b4c 0%, #66332f 60%, #3b1d1a 100%);
   box-shadow:
     0 4px 8px rgba(0, 0, 0, 0.8),
     inset 0 4px 6px rgba(255, 255, 255, 0.15);
-  border: 3px solid #4b2a21;
+  border: 2px solid #4b2a21;
   transform: rotate(-15deg);
+  @media (min-width: 640px) {
+    width: 56px;
+    height: 56px;
+    margin-left: -28px;
+    margin-top: -28px;
+    border-width: 3px;
+  }
+  @media (min-width: 1280px) {
+    width: 80px;
+    height: 80px;
+    margin-left: -40px;
+    margin-top: -40px;
+  }
 `;
 
 const InnerRing1 = styled.div`
   position: absolute;
-  inset: 16px;
+  inset: 8px;
   border-radius: 9999px;
-  border: 4px solid #111;
+  border: 2px solid #111;
   opacity: 0.35;
   box-shadow: inset 0 0 10px #000;
+  @media (min-width: 640px) {
+    inset: 12px;
+    border-width: 3px;
+  }
+  @media (min-width: 1280px) {
+    inset: 16px;
+    border-width: 4px;
+  }
 `;
 
 const InnerRing2 = styled.div`
   position: absolute;
-  inset: 40px;
+  inset: 18px;
   border-radius: 9999px;
-  border: 2px solid #444;
+  border: 1px solid #444;
   opacity: 0.25;
   box-shadow: inset 0 0 5px #222;
+  @media (min-width: 640px) {
+    inset: 28px;
+    border-width: 1.5px;
+  }
+  @media (min-width: 1280px) {
+    inset: 40px;
+    border-width: 2px;
+  }
 `;
 
 const ToneArm = styled.div<{ isPlaying: boolean }>`
   position: absolute;
   z-index: 30;
   border-radius: 6px;
-  height: 140px;
-  width: 10px;
-  right: -48px;
-  top: 58px;
+  height: 80px;
+  width: 7px;
+  right: -24px;
+  top: 32px;
   background: linear-gradient(135deg, #bbb 0%, #666 60%, #444 90%);
   box-shadow:
     0 6px 15px rgba(0, 0, 0, 0.6),
@@ -149,7 +208,31 @@ const ToneArm = styled.div<{ isPlaying: boolean }>`
   filter: drop-shadow(2px 4px 2px rgba(0, 0, 0, 0.3));
   transition: all 0.7s ease-in-out;
   transform: ${({ isPlaying }) =>
-    isPlaying ? 'rotate(45deg) translateZ(25px)' : 'rotate(10deg) translateZ(0)'};
+    isPlaying ? 'rotate(45deg) translateZ(12px)' : 'rotate(10deg) translateZ(0)'};
+  @media (min-width: 640px) {
+    height: 110px;
+    width: 9px;
+    right: -32px;
+    top: 44px;
+    transform: ${({ isPlaying }) =>
+      isPlaying ? 'rotate(45deg) translateZ(18px)' : 'rotate(10deg) translateZ(0)'};
+  }
+  @media (min-width: 768px) {
+    height: 130px;
+    width: 10px;
+    right: -40px;
+    top: 52px;
+    transform: ${({ isPlaying }) =>
+      isPlaying ? 'rotate(45deg) translateZ(22px)' : 'rotate(10deg) translateZ(0)'};
+  }
+  @media (min-width: 1280px) {
+    height: 180px;
+    width: 14px;
+    right: -60px;
+    top: 72px;
+    transform: ${({ isPlaying }) =>
+      isPlaying ? 'rotate(45deg) translateZ(32px)' : 'rotate(10deg) translateZ(0)'};
+  }
 `;
 
 const Needle = styled.div`

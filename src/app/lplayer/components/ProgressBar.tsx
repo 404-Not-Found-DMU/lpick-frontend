@@ -28,7 +28,7 @@ const ProgressBar = () => {
   };
 
   return (
-    <div className="w-full px-4">
+    <div className="w-full px-2 sm:px-4">
       <div className="mb-1 flex items-center justify-between text-xs text-gray-500">
         <span>{formatTime(currentTime)}</span>
         <span>{formatTime(duration)}</span>

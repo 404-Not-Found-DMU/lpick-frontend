@@ -19,7 +19,7 @@ const TabMenu = ({ selected, setSelected }: TabMenuProps) => {
       <button
         onClick={() => setSelected('playlist')}
         className={clsx(
-          'relative z-10 flex w-full min-w-[120px] items-center justify-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
+          'relative z-10 flex w-full min-w-[80px] items-center justify-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors sm:min-w-[120px]',
           selected === 'playlist' ? 'text-white' : 'text-gray-600',
         )}
       >
@@ -30,7 +30,7 @@ const TabMenu = ({ selected, setSelected }: TabMenuProps) => {
       <button
         onClick={() => setSelected('collection')}
         className={clsx(
-          'relative z-10 flex w-full min-w-[120px] items-center justify-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
+          'relative z-10 flex w-full min-w-[80px] items-center justify-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors sm:min-w-[120px]',
           selected === 'collection' ? 'text-white' : 'text-gray-600',
         )}
       >

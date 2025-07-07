@@ -30,18 +30,18 @@ const VolumeBar = () => {
 
   return (
     <div className="flex items-center space-x-2">
-      <button onClick={toggleMute}>
+      <button onClick={toggleMute} aria-label={volume === 0 ? '음소거 해제' : '음소거'}>
         {volume === 0 ? (
-          <Volume2 size={20} className="text-gray-700" />
-        ) : (
           <VolumeOff size={20} className="text-gray-700" />
+        ) : (
+          <Volume2 size={20} className="text-gray-700" />
         )}
       </button>
 
       <div
         ref={ref}
         onMouseDown={handleBarClick}
-        className="relative h-1 w-24 cursor-pointer rounded-full bg-gray-200"
+        className="relative h-1 w-32 cursor-pointer rounded-full bg-gray-200 sm:w-40"
       >
         <div
           className="absolute left-0 top-0 h-1 rounded-full bg-purple-400"

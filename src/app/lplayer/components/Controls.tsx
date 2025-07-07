@@ -35,9 +35,9 @@ const Controls = () => {
         onClick={togglePlay}
       >
         {isPlaying ? (
-          <Play size={24} strokeWidth={0.5} fill={'#ffffff'} className="text-white" />
-        ) : (
           <Pause size={24} strokeWidth={0.5} fill={'#ffffff'} className="text-white" />
+        ) : (
+          <Play size={24} strokeWidth={0.5} fill={'#ffffff'} className="text-white" />
         )}
       </button>
 

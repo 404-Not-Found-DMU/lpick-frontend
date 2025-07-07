@@ -21,10 +21,10 @@ const Playlist = () => {
   const [selectedTrackId, setSelectedTrackId] = useState<number>(1);
 
   return (
-    <div className="animate-slide-up mx-auto flex max-h-[70vh] w-full max-w-[400px] flex-col gap-8 overflow-y-auto sm:mx-0">
+    <div className="animate-slide-up mx-auto flex max-h-[70vh] w-full min-w-[260px] max-w-[400px] flex-col gap-8 overflow-y-auto sm:mx-0 md:max-w-[500px] lg:min-w-[400px] xl:max-w-[400px]">
       <TabMenu selected={selected} setSelected={setSelected} />
-      <div className="rounded-2xl bg-white p-4 shadow-md">
-        <h3 className="mb-4 font-bold text-gray-800">
+      <div className="rounded-2xl bg-white p-4 shadow-md dark:bg-gray-900">
+        <h3 className="mb-4 font-bold text-gray-800 dark:text-white">
           {selected === 'playlist' ? '현재 재생 목록' : '내 컬렉션'}
         </h3>
         <ul className="space-y-2">
@@ -34,7 +34,7 @@ const Playlist = () => {
               <li
                 key={item.id}
                 onClick={() => setSelectedTrackId(item.id)}
-                className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg p-2 text-sm hover:bg-gray-100 ${
+                className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg p-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
                   isActive ? 'bg-purple-100 font-semibold text-purple-700' : ''
                 }`}
               >

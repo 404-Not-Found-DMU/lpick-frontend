@@ -3,8 +3,8 @@ import Playlist from './components/Playlist';
 
 const LPlayerPage = () => {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-violet-50 via-white to-indigo-50 px-4 py-6 dark:from-gray-900 dark:via-gray-800 dark:to-violet-900/20">
-      <div className="mx-auto flex flex-col items-center justify-center gap-10 px-4 xl:flex-row xl:items-start xl:px-6">
+    <div className="w-full bg-gradient-to-br from-violet-50 via-white to-indigo-50 px-2 py-4 dark:from-gray-900 dark:via-gray-800 dark:to-violet-900/20 md:px-4 md:py-6">
+      <div className="mx-auto flex flex-col items-center justify-center gap-6 md:gap-8 lg:flex-row lg:items-start lg:gap-10 lg:px-6">
         <Player />
         <Playlist />
       </div>
