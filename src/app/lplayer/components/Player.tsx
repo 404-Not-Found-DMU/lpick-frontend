@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import RecordPlayer from './RecordPlayer';
-import ProgressBar from './ProgressBar';
+import PlayerProgressBar from './PlayerProgressBar';
 import PlayerControls from './Controls';
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 import { useAudio } from '../hooks/useAudioPlayer';
@@ -42,7 +42,7 @@ const Player = () => {
             {currentTrack?.artist || '-'}
           </p>
         </div>
-        <ProgressBar audioRef={audioRef} />
+        <PlayerProgressBar audioRef={audioRef} />
         <PlayerControls audioRef={audioRef} />
       </div>
     </div>

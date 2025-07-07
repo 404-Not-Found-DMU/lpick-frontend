@@ -8,10 +8,15 @@ import { fetchPlaylist } from './api/playlist.api';
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 
 const LPlayerPage = () => {
-  const { setPlaylist } = useAudioPlayerStore();
+  const { setPlaylist, setIsPlaying } = useAudioPlayerStore();
 
   useEffect(() => {
     fetchPlaylist().then((data) => setPlaylist(data));
+
+    return () => {
+      setPlaylist([]);
+      setIsPlaying(false);
+    };
   }, []);
 
   return (

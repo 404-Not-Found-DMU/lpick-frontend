@@ -8,7 +8,7 @@ interface UseProgressBarProps {
 
 export function useProgressBar({ vertical = false, onChange }: UseProgressBarProps = {}) {
   const ref = useRef<HTMLDivElement>(null);
-  const [percent, setPercent] = useState(100);
+  const [percent, setPercent] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
   const updatePercent = (clientX: number, clientY: number) => {

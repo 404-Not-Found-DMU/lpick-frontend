@@ -20,12 +20,7 @@ export const useAudio = () => {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-
-    if (isPlaying) {
-      audio.play().catch((e) => console.warn('Autoplay blocked:', e));
-    } else {
-      audio.pause();
-    }
+    isPlaying ? audio.play() : audio.pause();
   }, [isPlaying]);
 
   useEffect(() => {

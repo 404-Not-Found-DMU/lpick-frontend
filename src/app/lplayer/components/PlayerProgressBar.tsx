@@ -8,8 +8,8 @@ interface ProgressBarProps {
   audioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
-const ProgressBar = ({ audioRef }: ProgressBarProps) => {
-  const { setCurrentTime } = useAudioPlayerStore();
+const PlayerProgressBar = ({ audioRef }: ProgressBarProps) => {
+  const { setIsPlaying, setCurrentTime } = useAudioPlayerStore();
 
   const { ref, percent, setPercent, handleMouseDown } = useProgressBar({
     onChange: (p) => {
@@ -21,7 +21,6 @@ const ProgressBar = ({ audioRef }: ProgressBarProps) => {
     },
   });
 
-  // audio time → percent
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -60,7 +59,10 @@ const ProgressBar = ({ audioRef }: ProgressBarProps) => {
 
       <div
         ref={ref}
-        onMouseDown={handleMouseDown}
+        onMouseDown={(e) => {
+          handleMouseDown(e);
+          setIsPlaying(true);
+        }}
         className="relative h-2 w-full cursor-pointer rounded-full bg-gray-200"
       >
         <div
@@ -76,4 +78,4 @@ const ProgressBar = ({ audioRef }: ProgressBarProps) => {
   );
 };
 
-export default ProgressBar;
+export default PlayerProgressBar;
