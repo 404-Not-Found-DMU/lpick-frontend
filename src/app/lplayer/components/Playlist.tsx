@@ -1,26 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import TabMenu from './TabMenu';
 
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 
-import { fetchPlaylist } from '../api/playlist.api';
-
-import type { TempTrack } from '../temp/playlist.temp';
 import PlaylistDuration from './PlaylistDuration';
 
 const Playlist = () => {
   const [selected, setSelected] = useState<'playlist' | 'collection'>('playlist');
-  const { currentTrackId, setCurrentTrackId } = useAudioPlayerStore();
-  const [playlist, setPlaylist] = useState<TempTrack[]>([]);
-  useEffect(() => {
-    fetchPlaylist().then((data) => setPlaylist(data));
-  }, []);
+  const { playlist, currentTrackId, setCurrentTrackId } = useAudioPlayerStore();
 
   return (
-    <div className="animate-slide-up mx-auto flex max-h-[70vh] w-full min-w-[260px] max-w-[400px] flex-col gap-8 overflow-y-auto sm:mx-0 md:max-w-[500px] lg:min-w-[400px] xl:max-w-[400px]">
+    <div className="animate-slide-up mx-auto flex max-h-[70vh] w-full min-w-[260px] max-w-[400px] flex-col gap-8 overflow-y-auto sm:mx-0 md:max-w-[400px] lg:min-w-[400px] xl:max-w-[400px]">
       <TabMenu selected={selected} setSelected={setSelected} />
       <div className="rounded-2xl bg-white p-4 shadow-md dark:bg-gray-900">
         <h3 className="mb-4 font-bold text-gray-800 dark:text-white">
@@ -53,7 +46,6 @@ const Playlist = () => {
                 {/* duration은 Player에서 동적으로 관리되므로, 현재 곡만 표시 */}
                 {isActive && (
                   <span className="font-semibold text-purple-700">
-                    {/* ProgressBar에서 보여주는 duration과 동일하게 표시 */}
                     <PlaylistDuration />
                   </span>
                 )}

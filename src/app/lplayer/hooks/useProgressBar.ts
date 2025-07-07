@@ -1,28 +1,46 @@
-import { useState, useRef, useEffect } from 'react';
+// hooks/useProgressBar.ts
+import { useEffect, useRef, useState } from 'react';
 
-export function useProgressBar(initialPercent = 0) {
+interface UseProgressBarProps {
+  vertical?: boolean;
+  onChange?: (percent: number) => void;
+}
+
+export function useProgressBar({ vertical = false, onChange }: UseProgressBarProps = {}) {
   const ref = useRef<HTMLDivElement>(null);
-  const [percent, setPercent] = useState(initialPercent);
+  const [percent, setPercent] = useState(100);
   const [isDragging, setIsDragging] = useState(false);
 
-  const updatePercent = (clientX: number) => {
+  const updatePercent = (clientX: number, clientY: number) => {
     if (!ref.current) return;
-    const { left, width } = ref.current.getBoundingClientRect();
-    const x = clientX - left;
-    const newPercent = Math.min(Math.max((x / width) * 100, 0), 100);
+    const rect = ref.current.getBoundingClientRect();
+
+    let newPercent = 0;
+
+    if (vertical) {
+      const y = clientY - rect.top;
+      newPercent = 100 - Math.min(Math.max((y / rect.height) * 100, 0), 100);
+    } else {
+      const x = clientX - rect.left;
+      newPercent = Math.min(Math.max((x / rect.width) * 100, 0), 100);
+    }
+
     setPercent(newPercent);
+    if (onChange) onChange(newPercent);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
-    updatePercent(e.clientX);
+    updatePercent(e.clientX, e.clientY);
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging) updatePercent(e.clientX);
+    if (isDragging) updatePercent(e.clientX, e.clientY);
   };
 
-  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
   useEffect(() => {
     if (isDragging) {

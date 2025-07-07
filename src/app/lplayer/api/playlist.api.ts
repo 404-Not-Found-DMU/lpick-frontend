@@ -1,5 +1,5 @@
-import { tempPlaylist, TempTrack } from '../temp/playlist.temp';
+import { tempPlaylist, MusicTrack } from '../temp/playlist.temp';
 
-export const fetchPlaylist = async (): Promise<TempTrack[]> => {
+export const fetchPlaylist = async (): Promise<MusicTrack[]> => {
   return tempPlaylist;
 };

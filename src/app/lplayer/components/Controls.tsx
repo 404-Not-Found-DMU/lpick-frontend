@@ -4,28 +4,23 @@ import React from 'react';
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 import clsx from 'clsx';
 import { Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward } from 'lucide-react';
+import VolumeBar from './VolumeBar';
 
-interface ControlsProps {
-  audioRef: React.RefObject<HTMLAudioElement>;
-  playlist: { id: string }[];
-  currentTrackIndex: number;
+interface PlayerControlsProps {
+  audioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
-const Controls = ({ audioRef, playlist, currentTrackIndex }: ControlsProps) => {
-  const { loopMode, isPlaying, isShuffle, cycleLoopMode, toggleShuffle, setIsPlaying } =
-    useAudioPlayerStore();
-
-  const handlePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
-      audio.play();
-      setIsPlaying(true);
-    }
-  };
+const PlayerControls = ({ audioRef }: PlayerControlsProps) => {
+  const {
+    loopMode,
+    isPlaying,
+    isShuffle,
+    cycleLoopMode,
+    toggleShuffle,
+    togglePlay,
+    goToPrevTrack,
+    goToNextTrack,
+  } = useAudioPlayerStore();
 
   return (
     <div className="mt-4 flex items-center justify-center gap-8">
@@ -47,11 +42,11 @@ const Controls = ({ audioRef, playlist, currentTrackIndex }: ControlsProps) => {
           onClick={cycleLoopMode}
         />
       )}
-      <SkipBack onClick={handlePrev} size={24} className="cursor-pointer text-gray-700" />
+      <SkipBack onClick={goToPrevTrack} size={24} className="cursor-pointer text-gray-700" />
 
       <button
         className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-500 text-lg text-white"
-        onClick={handlePlayPause}
+        onClick={togglePlay}
       >
         {isPlaying ? (
           <Pause size={24} strokeWidth={0.5} fill={'#ffffff'} className="text-white" />
@@ -60,7 +55,7 @@ const Controls = ({ audioRef, playlist, currentTrackIndex }: ControlsProps) => {
         )}
       </button>
 
-      <SkipForward onClick={handleNext} size={24} className="cursor-pointer text-gray-700" />
+      <SkipForward onClick={goToNextTrack} size={24} className="cursor-pointer text-gray-700" />
       <Shuffle
         size={24}
         strokeWidth={isShuffle ? 3 : 2}
@@ -70,8 +65,11 @@ const Controls = ({ audioRef, playlist, currentTrackIndex }: ControlsProps) => {
         )}
         onClick={toggleShuffle}
       />
+      <div className="absolute right-0 -translate-x-1/2">
+        <VolumeBar audioRef={audioRef} />
+      </div>
     </div>
   );
 };
 
-export default Controls;
+export default PlayerControls;

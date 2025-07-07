@@ -1,67 +1,47 @@
 'use client';
 
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect } from 'react';
+import { useProgressBar } from '../hooks/useProgressBar';
 
 interface ProgressBarProps {
-  audioRef: React.RefObject<HTMLAudioElement>;
+  audioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
 const ProgressBar = ({ audioRef }: ProgressBarProps) => {
-  const [progress, setProgress] = useState(0);
   const { setCurrentTime } = useAudioPlayerStore();
-  const barRef = useRef<HTMLDivElement | null>(null);
 
+  const { ref, percent, setPercent, handleMouseDown } = useProgressBar({
+    onChange: (p) => {
+      const audio = audioRef.current;
+      if (!audio || !audio.duration) return;
+      const newTime = (p / 100) * audio.duration;
+      audio.currentTime = newTime;
+      setCurrentTime(newTime);
+    },
+  });
+
+  // audio time → percent
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const updateProgress = () => {
-      if (audio.duration) {
-        const current = audio.currentTime;
-        const total = audio.duration;
-        setProgress((current / total) * 100);
-      }
+      if (!audio.duration) return;
+      const current = audio.currentTime;
+      const total = audio.duration;
+      setPercent((current / total) * 100);
     };
+
+    const resetProgress = () => setPercent(0);
 
     audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended', resetProgress);
     return () => {
       audio.removeEventListener('timeupdate', updateProgress);
+      audio.removeEventListener('ended', resetProgress);
     };
-  }, [audioRef]);
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    const audio = audioRef.current;
-    const bar = barRef.current;
-    if (!audio || !bar || !audio.duration) return;
-
-    const rect = bar.getBoundingClientRect();
-
-    const update = (clientX: number) => {
-      const x = clientX - rect.left;
-      const clampedX = Math.min(Math.max(x, 0), rect.width);
-      const ratio = clampedX / rect.width;
-      const newTime = ratio * audio.duration;
-
-      audio.currentTime = newTime;
-      setCurrentTime(newTime);
-      setProgress(ratio * 100);
-    };
-
-    update(e.clientX);
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      update(moveEvent.clientX);
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
+  }, [audioRef, setPercent]);
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -79,17 +59,17 @@ const ProgressBar = ({ audioRef }: ProgressBarProps) => {
       </div>
 
       <div
-        ref={barRef}
+        ref={ref}
         onMouseDown={handleMouseDown}
         className="relative h-2 w-full cursor-pointer rounded-full bg-gray-200"
       >
         <div
           className="absolute left-0 top-0 h-2 rounded-full bg-purple-400"
-          style={{ width: `${progress}%` }}
+          style={{ width: `${percent}%` }}
         />
         <div
           className="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-purple-500 shadow-md transition-transform"
-          style={{ left: `calc(${progress}% - 0.5rem)` }}
+          style={{ left: `calc(${percent}% - 0.5rem)` }}
         />
       </div>
     </div>

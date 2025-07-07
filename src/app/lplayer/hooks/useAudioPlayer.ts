@@ -4,16 +4,28 @@ import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 import { useRef, useEffect } from 'react';
 
 export const useAudio = () => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { isPlaying, setIsPlaying, setCurrentTime, setDuration, isMuted, loopMode, isShuffle } =
-    useAudioPlayerStore();
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const {
+    isPlaying,
+    currentTime,
+    isMuted,
+    loopMode,
+    isShuffle,
+    setIsPlaying,
+    setCurrentTime,
+    setDuration,
+    goToNextTrack,
+  } = useAudioPlayerStore();
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (isPlaying) audio.play();
-    else audio.pause();
+    if (isPlaying) {
+      audio.play().catch((e) => console.warn('Autoplay blocked:', e));
+    } else {
+      audio.pause();
+    }
   }, [isPlaying]);
 
   useEffect(() => {
@@ -29,34 +41,24 @@ export const useAudio = () => {
     if (!audio) return;
 
     const update = () => setCurrentTime(audio.currentTime);
-    const loaded = () => setDuration(audio.duration);
+    const loaded = () => {
+      setDuration(audio.duration);
 
-    audio.addEventListener('timeupdate', update);
+      if (isPlaying && audio) {
+        setIsPlaying(true);
+      }
+    };
+
     audio.addEventListener('loadedmetadata', loaded);
-    audio.addEventListener('ended', () => {
-      setIsPlaying(false);
-    });
+    audio.addEventListener('timeupdate', update);
+    audio.addEventListener('ended', goToNextTrack);
 
     return () => {
       audio.removeEventListener('timeupdate', update);
       audio.removeEventListener('loadedmetadata', loaded);
+      audio.addEventListener('ended', goToNextTrack);
     };
   }, [isShuffle]);
 
-  const handlePrev = () => {
-    if (!playlist.length) return;
-
-    const prevIndex = currentTrackIndex > 0 ? currentTrackIndex - 1 : 0;
-    setCurrentTrackId(playlist[prevIndex].id);
-  };
-
-  const handleNext = () => {
-    if (!playlist.length) return;
-
-    const nextIndex =
-      currentTrackIndex < playlist.length - 1 ? currentTrackIndex + 1 : playlist.length - 1;
-    setCurrentTrackId(playlist[nextIndex].id);
-  };
-
-  return { audioRef, handlePrev, handleNext };
+  return { audioRef, currentTime };
 };

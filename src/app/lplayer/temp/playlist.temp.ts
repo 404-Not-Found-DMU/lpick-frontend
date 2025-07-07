@@ -1,4 +1,4 @@
-export interface TempTrack {
+export interface MusicTrack {
   id: number;
   title: string;
   artist: string;
@@ -6,7 +6,7 @@ export interface TempTrack {
   cover: string;
 }
 
-export const tempPlaylist: TempTrack[] = [
+export const tempPlaylist: MusicTrack[] = [
   {
     id: 1,
     title: 'Pink Floyd - The Dark Side of the Moon',
