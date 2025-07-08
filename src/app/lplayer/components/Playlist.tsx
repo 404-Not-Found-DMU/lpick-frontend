@@ -13,7 +13,7 @@ const Playlist = () => {
   const { playlist, currentTrackId, setCurrentTrackId } = useAudioPlayerStore();
 
   return (
-    <div className="animate-slide-up mx-auto flex max-h-[70vh] w-full min-w-[260px] max-w-[400px] flex-col gap-8 overflow-y-auto sm:mx-0 md:max-w-[400px] lg:min-w-[400px] xl:max-w-[400px]">
+    <div className="animate-slide-up mx-auto flex max-h-[70vh] w-full min-w-[260px] max-w-[400px] flex-col gap-8 sm:mx-0 md:max-w-[400px] lg:min-w-[400px] xl:max-w-[400px]">
       <TabMenu selected={selected} setSelected={setSelected} />
       <div className="rounded-2xl bg-white p-4 shadow-md dark:bg-gray-900">
         <h3 className="mb-4 font-bold text-gray-800 dark:text-white">
