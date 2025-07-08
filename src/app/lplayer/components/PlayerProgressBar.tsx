@@ -66,11 +66,11 @@ const PlayerProgressBar = ({ audioRef }: ProgressBarProps) => {
         className="relative h-2 w-full cursor-pointer rounded-full bg-gray-200"
       >
         <div
-          className="absolute left-0 top-0 h-2 rounded-full bg-purple-400"
+          className="absolute left-0 top-0 h-2 rounded-full bg-violet-400"
           style={{ width: `${percent}%` }}
         />
         <div
-          className="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-purple-500 shadow-md transition-transform"
+          className="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-violet-500 shadow-md transition-transform"
           style={{ left: `calc(${percent}% - 0.5rem)` }}
         />
       </div>

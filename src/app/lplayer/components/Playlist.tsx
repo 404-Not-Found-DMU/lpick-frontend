@@ -27,13 +27,13 @@ const Playlist = () => {
                 key={item.id}
                 onClick={() => setCurrentTrackId(item.id)}
                 className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg p-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                  isActive ? 'bg-purple-100 font-semibold text-purple-700' : ''
+                  isActive ? 'bg-violet-100 font-semibold text-violet-700' : ''
                 }`}
               >
                 <div className="flex items-center space-x-3">
                   <div
                     className={`flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full text-xl text-white ${
-                      isActive ? 'bg-purple-600' : 'bg-gradient-to-r from-purple-400 to-blue-400'
+                      isActive ? 'bg-violet-600' : 'bg-gradient-to-r from-violet-400 to-blue-400'
                     }`}
                   >
                     {i + 1}
@@ -45,7 +45,7 @@ const Playlist = () => {
                 </div>
                 {/* duration은 Player에서 동적으로 관리되므로, 현재 곡만 표시 */}
                 {isActive && (
-                  <span className="font-semibold text-purple-700">
+                  <span className="font-semibold text-violet-700">
                     <PlaylistDuration />
                   </span>
                 )}

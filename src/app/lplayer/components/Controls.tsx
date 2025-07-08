@@ -28,7 +28,7 @@ const PlayerControls = ({ audioRef }: PlayerControlsProps) => {
         <Repeat1
           size={24}
           strokeWidth={3}
-          className="cursor-pointer text-purple-600 transition-all"
+          className="cursor-pointer text-violet-600 transition-all"
           onClick={cycleLoopMode}
         />
       ) : (
@@ -37,7 +37,7 @@ const PlayerControls = ({ audioRef }: PlayerControlsProps) => {
           strokeWidth={loopMode === 'none' ? 2 : 3}
           className={clsx(
             'cursor-pointer transition-all',
-            loopMode === 'none' ? 'text-gray-700' : 'text-purple-600',
+            loopMode === 'none' ? 'text-gray-700' : 'text-violet-600',
           )}
           onClick={cycleLoopMode}
         />
@@ -45,7 +45,7 @@ const PlayerControls = ({ audioRef }: PlayerControlsProps) => {
       <SkipBack onClick={goToPrevTrack} size={24} className="cursor-pointer text-gray-700" />
 
       <button
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-500 text-lg text-white"
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-500 text-lg text-white"
         onClick={togglePlay}
       >
         {isPlaying ? (
@@ -61,7 +61,7 @@ const PlayerControls = ({ audioRef }: PlayerControlsProps) => {
         strokeWidth={isShuffle ? 3 : 2}
         className={clsx(
           'cursor-pointer transition-all',
-          isShuffle ? 'text-purple-600' : 'text-gray-700',
+          isShuffle ? 'text-violet-600' : 'text-gray-700',
         )}
         onClick={toggleShuffle}
       />

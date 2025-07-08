@@ -11,7 +11,7 @@ const TabMenu = ({ selected, setSelected }: TabMenuProps) => {
     <div className="relative flex w-auto items-center justify-center rounded-xl p-1 shadow-md">
       <div
         className={clsx(
-          'absolute left-1 top-1 flex h-[calc(100%-0.5rem)] w-[calc(50%-8px)] rounded-lg bg-purple-400 transition-transform duration-300',
+          'absolute left-1 top-1 flex h-[calc(100%-0.5rem)] w-[calc(50%-8px)] rounded-lg bg-violet-400 transition-transform duration-300',
           selected === 'collection' && 'translate-x-[calc(100%+8px)]',
         )}
       />
