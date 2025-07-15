@@ -1,0 +1,34 @@
+import type { InfoboxData, TracklistData } from "@/types/hierarchical.editor.types"
+import { InfoboxForm } from "./InfoboxForm"
+import { TracklistForm } from "./TracklistForm"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card/Card"
+
+interface FixedSectionsProps {
+  infoboxData: InfoboxData
+  onInfoboxUpdate: (data: InfoboxData) => void
+  tracklistData: TracklistData
+  onTracklistUpdate: (data: TracklistData) => void
+}
+
+export function FixedSections({ infoboxData, onInfoboxUpdate, tracklistData, onTracklistUpdate }: FixedSectionsProps) {
+  return (
+    <div className="space-y-6">
+      <Card className="bg-white dark:bg-gray-800 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-base font-semibold">기본 정보</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <InfoboxForm data={infoboxData} onUpdate={onInfoboxUpdate} />
+        </CardContent>
+      </Card>
+      <Card className="bg-white dark:bg-gray-800 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-base font-semibold">트랙리스트</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TracklistForm data={tracklistData} onUpdate={onTracklistUpdate} />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
