@@ -2,6 +2,7 @@
 import { ThemeProvider } from '@/modules/theme/ThemeProvider';
 
 import '../styles/globals.css';
+import '@toast-ui/editor/dist/toastui-editor.css';
 import { Header, Footer } from '@/components';
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
