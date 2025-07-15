@@ -20,6 +20,7 @@ import { SortableTextBlock } from './SortableTextBlock';
 import { Button } from '@/components/Button';
 import { PlusCircle } from 'lucide-react';
 import { LivePreview } from './LivePreview';
+import React from 'react';
 
 // 임시 데이터터
 const initialInfoboxData: InfoboxData = {
@@ -93,6 +94,39 @@ export function HierarchicalEditor() {
   const [tracklistData, setTracklistData] = useState(initialTracklistData);
   const [textBlocks, setTextBlocks] = useState(initialTextBlocks);
   const [activeBlock, setActiveBlock] = useState<TextBlock | null>(null);
+  const [showJson, setShowJson] = React.useState(false);
+
+  // JSON 내보내기
+  const handleExportJson = () => {
+    const exportData = {
+      infoboxData,
+      tracklistData,
+      textBlocks,
+    };
+    const json = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'wiki-data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // JSON 불러오기
+  const handleImportJson = (data: {
+    infoboxData: InfoboxData;
+    tracklistData: TracklistData;
+    textBlocks: TextBlock[];
+  }) => {
+    if (data?.infoboxData && data?.tracklistData && data?.textBlocks) {
+      setInfoboxData(data.infoboxData);
+      setTracklistData(data.tracklistData);
+      setTextBlocks(data.textBlocks);
+    } else {
+      alert('올바른 형식의 JSON이 아닙니다.');
+    }
+  };
 
   const handleAddBlock = () => {
     const newBlock: TextBlock = {
@@ -146,7 +180,33 @@ export function HierarchicalEditor() {
 
   return (
     <div className="flex h-full flex-col bg-gray-100 dark:bg-gray-900">
-      <HierarchicalHeader documentTitle={`${infoboxData.artist} - ${infoboxData.title}`} />
+      <HierarchicalHeader
+        documentTitle={`${infoboxData.artist} - ${infoboxData.title}`}
+        onShowJson={() => setShowJson(true)}
+        onImportJson={handleImportJson}
+      />
+      {/* JSON 모달 */}
+      {showJson && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded shadow-lg max-w-2xl w-full">
+            <pre className="overflow-auto max-h-96 text-xs">{JSON.stringify({ infoboxData, tracklistData, textBlocks }, null, 2)}</pre>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setShowJson(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+              >
+                닫기
+              </button>
+              <button
+                onClick={handleExportJson}
+                className="px-4 py-2 bg-lavender-600 text-white rounded hover:bg-lavender-700"
+              >
+                JSON 내보내기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex flex-1 flex-row gap-px overflow-hidden bg-gray-200 dark:bg-gray-700">
         {/* 요소 추가 패널 */}
         <aside className="grid flex-1 grid-cols-1 gap-px overflow-y-auto bg-gray-50 p-4 dark:bg-gray-900 md:p-8">
