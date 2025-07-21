@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import styled from 'styled-components';
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
@@ -18,14 +18,17 @@ const RecordPlayer = ({ cover }: RecordPlayerProps) => {
 
   const rotationSpeed = 360 / 15;
 
-  const animate = (time: number) => {
-    if (previousTimeRef.current !== null) {
-      const deltaTime = (time - previousTimeRef.current) / 1000;
-      setRotation((prev) => (prev + rotationSpeed * deltaTime) % 360);
-    }
-    previousTimeRef.current = time;
-    requestRef.current = requestAnimationFrame(animate);
-  };
+  const animate = useCallback(
+    (time: number) => {
+      if (previousTimeRef.current !== null) {
+        const deltaTime = (time - previousTimeRef.current) / 1000;
+        setRotation((prev) => (prev + rotationSpeed * deltaTime) % 360);
+      }
+      previousTimeRef.current = time;
+      requestRef.current = requestAnimationFrame(animate);
+    },
+    [rotationSpeed],
+  );
 
   useEffect(() => {
     if (isPlaying) {
@@ -43,7 +46,7 @@ const RecordPlayer = ({ cover }: RecordPlayerProps) => {
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [isPlaying]);
+  }, [animate, isPlaying]);
   return (
     <LPContainer>
       <LPDisc
