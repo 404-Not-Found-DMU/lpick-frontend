@@ -1,5 +1,4 @@
 import { MusicTrack } from '@/app/lplayer/temp/playlist.temp';
-import { Volume } from 'lucide-react';
 import { create } from 'zustand';
 
 type LoopMode = 'none' | 'all' | 'one';

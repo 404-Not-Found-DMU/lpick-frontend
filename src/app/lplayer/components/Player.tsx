@@ -8,20 +8,60 @@ import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 import { useAudio } from '../hooks/useAudioPlayer';
 
 const Player = () => {
-  const { playlist, currentTrackId, isPlaying } = useAudioPlayerStore();
+  const { playlist, currentTrackId, isPlaying, setIsPlaying } = useAudioPlayerStore();
   const currentTrack = playlist.find((item) => item.id === currentTrackId) || playlist[0];
   const { audioRef } = useAudio();
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentTrack) return;
+
+    const isFirstLoad = !audio.src || audio.src === '';
+
     audio.src = currentTrack.mp3;
     audio.currentTime = 0;
 
-    if (isPlaying) {
-      audio.play();
+    // 처음 로드가 아닐 때만 자동 재생 (트랙 변경 시에만)
+    if (!isFirstLoad) {
+      const handleLoadedData = () => {
+        setIsPlaying(true);
+        audio.play().catch((error) => {
+          console.warn('Auto play failed:', error);
+        });
+      };
+
+      audio.addEventListener('loadeddata', handleLoadedData, { once: true });
+
+      return () => {
+        audio.removeEventListener('loadeddata', handleLoadedData);
+      };
     }
-  }, [currentTrack, audioRef]);
+  }, [currentTrack, audioRef, setIsPlaying]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleCanPlay = () => {
+      if (isPlaying) {
+        audio.play().catch((error) => {
+          console.warn('Play failed:', error);
+        });
+      } else {
+        audio.pause();
+      }
+    };
+
+    if (audio.readyState >= 2) {
+      handleCanPlay();
+    } else {
+      audio.addEventListener('canplay', handleCanPlay, { once: true });
+    }
+
+    return () => {
+      audio.removeEventListener('canplay', handleCanPlay);
+    };
+  }, [isPlaying, audioRef]);
 
   return (
     <div className="animate-slide-up mx-auto flex w-full min-w-0 max-w-[95vw] flex-col items-center justify-center rounded-2xl bg-white px-6 py-8 shadow-lg dark:bg-gray-900 sm:max-w-[700px] md:max-w-[900px] md:px-12 md:py-10 xl:max-w-[1200px] xl:px-32 xl:py-20 2xl:max-w-[1400px]">
