@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Share2, Music, Settings, Camera, LogOut, Star, Zap } from 'lucide-react';
+import { Share2, Music, Settings, LogOut, Star, Zap } from 'lucide-react';
 import { useMyPageStore } from '@/store/myPageStore';
 
 interface StatCardProps {
@@ -30,9 +30,6 @@ const ProfileSidebar = () => {
               <span className="text-lg font-bold text-gray-800 dark:text-white">음</span>
             </div>
           </div>
-          <button className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-blue-500 transition-colors hover:bg-blue-600 dark:border-gray-900">
-            <Camera className="h-2.5 w-2.5 text-white" />
-          </button>
         </div>
 
         <h3 className="mb-1 text-base font-bold text-gray-900 dark:text-white">
