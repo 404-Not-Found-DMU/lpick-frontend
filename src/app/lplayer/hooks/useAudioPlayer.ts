@@ -44,15 +44,11 @@ export const useAudio = () => {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-<<<<<<< HEAD
-    // isPlaying ? audio.play() : audio.pause();
-=======
     if (isPlaying) {
       audio.play();
     } else {
       audio.pause();
     }
->>>>>>> f7ae35ee97058c480be706246a14cda25887f8c6
   }, [isPlaying]);
 
   useEffect(() => {
