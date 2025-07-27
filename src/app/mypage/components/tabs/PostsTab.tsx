@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import {
   FileText,
   Eye,
-  Lock,
   Heart,
   Plus,
   Edit,
@@ -28,12 +27,6 @@ interface Post {
 interface FilterItem {
   name: string;
   count: number;
-}
-
-interface StatItem {
-  icon: React.ElementType;
-  value: number | string;
-  color: string;
 }
 
 const PostsTab = () => {
@@ -119,13 +112,6 @@ const PostsTab = () => {
     const config = categoryConfig[category as keyof typeof categoryConfig];
     return config?.bg || 'bg-gray-100 dark:bg-gray-900/20';
   };
-
-  const StatIcon = ({ icon: Icon, value, color }: StatItem) => (
-    <div className={`flex items-center gap-1 ${color}`}>
-      <Icon className="h-4 w-4 fill-current" />
-      <span className="text-sm font-medium">{value}</span>
-    </div>
-  );
 
   const FilterButton = ({
     filter,
