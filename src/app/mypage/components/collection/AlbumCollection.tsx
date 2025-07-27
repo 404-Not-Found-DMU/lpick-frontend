@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, ExternalLink, Heart, MoreHorizontal, Filter, TrendingUp, Music } from 'lucide-react';
+import { Play, ExternalLink, Heart, Filter, TrendingUp, Music } from 'lucide-react';
 import { tempAlbums } from '../../temp/mypage.temp';
 
 const AlbumCollection = () => {

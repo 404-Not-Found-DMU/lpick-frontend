@@ -11,10 +11,6 @@ import {
   Settings as SettingsIcon,
   ChevronRight,
   User,
-  Palette,
-  Moon,
-  Sun,
-  Globe,
   Lock,
 } from 'lucide-react';
 
@@ -118,7 +114,6 @@ const MenuButton: React.FC<MenuButtonProps> = ({
 );
 
 const SettingsTab: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [notifications, setNotifications] = useState<NotificationSettings>({
     followers: true,
     comments: true,
@@ -154,12 +149,6 @@ const SettingsTab: React.FC = () => {
     { key: 'postsPublic', label: '게시글 공개' },
     { key: 'activityPublic', label: '활동 내역 공개' },
   ] as const;
-
-  const themeOptions = [
-    { id: 'light', icon: Sun, label: '라이트', active: true },
-    { id: 'dark', icon: Moon, label: '다크', active: false },
-    { id: 'system', icon: Globe, label: '시스템', active: false },
-  ];
 
   const accountMenuItems = [
     { icon: User, title: '프로필 정보 수정', subtitle: '이름, 프로필 사진 등' },

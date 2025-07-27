@@ -1,17 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  Bookmark,
-  FileText,
-  Music,
-  Calendar,
-  Search,
-  Filter,
-  Heart,
-  Eye,
-  User,
-} from 'lucide-react';
+import { Bookmark, FileText, Music, Calendar, Filter, Heart, Eye, User } from 'lucide-react';
 
 const BookmarkTab = () => {
   const [selectedFilter, setSelectedFilter] = useState('전체');

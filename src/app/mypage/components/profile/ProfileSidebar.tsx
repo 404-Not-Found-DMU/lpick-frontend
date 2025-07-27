@@ -20,13 +20,6 @@ const StatCard = ({ label, value, className = '' }: StatCardProps) => (
 const ProfileSidebar = () => {
   const { userProfile, activityStats, setActiveTab } = useMyPageStore();
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'k';
-    }
-    return num.toString();
-  };
-
   return (
     <div className="sticky top-6 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900">
       {/* Profile Header */}

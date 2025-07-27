@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Music } from 'lucide-react';
 
 // 기능별로 그룹화된 컴포넌트 import
 import { TabNavigation } from './components/common';
@@ -13,7 +12,6 @@ import {
   PostsTab,
   LikesTab,
   CommentsTab,
-  FollowingTab,
   SettingsTab,
   InquiryTab,
   BookmarkTab,
