@@ -4,18 +4,20 @@ import React from 'react';
 
 // 기능별로 그룹화된 컴포넌트 import
 import { TabNavigation } from './components/common';
-import { ProfileSidebar } from './components/profile';
-import { StatsGrid } from './components/stats';
-import { AlbumCollection, EquipmentSection } from './components/collection';
-import { ActivitySections, RecentDocuments } from './components/activity';
 import {
-  PostsTab,
-  LikesTab,
-  CommentsTab,
-  SettingsTab,
-  InquiryTab,
-  BookmarkTab,
-} from './components/tabs';
+  ActivitySections,
+  AlbumCollection,
+  EquipmentSection,
+  RecentDocuments,
+  StatsGrid,
+} from './components/overview';
+import { PostsTab } from './components/post';
+import { CommentsTab } from './components/comment';
+import { LikesTab } from './components/like';
+import { BookmarkTab } from './components/bookmark';
+import { SettingsTab } from './components/settings';
+import { InquiryTab } from './components/inquiry';
+import { ProfileSidebar } from './components/profile';
 
 // 커스텀 훅
 import { useMyPageTabs } from './hooks/useMyPageTabs';
