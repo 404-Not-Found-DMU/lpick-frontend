@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import KakaoIcon from '@/assets/icons/KakaoIcon';
+import { fetcher } from '@/hooks/api/fetchers';
 
 const LoginCard = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,6 +11,11 @@ const LoginCard = () => {
     setIsLoading(true);
     try {
       console.log('카카오 로그인 시도');
+
+      await fetcher('/developer-token', {
+      method: 'POST',
+      });
+      
     } catch (error) {
       console.error('로그인 오류:', error);
     } finally {

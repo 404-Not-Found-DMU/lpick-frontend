@@ -20,7 +20,7 @@ export const useAudio = () => {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    isPlaying ? audio.play() : audio.pause();
+    // isPlaying ? audio.play() : audio.pause();
   }, [isPlaying]);
 
   useEffect(() => {
