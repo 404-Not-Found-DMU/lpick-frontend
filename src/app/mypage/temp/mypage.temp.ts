@@ -1,33 +1,49 @@
-import { FileText, Heart, MessageCircle, Users } from 'lucide-react';
+import { FileText, MessageCircle, Users, Edit } from 'lucide-react';
+import type {
+  StatCard,
+  Album,
+  Playlist,
+  RecentDocument,
+  Activity,
+  FollowingUser,
+  Post,
+  Comment,
+  LikedItem,
+  BookmarkItem,
+} from '../types/mypage.types';
 
-export const tempStats = [
+export const tempStats: StatCard[] = [
   {
     icon: FileText,
     value: '23',
     label: '작성글',
     color: 'bg-blue-500',
+    trend: '+12%',
   },
   {
     icon: MessageCircle,
     value: '89',
     label: '댓글',
     color: 'bg-green-500',
+    trend: '+8%',
   },
   {
-    icon: Heart,
-    value: '456',
-    label: '좋아요',
-    color: 'bg-red-500',
+    icon: Edit,
+    value: '15',
+    label: '위키편집',
+    color: 'bg-purple-500',
+    trend: '+15%',
   },
   {
     icon: Users,
-    value: '1.2k',
-    label: '팔로워',
-    color: 'bg-purple-500',
+    value: '7',
+    label: '토론참여',
+    color: 'bg-orange-500',
+    trend: '+5%',
   },
 ];
 
-export const tempAlbums = [
+export const tempAlbums: Album[] = [
   {
     id: 1,
     title: 'Abbey Road',
@@ -126,7 +142,7 @@ export const tempAlbums = [
   },
 ];
 
-export const tempPlaylists = [
+export const tempPlaylists: Playlist[] = [
   {
     id: 1,
     title: '새벽의 감성',
@@ -171,7 +187,7 @@ export const tempPlaylists = [
   },
 ];
 
-export const tempRecentDocuments = [
+export const tempRecentDocuments: RecentDocument[] = [
   {
     id: 1,
     title: 'Pink Floyd - The Wall 앨범 리뷰 작성 중',
@@ -210,7 +226,7 @@ export const tempRecentDocuments = [
   },
 ];
 
-export const tempActivities = [
+export const tempActivities: Activity[] = [
   {
     id: 1,
     type: 'listen',
@@ -253,7 +269,7 @@ export const tempActivities = [
   },
 ];
 
-export const tempFollowingUsers = [
+export const tempFollowingUsers: FollowingUser[] = [
   {
     id: 1,
     name: 'MusicCritic',
@@ -308,5 +324,113 @@ export const tempFollowingUsers = [
     posts: 123,
     isVerified: false,
     lastActive: '1일 전',
+  },
+];
+
+export const tempPosts: Post[] = [
+  {
+    id: 1,
+    title: '새로운 재즈 앨범 발매 소식',
+    content: '재즈 피아니스트 존 스미스의 새로운 앨범이 발매되었습니다. 감상해보세요!',
+    author: 'JazzLover',
+    date: '2023-10-10',
+    likes: 120,
+    comments: 45,
+    isBookmarked: false,
+  },
+  {
+    id: 2,
+    title: '클래식 음악의 이해',
+    content: '클래식 음악을 처음 접하는 분들을 위한 가이드입니다. 주요 작곡가와 작품을 소개합니다.',
+    author: 'ClassicalExpert',
+    date: '2023-10-09',
+    likes: 95,
+    comments: 30,
+    isBookmarked: true,
+  },
+  {
+    id: 3,
+    title: '록의 역사',
+    content: '록 음악의 발전과 주요 아티스트에 대한 포스팅입니다.',
+    author: 'RockFan',
+    date: '2023-10-08',
+    likes: 110,
+    comments: 25,
+    isBookmarked: false,
+  },
+];
+
+export const tempComments: Comment[] = [
+  {
+    id: 1,
+    postId: 1,
+    author: 'MusicCritic',
+    content: '이 앨범은 정말 대단합니다! 특히 피아노 솔로가 인상적이었어요.',
+    date: '2023-10-10',
+    likes: 10,
+  },
+  {
+    id: 2,
+    postId: 1,
+    author: 'VinylCollector',
+    content: '재즈는 역시 비닐로 들어야 제맛이죠!',
+    date: '2023-10-11',
+    likes: 5,
+  },
+  {
+    id: 3,
+    postId: 2,
+    author: 'JazzMaster',
+    content: '클래식 입문자에게 정말 유용한 정보네요!',
+    date: '2023-10-09',
+    likes: 8,
+  },
+];
+
+export const tempLikedItems: LikedItem[] = [
+  {
+    id: 1,
+    title: 'Abbey Road',
+    artist: 'The Beatles',
+    album: 'Abbey Road',
+    year: 1969,
+    type: 'album',
+  },
+  {
+    id: 2,
+    title: 'Bohemian Rhapsody',
+    artist: 'Queen',
+    album: 'A Night at the Opera',
+    year: 1975,
+    type: 'song',
+  },
+  {
+    id: 3,
+    title: 'Stairway to Heaven',
+    artist: 'Led Zeppelin',
+    album: 'Led Zeppelin IV',
+    year: 1971,
+    type: 'song',
+  },
+];
+
+export const tempBookmarks: BookmarkItem[] = [
+  {
+    id: 1,
+    title: '재즈 명반 모음',
+    description: '재즈의 역사적인 앨범들을 모아놓은 플레이리스트',
+    url: 'https://example.com/jazz-essentials',
+  },
+  {
+    id: 2,
+    title: '클래식 음악 감상법',
+    description: '클래식 음악을 더 깊이 이해하기 위한 자료들',
+    url: 'https://example.com/classical-listening',
+  },
+  {
+    id: 3,
+    title: '록 음악의 모든 것',
+    description: '록 음악의 역사, 앨범, 아티스트에 대한 정보',
+    url: 'https://example.com/rock-music',
   },
 ];
