@@ -12,9 +12,10 @@ const LoginCard = () => {
     try {
       console.log('카카오 로그인 시도');
 
-      await fetcher('/developer-token', {
+      const res = await fetcher('/api/v1/developer-token', {
       method: 'POST',
       });
+      console.log('응답:', res);
       
     } catch (error) {
       console.error('로그인 오류:', error);
