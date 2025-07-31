@@ -48,6 +48,22 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
 
 CardTitle.displayName = 'CardTitle'
 
+export type CardDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
+
+export const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionProps>(
+  ({ className = '', ...props }, ref) => {
+    return (
+      <p
+        ref={ref}
+        className={`text-sm text-gray-500 dark:text-gray-400 ${className}`}
+        {...props}
+      />
+    )
+  }
+)
+
+CardDescription.displayName = 'CardDescription'
+
 export type CardContentProps = React.HTMLAttributes<HTMLDivElement>
 
 export const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(

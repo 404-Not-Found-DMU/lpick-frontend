@@ -2,6 +2,7 @@ import type { InfoboxData, TracklistData } from "@/types/hierarchical.editor.typ
 import { InfoboxForm } from "./InfoboxForm"
 import { TracklistForm } from "./TracklistForm"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card/Card"
+import { ClientOnly } from "@/components"
 
 interface FixedSectionsProps {
   infoboxData: InfoboxData
@@ -26,7 +27,9 @@ export function FixedSections({ infoboxData, onInfoboxUpdate, tracklistData, onT
           <CardTitle className="text-base font-semibold">트랙리스트</CardTitle>
         </CardHeader>
         <CardContent>
-          <TracklistForm data={tracklistData} onUpdate={onTracklistUpdate} />
+          <ClientOnly fallback={<div className="space-y-3">트랙리스트 로딩 중...</div>}>
+            <TracklistForm data={tracklistData} onUpdate={onTracklistUpdate} />
+          </ClientOnly>
         </CardContent>
       </Card>
     </div>

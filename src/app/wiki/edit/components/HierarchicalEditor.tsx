@@ -22,6 +22,7 @@ import { PlusCircle } from 'lucide-react';
 import { LivePreview } from './LivePreview';
 import React from 'react';
 import dummyWikiData from '../dummyWikiData.json';
+import { ClientOnly } from '@/components';
 
 
 const generateNumbering = (blocks: TextBlock[]): { [id: string]: string } => {
@@ -202,22 +203,24 @@ export function HierarchicalEditor() {
               onTracklistUpdate={setTracklistData}
             />
             <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-700">
-              <SortableContext
-                items={textBlocks.map((b) => b.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className="space-y-4">
-                  {textBlocks.map((block) => (
-                    <SortableTextBlock
-                      key={block.id}
-                      block={block}
-                      numbering={numberingMap[block.id] || ''}
-                      onUpdate={handleUpdateBlock}
-                      onDelete={handleDeleteBlock}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
+              <ClientOnly fallback={<div className="space-y-4">텍스트 블록 로딩 중...</div>}>
+                <SortableContext
+                  items={textBlocks.map((b) => b.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-4">
+                    {textBlocks.map((block) => (
+                      <SortableTextBlock
+                        key={block.id}
+                        block={block}
+                        numbering={numberingMap[block.id] || ''}
+                        onUpdate={handleUpdateBlock}
+                        onDelete={handleDeleteBlock}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </ClientOnly>
             </div>
             <div className="mt-8 text-center">
               <Button
