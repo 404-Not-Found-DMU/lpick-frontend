@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import KakaoIcon from '@/assets/icons/KakaoIcon';
+import { fetcher } from '@/hooks/api/fetchers';
 
 const LoginCard = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,6 +11,12 @@ const LoginCard = () => {
     setIsLoading(true);
     try {
       console.log('카카오 로그인 시도');
+
+      const res = await fetcher('/api/v1/developer-token', {
+      method: 'POST',
+      });
+      console.log('응답:', res);
+      
     } catch (error) {
       console.error('로그인 오류:', error);
     } finally {
@@ -30,13 +37,13 @@ const LoginCard = () => {
                   <div className="absolute inset-0 rounded-full border-4 border-gray-700 opacity-30 dark:border-gray-600"></div>
                   <div className="absolute inset-[15px] rounded-full border-2 border-gray-700 opacity-20 dark:border-gray-600 sm:inset-[20px] lg:inset-[30px]"></div>
                   <div className="absolute inset-[30px] rounded-full border-2 border-gray-700 opacity-20 dark:border-gray-600 sm:inset-[40px] lg:inset-[60px]"></div>
-                  <div className="absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-violet-500 dark:bg-violet-400 sm:h-12 sm:w-12 lg:h-16 lg:w-16">
+                  <div className="absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-lavender-500 dark:bg-lavender-400 sm:h-12 sm:w-12 lg:h-16 lg:w-16">
                     <div className="h-3 w-3 rounded-full bg-gray-900 dark:bg-black sm:h-4 sm:w-4 lg:h-6 lg:w-6"></div>
                   </div>
                 </div>
                 {/* 반짝이는 효과 */}
                 <div className="absolute right-4 top-4 h-1.5 w-1.5 animate-ping rounded-full bg-white opacity-100 sm:right-6 sm:top-6 sm:h-2 sm:w-2 lg:right-8 lg:top-8 lg:h-3 lg:w-3"></div>
-                <div className="absolute bottom-6 left-3 h-1 w-1 animate-pulse rounded-full bg-violet-300 sm:bottom-8 sm:left-4 sm:h-1.5 sm:w-1.5 lg:bottom-12 lg:left-6 lg:h-2 lg:w-2"></div>
+                <div className="absolute bottom-6 left-3 h-1 w-1 animate-pulse rounded-full bg-lavender-300 sm:bottom-8 sm:left-4 sm:h-1.5 sm:w-1.5 lg:bottom-12 lg:left-6 lg:h-2 lg:w-2"></div>
               </div>
             </div>
           </div>
@@ -47,7 +54,6 @@ const LoginCard = () => {
             로그인하고 LP 음악의 세계를 탐험하세요
           </p>
         </div>
-
         <div className="space-y-3 sm:space-y-4 lg:space-y-6">
           <button
             onClick={handleKakaoLogin}
@@ -62,11 +68,11 @@ const LoginCard = () => {
         <div className="mt-4 border-t border-gray-200 pt-3 dark:border-gray-600 sm:mt-6 sm:pt-4 lg:mt-8 lg:pt-6">
           <p className="text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">
             로그인 시 LPick의{' '}
-            <Link href="/terms" className="text-violet-500 hover:underline dark:text-violet-400">
+            <Link href="/terms" className="text-lavender-500 hover:underline dark:text-lavender-400">
               이용약관
             </Link>{' '}
             및{' '}
-            <Link href="/privacy" className="text-violet-500 hover:underline dark:text-violet-400">
+            <Link href="/privacy" className="text-lavender-500 hover:underline dark:text-lavender-400">
               개인정보처리방침
             </Link>
             에 동의하시는 것으로 간주합니다.
