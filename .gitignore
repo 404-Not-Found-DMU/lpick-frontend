@@ -27,3 +27,5 @@ node_modules/
 .vscode/
 
 *storybook.log
+
+.env
