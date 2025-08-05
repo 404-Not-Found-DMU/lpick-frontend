@@ -36,28 +36,20 @@ export const Dialog: React.FC<DialogProps> = ({
   const onOpenChange = isControlled ? controlledOnOpenChange : setInternalOpen;
 
   return (
-    <DialogContext.Provider value={{ open, onOpenChange }}>
+    <DialogContext.Provider value={{ open, onOpenChange: onOpenChange || (() => {}) }}>
       {children}
     </DialogContext.Provider>
   );
 };
 
 export interface DialogTriggerProps {
-  asChild?: boolean;
   children: React.ReactNode;
 }
 
 export const DialogTrigger: React.FC<DialogTriggerProps> = ({ 
-  asChild = false, 
   children 
 }) => {
   const { onOpenChange } = useDialogContext();
-
-  if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children, {
-      onClick: () => onOpenChange(true),
-    });
-  }
 
   return (
     <button onClick={() => onOpenChange(true)}>

@@ -1,4 +1,4 @@
-import { MarkdownRenderer } from "./MarkdownRenderer"
+import { MarkdownRenderer } from "../common/MarkdownRenderer"
 import type { InfoboxData, TracklistData, TextBlock } from "@/types/hierarchical.editor.types"
 import Image from "next/image"
 import { useState } from "react"
@@ -40,7 +40,7 @@ function LPAccordion({ lp, index }: LPAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const hasAnyData = lp.material || lp.rpm || lp.diameter || lp.weight || 
-    lp.pressingCountry || lp.pressingInfo || lp.condition || 
+    lp.pressingCountry || lp.pressingInfo ||
     lp.isColored !== undefined || lp.labelType || lp.format || lp.specialNotes
 
   return (
@@ -117,12 +117,6 @@ function LPAccordion({ lp, index }: LPAccordionProps) {
                   <td className="p-3 text-gray-900 dark:text-gray-100">{lp.pressingInfo}</td>
                 </tr>
               )}
-              {lp.condition && (
-                <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <th className="p-3 text-left font-semibold w-1/3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50">판 상태</th>
-                  <td className="p-3 text-gray-900 dark:text-gray-100">{lp.condition}</td>
-                </tr>
-              )}
               {lp.labelType && (
                 <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <th className="p-3 text-left font-semibold w-1/3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50">라벨</th>
@@ -152,7 +146,7 @@ function LPAccordion({ lp, index }: LPAccordionProps) {
 const renderHeading = (block: TextBlock, numbering: string) => {
   const titleContent = (
     <>
-      <span className="text-lavender-600 dark:text-lavender-400">{numbering}</span> {block.title}
+      <span className="text-lavender-600 dark:text-lavender-400 mr-1">{numbering}</span> {block.title}
     </>
   )
   switch (block.depth) {

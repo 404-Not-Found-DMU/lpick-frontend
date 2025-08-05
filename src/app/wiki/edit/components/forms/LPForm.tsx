@@ -1,17 +1,20 @@
-import type { InfoboxData, TracklistData } from "@/types/hierarchical.editor.types"
+import type { LPInfo, CategoryFormProps } from "@/types/hierarchical.editor.types"
 import { InfoboxForm } from "./InfoboxForm"
 import { TracklistForm } from "./TracklistForm"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card/Card"
 import { ClientOnly } from "@/components"
 
-interface FixedSectionsProps {
-  infoboxData: InfoboxData
-  onInfoboxUpdate: (data: InfoboxData) => void
-  tracklistData: TracklistData
-  onTracklistUpdate: (data: TracklistData) => void
-}
+type LPFormProps = CategoryFormProps<LPInfo>;
 
-export function FixedSections({ infoboxData, onInfoboxUpdate, tracklistData, onTracklistUpdate }: FixedSectionsProps) {
+export function LPForm({ data, onUpdate }: LPFormProps) {
+  const handleInfoboxUpdate = (infobox: unknown) => {
+    onUpdate({ ...data, infobox });
+  };
+
+  const handleTracklistUpdate = (tracklist: unknown) => {
+    onUpdate({ ...data, tracklist });
+  };
+
   return (
     <div className="space-y-6">
       <Card className="bg-white dark:bg-gray-800 shadow-sm">
@@ -19,7 +22,10 @@ export function FixedSections({ infoboxData, onInfoboxUpdate, tracklistData, onT
           <CardTitle className="text-base font-semibold">기본 정보</CardTitle>
         </CardHeader>
         <CardContent>
-          <InfoboxForm data={infoboxData} onUpdate={onInfoboxUpdate} />
+          <InfoboxForm 
+            data={data.infobox} 
+            onUpdate={handleInfoboxUpdate} 
+          />
         </CardContent>
       </Card>
       <Card className="bg-white dark:bg-gray-800 shadow-sm">
@@ -28,10 +34,13 @@ export function FixedSections({ infoboxData, onInfoboxUpdate, tracklistData, onT
         </CardHeader>
         <CardContent>
           <ClientOnly fallback={<div className="space-y-3">트랙리스트 로딩 중...</div>}>
-            <TracklistForm data={tracklistData} onUpdate={onTracklistUpdate} />
+            <TracklistForm 
+              data={data.tracklist} 
+              onUpdate={handleTracklistUpdate} 
+            />
           </ClientOnly>
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+} 

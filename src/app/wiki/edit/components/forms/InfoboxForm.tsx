@@ -10,6 +10,7 @@ import { nanoid } from "nanoid"
 import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core"
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { DeleteConfirmModal } from "../common/DeleteConfirmModal"
 import type { InfoboxData, LPInfo } from "@/types/hierarchical.editor.types"
 
 interface InfoboxFormProps {
@@ -27,6 +28,7 @@ interface SortableLPItemProps {
 }
 
 function SortableLPItem({ lp, index, isExpanded, onToggleExpansion, onLPChange, onRemoveLP }: SortableLPItemProps) {
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: lp.id })
   const style = { transform: CSS.Transform.toString(transform), transition }
 
@@ -63,14 +65,14 @@ function SortableLPItem({ lp, index, isExpanded, onToggleExpansion, onLPChange, 
           </div>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={(e) => {
               e.stopPropagation()
-              onRemoveLP(lp.id)
+              setShowDeleteModal(true)
             }}
-            className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+            className="h-8 w-8"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3 h-3 text-lavender-400" />
           </Button>
         </div>
       </div>
@@ -139,25 +141,14 @@ function SortableLPItem({ lp, index, isExpanded, onToggleExpansion, onLPChange, 
             </div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor={`pressingInfo-${lp.id}`}>프레싱 정보</Label>
-              <Input 
-                id={`pressingInfo-${lp.id}`}
-                value={lp.pressingInfo} 
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onLPChange(lp.id, "pressingInfo", e.target.value)}
-                placeholder="오리지널, 재발매, 첫 프레싱 등"
-              />
-            </div>
-            <div>
-              <Label htmlFor={`condition-${lp.id}`}>판 상태</Label>
-              <Input 
-                id={`condition-${lp.id}`}
-                value={lp.condition} 
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onLPChange(lp.id, "condition", e.target.value)}
-                placeholder="Mint, VG+, G 등"
-              />
-            </div>
+          <div>
+            <Label htmlFor={`pressingInfo-${lp.id}`}>프레싱 정보</Label>
+            <Input 
+              id={`pressingInfo-${lp.id}`}
+              value={lp.pressingInfo} 
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onLPChange(lp.id, "pressingInfo", e.target.value)}
+              placeholder="오리지널, 재발매, 첫 프레싱 등"
+            />
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -221,6 +212,14 @@ function SortableLPItem({ lp, index, isExpanded, onToggleExpansion, onLPChange, 
           </div>
         </div>
       )}
+      
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => onRemoveLP(lp.id)}
+        title="LP 정보 삭제"
+        message={`LP #${index + 1}${lp.alias ? ` (${lp.alias})` : ''} 정보를 정말 삭제하시겠습니까?`}
+      />
     </div>
   )
 }
@@ -249,7 +248,6 @@ export function InfoboxForm({ data, onUpdate }: InfoboxFormProps) {
       weight: "",
       pressingCountry: "",
       pressingInfo: "",
-      condition: "",
       isColored: false,
       labelType: "",
       format: "",
@@ -314,27 +312,9 @@ export function InfoboxForm({ data, onUpdate }: InfoboxFormProps) {
           <Input id="genre" value={data.genre} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("genre", e.target.value)} />
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="label">레이블</Label>
-          <Input id="label" value={data.label} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("label", e.target.value)} />
-        </div>
-        <div>
-          <Label htmlFor="tableColor">테이블 색상</Label>
-          <div className="flex items-center gap-2">
-            <Input
-              type="color"
-              value={data.tableColor}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("tableColor", e.target.value)}
-              className="p-1 h-10 w-14"
-            />
-            <Input
-              value={data.tableColor}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("tableColor", e.target.value)}
-              placeholder="#f3e8ff"
-            />
-          </div>
-        </div>
+      <div>
+        <Label htmlFor="label">레이블</Label>
+        <Input id="label" value={data.label} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("label", e.target.value)} />
       </div>
       
       {/* LP 정보 섹션 */}

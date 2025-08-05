@@ -42,8 +42,8 @@ function SortableTrackRow({
         placeholder="길이"
         className="flex-2 bg-white dark:bg-gray-700"
       />
-      <Button variant="ghost" size="sm" onClick={() => onDeleteTrack(track.id)} className="h-9 w-9 flex-shrink-0">
-        <Trash2 className="w-4 h-4 text-gray-500 hover:text-red-500" />
+      <Button variant="ghost" size="icon" onClick={() => onDeleteTrack(track.id)} className="h-9 w-9 flex-shrink-0">
+        <Trash2 className="w-3 h-3 text-lavender-400" />
       </Button>
     </div>
   )
