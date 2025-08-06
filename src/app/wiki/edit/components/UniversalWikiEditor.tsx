@@ -1,76 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-
 import type { 
   WikiCategory, 
   CategoryData, 
-  TextBlock, 
-  InfoboxData, 
-  TracklistData,
-  EquipmentInfo,
-  ArtistInfo,
-  OtherInfo
+  TextBlock
 } from '@/types/hierarchical.editor.types';
 
 import { ClientOnly } from '@/components';
+import { useWikiEditor } from '../hooks/useWikiEditor';
 
 import { HierarchicalHeader } from './HierarchicalHeader';
 import { CategoryFormSelector } from './CategoryFormSelector';
 import { TextBlockEditor } from './TextBlockEditor';
 import { LivePreview } from './preview/LivePreview';
-
-// 기본 데이터 생성 함수들
-const createDefaultLPData = (): CategoryData => ({
-  type: 'lp',
-  data: {
-    infobox: {
-      title: '',
-      artist: '',
-      coverUrl: '',
-      releaseDate: '',
-      genre: '',
-      label: '',
-      lpInfos: []
-    },
-    tracklist: {
-      tracks: []
-    }
-  }
-});
-
-const createDefaultEquipmentData = (): CategoryData => ({
-  type: 'equipment',
-  data: {
-    name: '',
-    brand: '',
-    releaseYear: '',
-    description: '',
-    equipmentType: 'other',
-    imageUrl: ''
-  }
-});
-
-const createDefaultArtistData = (): CategoryData => ({
-  type: 'artist',
-  data: {
-    name: '',
-    country: '',
-    activePeriod: '',
-    roles: [],
-    imageUrl: '',
-    discography: [],
-    activities: []
-  }
-});
-
-const createDefaultOtherData = (): CategoryData => ({
-  type: 'other',
-  data: {
-    title: '',
-    content: ''
-  }
-});
 
 interface UniversalWikiEditorProps {
   category: WikiCategory;
@@ -86,87 +29,31 @@ export function UniversalWikiEditor({
   initialData, 
   onSave 
 }: UniversalWikiEditorProps) {
-  // 카테고리별 기본 데이터 생성
-  const getDefaultCategoryData = (): CategoryData => {
-    switch (category) {
-      case 'lp':
-        return createDefaultLPData();
-      case 'equipment':
-        return createDefaultEquipmentData();
-      case 'artist':
-        return createDefaultArtistData();
-      case 'other':
-        return createDefaultOtherData();
-      default:
-        return createDefaultLPData();
-    }
-  };
-
-  const [categoryData, setCategoryData] = useState<CategoryData>(
-    initialData?.categoryData || getDefaultCategoryData()
-  );
-  
-  const [textBlocks, setTextBlocks] = useState<TextBlock[]>(
-    initialData?.textBlocks || []
-  );
-  
   const [showJson, setShowJson] = useState(false);
+  
+  const {
+    categoryData,
+    textBlocks,
+    updateCategoryData,
+    updateTextBlocks,
+    addTextBlock,
+    removeTextBlock,
+    updateTextBlock,
+    handleSave,
+    handleExportJson,
+    handleImportJson,
+    getDocumentTitle
+  } = useWikiEditor({ category, initialData, onSave });
 
-  // JSON 내보내기
-  const handleExportJson = () => {
-    const exportData = {
-      categoryData,
-      textBlocks,
-    };
-    const json = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `wiki-${category}-data.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // JSON 불러오기
-  const handleImportJson = (data: {
+  // JSON 가져오기 핸들러
+  const handleImportJsonWithValidation = (data: {
     categoryData: CategoryData;
     textBlocks: TextBlock[];
   }) => {
     if (data?.categoryData && data?.textBlocks) {
-      setCategoryData(data.categoryData);
-      setTextBlocks(data.textBlocks);
+      handleImportJson(data);
     } else {
       alert('올바른 형식의 JSON이 아닙니다.');
-    }
-  };
-
-  // 저장 핸들러
-  const handleSave = () => {
-    if (onSave) {
-      onSave({ categoryData, textBlocks });
-    }
-  };
-
-  // 문서 제목 생성
-  const getDocumentTitle = (): string => {
-    switch (category) {
-      case 'lp':
-        const lpData = categoryData.data as { infobox: InfoboxData; tracklist: TracklistData };
-        return lpData.infobox.title && lpData.infobox.artist 
-          ? `${lpData.infobox.artist} - ${lpData.infobox.title}`
-          : 'LP 위키 편집';
-      case 'equipment':
-        const equipmentData = categoryData.data as EquipmentInfo;
-        return equipmentData.name || '장비 위키 편집';
-      case 'artist':
-        const artistData = categoryData.data as ArtistInfo;
-        return artistData.name || '아티스트 위키 편집';
-      case 'other':
-        const otherData = categoryData.data as OtherInfo;
-        return otherData.title || '기타 위키 편집';
-      default:
-        return '위키 편집';
     }
   };
 
@@ -175,7 +62,7 @@ export function UniversalWikiEditor({
       <HierarchicalHeader
         documentTitle={getDocumentTitle()}
         onShowJson={() => setShowJson(true)}
-        onImportJson={handleImportJson}
+        onImportJson={handleImportJsonWithValidation}
         onSave={handleSave}
       />
       
@@ -211,13 +98,13 @@ export function UniversalWikiEditor({
             <CategoryFormSelector
               category={category}
               categoryData={categoryData}
-              onCategoryDataChange={setCategoryData}
+              onCategoryDataChange={updateCategoryData}
             />
           </ClientOnly>
           
           <TextBlockEditor
             textBlocks={textBlocks}
-            onTextBlocksChange={setTextBlocks}
+            onTextBlocksChange={updateTextBlocks}
           />
         </main>
 
