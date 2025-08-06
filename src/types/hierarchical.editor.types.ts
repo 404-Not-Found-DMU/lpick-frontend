@@ -49,7 +49,7 @@ export interface TextBlock {
 
   // 장비 공통 정보
   export interface EquipmentBaseInfo {
-    id: string
+    id?: string // 백엔드에서 생성하므로 옵셔널
     name: string
     brand: string
     releaseYear: string
@@ -98,7 +98,7 @@ export interface TextBlock {
 
   // 디스코그래피 항목
   export interface DiscographyItem {
-    id: string
+    id?: string // 백엔드에서 생성하므로 옵셔널
     title: string
     releaseDate: string
     type: string // "앨범", "싱글", "EP", "컴필레이션" 등
@@ -107,7 +107,7 @@ export interface TextBlock {
 
   // 활동 이력 항목
   export interface ActivityItem {
-    id: string
+    id?: string // 백엔드에서 생성하므로 옵셔널
     year: string
     title: string
     description: string
@@ -116,7 +116,7 @@ export interface TextBlock {
 
   // 아티스트 정보
   export interface ArtistInfo {
-    id: string
+    id?: string // 백엔드에서 생성하므로 옵셔널
     name: string
     country: string
     activePeriod: string
@@ -128,7 +128,7 @@ export interface TextBlock {
 
   // 기타 정보 (마크다운 에디터만 사용)
   export interface OtherInfo {
-    id: string
+    id?: string // 백엔드에서 생성하므로 옵셔널
     title: string
     content: string // 마크다운
   }

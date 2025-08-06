@@ -1,3 +1,4 @@
+import React from "react"
 import { MarkdownRenderer } from "../common/MarkdownRenderer"
 import type { 
   InfoboxData, 
@@ -194,14 +195,15 @@ function EquipmentAccordion({ title, data, fields }: EquipmentAccordionProps) {
         <div className="px-6 pb-4">
           <table className="w-full text-sm">
             <tbody>
-              {fields.map((field) => (
-                data[field.key] && (
+              {fields.map((field) => {
+                const value = data[field.key];
+                return value ? (
                   <tr key={field.key} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <th className="p-3 text-left font-semibold w-1/3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50">{field.label}</th>
-                    <td className="p-3 text-gray-900 dark:text-gray-100">{String(data[field.key])}</td>
+                    <td className="p-3 text-gray-900 dark:text-gray-100">{String(value)}</td>
                   </tr>
-                )
-              ))}
+                ) : null;
+              })}
             </tbody>
           </table>
         </div>
@@ -229,9 +231,9 @@ const renderHeading = (block: TextBlock, numbering: string) => {
 }
 
 // 오버로드된 함수 시그니처
-export function LivePreview(props: LivePreviewProps): JSX.Element;
-export function LivePreview(props: LivePreviewLPProps): JSX.Element;
-export function LivePreview(props: LivePreviewProps | LivePreviewLPProps): JSX.Element {
+export function LivePreview(props: LivePreviewProps): React.JSX.Element;
+export function LivePreview(props: LivePreviewLPProps): React.JSX.Element;
+export function LivePreview(props: LivePreviewProps | LivePreviewLPProps): React.JSX.Element {
   // 기존 LP 전용 props인지 확인
   if ('infoboxData' in props && 'tracklistData' in props) {
     const { infoboxData, tracklistData, textBlocks } = props;
@@ -490,7 +492,7 @@ export function LivePreview(props: LivePreviewProps | LivePreviewLPProps): JSX.E
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
                   <EquipmentAccordion
                     title="턴테이블 정보"
-                    data={equipmentData.turntableInfo as Record<string, unknown>}
+                    data={equipmentData.turntableInfo as unknown as Record<string, unknown>}
                     fields={[
                       { key: 'rotationSpeed', label: '회전속도' },
                       { key: 'driveType', label: '구동 방식' },
@@ -509,7 +511,7 @@ export function LivePreview(props: LivePreviewProps | LivePreviewLPProps): JSX.E
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
                   <EquipmentAccordion
                     title="스피커 정보"
-                    data={equipmentData.speakerInfo as Record<string, unknown>}
+                    data={equipmentData.speakerInfo as unknown as Record<string, unknown>}
                     fields={[
                       { key: 'type', label: '스피커 방식' },
                       { key: 'enclosureType', label: '인클로저 형태' },
@@ -528,7 +530,7 @@ export function LivePreview(props: LivePreviewProps | LivePreviewLPProps): JSX.E
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
                   <EquipmentAccordion
                     title="앰프 정보"
-                    data={equipmentData.ampInfo as Record<string, unknown>}
+                    data={equipmentData.ampInfo as unknown as Record<string, unknown>}
                     fields={[
                       { key: 'output', label: '출력 (W)' },
                       { key: 'inputTerminals', label: '입력단자' },
@@ -547,7 +549,7 @@ export function LivePreview(props: LivePreviewProps | LivePreviewLPProps): JSX.E
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
                   <EquipmentAccordion
                     title="헤드폰 정보"
-                    data={equipmentData.headphoneInfo as Record<string, unknown>}
+                    data={equipmentData.headphoneInfo as unknown as Record<string, unknown>}
                     fields={[
                       { key: 'type', label: '헤드폰 형식' },
                       { key: 'impedance', label: '임피던스' }

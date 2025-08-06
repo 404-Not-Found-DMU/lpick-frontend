@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { nanoid } from 'nanoid';
 
 import type { 
   WikiCategory, 
@@ -43,7 +42,6 @@ const createDefaultLPData = (): CategoryData => ({
 const createDefaultEquipmentData = (): CategoryData => ({
   type: 'equipment',
   data: {
-    id: nanoid(),
     name: '',
     brand: '',
     releaseYear: '',
@@ -56,7 +54,6 @@ const createDefaultEquipmentData = (): CategoryData => ({
 const createDefaultArtistData = (): CategoryData => ({
   type: 'artist',
   data: {
-    id: nanoid(),
     name: '',
     country: '',
     activePeriod: '',
@@ -70,7 +67,6 @@ const createDefaultArtistData = (): CategoryData => ({
 const createDefaultOtherData = (): CategoryData => ({
   type: 'other',
   data: {
-    id: nanoid(),
     title: '',
     content: ''
   }
