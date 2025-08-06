@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { nanoid } from 'nanoid';
 
 import type { 
@@ -13,27 +13,13 @@ import type {
   ArtistInfo,
   OtherInfo
 } from '@/types/hierarchical.editor.types';
-import { 
-  DndContext, 
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+
 import { ClientOnly } from '@/components';
 
 import { HierarchicalHeader } from './HierarchicalHeader';
 import { CategoryFormSelector } from './CategoryFormSelector';
 import { TextBlockEditor } from './TextBlockEditor';
-import { UniversalPreview } from './preview/UniversalPreview';
+import { LivePreview } from './preview/LivePreview';
 
 // 기본 데이터 생성 함수들
 const createDefaultLPData = (): CategoryData => ({
@@ -76,7 +62,6 @@ const createDefaultArtistData = (): CategoryData => ({
     activePeriod: '',
     roles: [],
     imageUrl: '',
-    introduction: '',
     discography: [],
     activities: []
   }
@@ -242,7 +227,7 @@ export function UniversalWikiEditor({
 
         {/* Preview Panel */}
         <aside className="flex-2 hidden overflow-y-auto bg-white p-4 dark:bg-gray-800 md:block md:p-8">
-          <UniversalPreview
+          <LivePreview
             category={category}
             categoryData={categoryData}
             textBlocks={textBlocks}

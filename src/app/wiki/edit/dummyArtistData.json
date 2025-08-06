@@ -8,7 +8,6 @@
       "activePeriod": "1960-1970",
       "roles": ["group", "composer", "singer"],
       "imageUrl": "https://example.com/beatles.jpg",
-      "introduction": "**The Beatles**는 1960년대를 대표하는 영국의 전설적인 록 밴드입니다. 존 레논, 폴 매카트니, 조지 해리슨, 링고 스타로 구성된 이 그룹은 음악계에 혁신적인 변화를 가져왔으며, 팝 문화의 아이콘으로 자리잡았습니다.\n\n## 주요 업적\n- 1960년대 최고의 밴드로 평가\n- 수많은 히트곡과 앨범 발매\n- 음악 산업에 지대한 영향",
       "discography": [
         {
           "id": "disc-1",

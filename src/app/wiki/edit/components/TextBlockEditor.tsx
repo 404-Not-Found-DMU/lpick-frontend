@@ -5,10 +5,6 @@ import type { TextBlock } from '@/types/hierarchical.editor.types';
 import {
   DndContext,
   closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
   DragEndEvent,
   DragOverlay,
   type DragStartEvent,
@@ -16,7 +12,6 @@ import {
 import {
   arrayMove,
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { createPortal } from 'react-dom';

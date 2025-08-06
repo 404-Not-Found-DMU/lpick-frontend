@@ -122,7 +122,6 @@ export interface TextBlock {
     activePeriod: string
     roles: ArtistRole[]
     imageUrl: string
-    introduction: string // 마크다운
     discography: DiscographyItem[]
     activities: ActivityItem[]
   }

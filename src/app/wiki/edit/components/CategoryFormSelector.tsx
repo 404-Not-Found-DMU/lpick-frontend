@@ -1,4 +1,12 @@
-import type { WikiCategory, CategoryData } from "@/types/hierarchical.editor.types"
+import type { 
+  WikiCategory, 
+  CategoryData, 
+  InfoboxData, 
+  TracklistData, 
+  EquipmentInfo, 
+  ArtistInfo, 
+  OtherInfo 
+} from "@/types/hierarchical.editor.types"
 import { LPForm } from "./forms/LPForm"
 import { EquipmentForm } from "./forms/EquipmentForm"
 import { ArtistForm } from "./forms/ArtistForm"
@@ -15,9 +23,30 @@ export function CategoryFormSelector({
   categoryData, 
   onCategoryDataChange 
 }: CategoryFormSelectorProps) {
-  const handleUpdate = (data: unknown) => {
+  const handleLPUpdate = (data: { infobox: InfoboxData; tracklist: TracklistData }) => {
     onCategoryDataChange({
-      ...categoryData,
+      type: 'lp',
+      data
+    });
+  };
+
+  const handleEquipmentUpdate = (data: EquipmentInfo) => {
+    onCategoryDataChange({
+      type: 'equipment',
+      data
+    });
+  };
+
+  const handleArtistUpdate = (data: ArtistInfo) => {
+    onCategoryDataChange({
+      type: 'artist',
+      data
+    });
+  };
+
+  const handleOtherUpdate = (data: OtherInfo) => {
+    onCategoryDataChange({
+      type: 'other',
       data
     });
   };
@@ -26,32 +55,32 @@ export function CategoryFormSelector({
     case 'lp':
       return (
         <LPForm 
-          data={categoryData.data as { infobox: unknown; tracklist: unknown }}
-          onUpdate={handleUpdate}
+          data={categoryData.data as { infobox: InfoboxData; tracklist: TracklistData }}
+          onUpdate={handleLPUpdate}
         />
       );
     
     case 'equipment':
       return (
         <EquipmentForm 
-          data={categoryData.data as unknown}
-          onUpdate={handleUpdate}
+          data={categoryData.data as EquipmentInfo}
+          onUpdate={handleEquipmentUpdate}
         />
       );
     
     case 'artist':
       return (
         <ArtistForm 
-          data={categoryData.data as unknown}
-          onUpdate={handleUpdate}
+          data={categoryData.data as ArtistInfo}
+          onUpdate={handleArtistUpdate}
         />
       );
     
     case 'other':
       return (
         <OtherForm 
-          data={categoryData.data as unknown}
-          onUpdate={handleUpdate}
+          data={categoryData.data as OtherInfo}
+          onUpdate={handleOtherUpdate}
         />
       );
     

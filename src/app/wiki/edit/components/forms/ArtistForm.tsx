@@ -8,9 +8,29 @@ import type {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card/Card"
 import { Input } from "@/components/Input"
 import { Button } from "@/components/Button"
-import { Plus, Edit, Trash2 } from "lucide-react"
+import { Plus, Edit, Trash2, GripVertical } from "lucide-react"
 import { useState } from "react"
 import { nanoid } from "nanoid"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { createPortal } from 'react-dom';
 
 type ArtistFormProps = CategoryFormProps<ArtistInfo>;
 
@@ -27,9 +47,149 @@ const ARTIST_ROLES: { value: ArtistRole; label: string }[] = [
 const RELEASE_TYPES = ['앨범', '싱글', 'EP', '컴필레이션', '라이브', '리믹스', '기타'];
 const ACTIVITY_TYPES = ['데뷔', '수상', '콘서트', '앨범 발매', '해체', '재결합', '기타'];
 
+// 정렬 가능한 디스코그래피 아이템 컴포넌트
+interface SortableDiscographyItemProps {
+  item: DiscographyItem;
+  onEdit: (item: DiscographyItem) => void;
+  onDelete: (id: string) => void;
+}
+
+function SortableDiscographyItem({ item, onEdit, onDelete }: SortableDiscographyItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg ${
+        isDragging ? 'opacity-50' : ''
+      }`}
+    >
+      <div className="flex items-center gap-3 flex-1">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+        <div className="flex-1">
+          <div className="font-medium">{item.title}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {item.releaseDate} • {item.type} • {item.role}
+          </div>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onEdit(item)}
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDelete(item.id)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// 정렬 가능한 활동 이력 아이템 컴포넌트
+interface SortableActivityItemProps {
+  item: ActivityItem;
+  onEdit: (item: ActivityItem) => void;
+  onDelete: (id: string) => void;
+}
+
+function SortableActivityItem({ item, onEdit, onDelete }: SortableActivityItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg ${
+        isDragging ? 'opacity-50' : ''
+      }`}
+    >
+      <div className="flex items-center gap-3 flex-1">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+        <div className="flex-1">
+          <div className="font-medium">{item.title}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {item.year} • {item.type}
+          </div>
+          <div className="text-sm mt-1">{item.description}</div>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onEdit(item)}
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDelete(item.id)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
   const [editingDiscography, setEditingDiscography] = useState<DiscographyItem | null>(null);
   const [editingActivity, setEditingActivity] = useState<ActivityItem | null>(null);
+  const [activeDiscography, setActiveDiscography] = useState<DiscographyItem | null>(null);
+  const [activeActivity, setActiveActivity] = useState<ActivityItem | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const handleFieldChange = (field: keyof ArtistInfo, value: unknown) => {
     onUpdate({ ...data, [field]: value });
@@ -88,6 +248,36 @@ export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
   const handleDeleteActivity = (id: string) => {
     const updatedActivities = data.activities.filter(a => a.id !== id);
     handleFieldChange("activities", updatedActivities);
+  };
+
+  const handleDiscographyDragStart = (event: DragStartEvent) => {
+    setActiveDiscography(data.discography.find((d) => d.id === event.active.id) || null);
+  };
+
+  const handleDiscographyDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveDiscography(null);
+    if (over && active.id !== over.id) {
+      const oldIndex = data.discography.findIndex((item) => item.id === active.id);
+      const newIndex = data.discography.findIndex((item) => item.id === over.id);
+      const updatedDiscography = arrayMove(data.discography, oldIndex, newIndex);
+      handleFieldChange("discography", updatedDiscography);
+    }
+  };
+
+  const handleActivityDragStart = (event: DragStartEvent) => {
+    setActiveActivity(data.activities.find((a) => a.id === event.active.id) || null);
+  };
+
+  const handleActivityDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveActivity(null);
+    if (over && active.id !== over.id) {
+      const oldIndex = data.activities.findIndex((item) => item.id === active.id);
+      const newIndex = data.activities.findIndex((item) => item.id === over.id);
+      const updatedActivities = arrayMove(data.activities, oldIndex, newIndex);
+      handleFieldChange("activities", updatedActivities);
+    }
   };
 
   return (
@@ -154,21 +344,6 @@ export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
         </CardContent>
       </Card>
 
-      {/* 소개글 */}
-      <Card className="bg-white dark:bg-gray-800 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">소개글</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <textarea
-            value={data.introduction}
-            onChange={(e) => handleFieldChange("introduction", e.target.value)}
-            placeholder="아티스트에 대한 소개글을 작성하세요. 마크다운을 지원합니다..."
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 min-h-[200px] resize-y"
-          />
-        </CardContent>
-      </Card>
-
       {/* 디스코그래피 */}
       <Card className="bg-white dark:bg-gray-800 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between">
@@ -179,32 +354,47 @@ export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          {data.discography.map((item) => (
-            <div key={item.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <div className="flex-1">
-                <div className="font-medium">{item.title}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {item.releaseDate} • {item.type} • {item.role}
-                </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDiscographyDragStart}
+            onDragEnd={handleDiscographyDragEnd}
+          >
+            <SortableContext
+              items={data.discography.map((d) => d.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-3">
+                {data.discography.map((item) => (
+                  <SortableDiscographyItem
+                    key={item.id}
+                    item={item}
+                    onEdit={setEditingDiscography}
+                    onDelete={handleDeleteDiscography}
+                  />
+                ))}
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setEditingDiscography(item)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteDiscography(item.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
+            </SortableContext>
+            {typeof window !== 'undefined' &&
+              createPortal(
+                <DragOverlay>
+                  {activeDiscography && (
+                    <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg opacity-80">
+                      <div className="flex items-center gap-3 flex-1">
+                        <GripVertical className="h-4 w-4 text-gray-400" />
+                        <div className="flex-1">
+                          <div className="font-medium">{activeDiscography.title}</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {activeDiscography.releaseDate} • {activeDiscography.type} • {activeDiscography.role}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </DragOverlay>,
+                document.body,
+              )}
+          </DndContext>
           
           {data.discography.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -224,33 +414,48 @@ export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          {data.activities.map((item) => (
-            <div key={item.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <div className="flex-1">
-                <div className="font-medium">{item.title}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {item.year} • {item.type}
-                </div>
-                <div className="text-sm mt-1">{item.description}</div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleActivityDragStart}
+            onDragEnd={handleActivityDragEnd}
+          >
+            <SortableContext
+              items={data.activities.map((a) => a.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-3">
+                {data.activities.map((item) => (
+                  <SortableActivityItem
+                    key={item.id}
+                    item={item}
+                    onEdit={setEditingActivity}
+                    onDelete={handleDeleteActivity}
+                  />
+                ))}
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setEditingActivity(item)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteActivity(item.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
+            </SortableContext>
+            {typeof window !== 'undefined' &&
+              createPortal(
+                <DragOverlay>
+                  {activeActivity && (
+                    <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg opacity-80">
+                      <div className="flex items-center gap-3 flex-1">
+                        <GripVertical className="h-4 w-4 text-gray-400" />
+                        <div className="flex-1">
+                          <div className="font-medium">{activeActivity.title}</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {activeActivity.year} • {activeActivity.type}
+                          </div>
+                          <div className="text-sm mt-1">{activeActivity.description}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </DragOverlay>,
+                document.body,
+              )}
+          </DndContext>
           
           {data.activities.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">

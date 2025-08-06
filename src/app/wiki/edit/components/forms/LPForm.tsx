@@ -1,17 +1,22 @@
-import type { LPInfo, CategoryFormProps } from "@/types/hierarchical.editor.types"
+import type { InfoboxData, TracklistData, CategoryFormProps } from "@/types/hierarchical.editor.types"
 import { InfoboxForm } from "./InfoboxForm"
 import { TracklistForm } from "./TracklistForm"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card/Card"
 import { ClientOnly } from "@/components"
 
-type LPFormProps = CategoryFormProps<LPInfo>;
+type LPFormData = {
+  infobox: InfoboxData;
+  tracklist: TracklistData;
+};
+
+type LPFormProps = CategoryFormProps<LPFormData>;
 
 export function LPForm({ data, onUpdate }: LPFormProps) {
-  const handleInfoboxUpdate = (infobox: unknown) => {
+  const handleInfoboxUpdate = (infobox: InfoboxData) => {
     onUpdate({ ...data, infobox });
   };
 
-  const handleTracklistUpdate = (tracklist: unknown) => {
+  const handleTracklistUpdate = (tracklist: TracklistData) => {
     onUpdate({ ...data, tracklist });
   };
 
