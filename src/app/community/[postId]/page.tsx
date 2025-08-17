@@ -1,148 +1,81 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Post, Comment } from '../types/community.types';
-import { SAMPLE_POSTS } from '../temp/community.temp';
-import { PostHeader, PostContent, CommentSection, LoadingSpinner, NotFound } from './components';
+import { PostContent, CommentSection, LoadingSpinner, NotFound, Sidebar } from './components';
+import { usePostDetail } from './hooks/usePostDetail';
 
 const PostDetailPage = () => {
   const params = useParams();
   const postId = Number(params.postId);
 
-  const [post, setPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState('');
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // TODO: API에서 실제 데이터 가져오기
-    const foundPost = SAMPLE_POSTS.find((p: Post) => p.id === postId);
-    if (foundPost) {
-      setPost({
-        ...foundPost,
-        content: foundPost.content || '게시글 내용이 없습니다.',
-      });
-
-      // 샘플 댓글 데이터
-      setComments([
-        {
-          id: 1,
-          postId: postId,
-          author: '음악애호가',
-          content: '정말 좋은 정보네요! 감사합니다.',
-          date: '2024-08-13',
-          likes: 5,
-        },
-        {
-          id: 2,
-          postId: postId,
-          author: 'LP컬렉터',
-          content: '저도 비슷한 경험이 있어서 공감됩니다.',
-          date: '2024-08-13',
-          likes: 2,
-        },
-      ]);
-    }
-    setLoading(false);
-  }, [postId]);
-
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    if (post) {
-      setPost({
-        ...post,
-        likes: isLiked ? post.likes - 1 : post.likes + 1,
-      });
-    }
-  };
-
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-  };
-
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-
-    const comment: Comment = {
-      id: Date.now(),
-      postId: postId,
-      author: '현재사용자', // TODO: 실제 사용자 정보
-      content: newComment,
-      date: new Date().toISOString().split('T')[0],
-      likes: 0,
-    };
-
-    setComments([...comments, comment]);
-    setNewComment('');
-
-    // 게시글 댓글 수 업데이트
-    if (post) {
-      setPost({ ...post, comments: post.comments + 1 });
-    }
-  };
-
-  const handleShare = () => {
-    // TODO: 공유 기능 구현
-    console.log('공유하기');
-  };
-
-  const handleReport = () => {
-    // TODO: 신고 기능 구현
-    console.log('신고하기');
-  };
-
-  const handleEdit = () => {
-    // TODO: 수정 기능 구현
-    console.log('게시글 수정');
-  };
-
-  const handleDelete = () => {
-    // TODO: 삭제 기능 구현
-    console.log('게시글 삭제');
-  };
-
-  const handleCommentLike = (commentId: number) => {
-    setComments(
-      comments.map((comment) =>
-        comment.id === commentId ? { ...comment, likes: comment.likes + 1 } : comment,
-      ),
-    );
-  };
+  const {
+    post,
+    comments,
+    newComment,
+    setNewComment,
+    isLiked,
+    isBookmarked,
+    loading,
+    handleLike,
+    handleBookmark,
+    handleCommentSubmit,
+    handleCommentLike,
+    handleEdit,
+    handleDelete,
+  } = usePostDetail(postId);
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-violet-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-purple-900/30">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (!post) {
-    return <NotFound />;
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-violet-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-purple-900/30">
+        <NotFound />
+      </div>
+    );
   }
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-4xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-      <PostHeader onShare={handleShare} onReport={handleReport} />
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-violet-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-purple-900/30">
+      {/* 컨테이너 - 완전한 중앙 정렬 */}
+      <div className="flex min-h-screen w-full justify-center px-4 py-6 sm:px-6 lg:px-8">
+        {/* Instagram 스타일 레이아웃 - 반응형 */}
+        <div className="flex w-full max-w-6xl flex-col gap-6 lg:flex-row lg:gap-8">
+          {/* 메인 콘텐츠 영역 - 반응형 */}
+          <div className="w-full max-w-2xl flex-1">
+            <PostContent
+              post={post}
+              isLiked={isLiked}
+              isBookmarked={isBookmarked}
+              onLike={handleLike}
+              onBookmark={handleBookmark}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              canEdit={true} // TODO: 실제 권한 체크
+            />
 
-      <PostContent
-        post={post}
-        isLiked={isLiked}
-        isBookmarked={isBookmarked}
-        onLike={handleLike}
-        onBookmark={handleBookmark}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        canEdit={true} // TODO: 실제 권한 체크
-      />
+            <div className="mt-6">
+              <CommentSection
+                comments={comments}
+                newComment={newComment}
+                onCommentChange={setNewComment}
+                onCommentSubmit={handleCommentSubmit}
+                onCommentLike={handleCommentLike}
+              />
+            </div>
+          </div>
 
-      <CommentSection
-        comments={comments}
-        newComment={newComment}
-        onCommentChange={setNewComment}
-        onCommentSubmit={handleCommentSubmit}
-        onCommentLike={handleCommentLike}
-      />
+          {/* 사이드바 영역 - 반응형 (모바일에서는 하단으로 이동) */}
+          <div className="w-full max-w-80 lg:flex-shrink-0">
+            <Sidebar post={post} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

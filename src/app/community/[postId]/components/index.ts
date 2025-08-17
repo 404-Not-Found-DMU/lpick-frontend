@@ -3,3 +3,8 @@ export { PostContent } from './PostContent';
 export { CommentSection } from './CommentSection';
 export { LoadingSpinner } from './LoadingSpinner';
 export { NotFound } from './NotFound';
+export { default as Sidebar } from './Sidebar';
+export { CommentHeader } from './CommentHeader';
+export { CommentForm } from './CommentForm';
+export { CommentList } from './CommentList';
+export { CommentItem } from './CommentItem';

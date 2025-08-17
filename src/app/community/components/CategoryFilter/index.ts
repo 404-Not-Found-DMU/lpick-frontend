@@ -1,0 +1,1 @@
+export { CommunityCategoryFilter } from './CategoryFilter';

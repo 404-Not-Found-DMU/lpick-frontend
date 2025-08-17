@@ -10,9 +10,9 @@ export interface Post {
   views: number;
   likes: number;
   comments: number;
-  category: string;
+  board: BoardType; // 게시판 (주제)
+  tag?: TagType; // 글머리 (성격)
   image?: string;
-  tags?: string[];
 }
 
 export interface Comment {
@@ -25,10 +25,23 @@ export interface Comment {
   parentId?: number; // 대댓글용
 }
 
-export interface Category {
-  id: string;
+// 게시판 타입 (주제)
+export type BoardType = '자유게시판' | '장비' | '음반' | '아티스트';
+
+// 글머리 타입 (성격)
+export type TagType = '질문' | '정보' | '홍보';
+
+export interface Board {
+  id: BoardType;
   name: string;
+  icon: string;
   count: number;
+}
+
+export interface Tag {
+  id: TagType;
+  name: string;
+  color: string;
 }
 
 export interface CommunityPageProps {
@@ -39,7 +52,8 @@ export interface CommunityPageProps {
 export type SortOption = 'latest' | 'popular' | 'views';
 
 export interface CommunityFilters {
-  category: string;
+  board: BoardType | 'all';
+  tag?: TagType;
   sortBy: SortOption;
   searchQuery: string;
 }
@@ -47,7 +61,7 @@ export interface CommunityFilters {
 export interface PostFormData {
   title: string;
   content: string;
-  category: string;
-  tags: string[];
+  board: BoardType;
+  tag?: TagType;
   image?: File | null;
 }

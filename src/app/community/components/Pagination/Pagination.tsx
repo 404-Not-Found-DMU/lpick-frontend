@@ -1,5 +1,6 @@
 'use client';
-import { Button } from '@/components/Button/Button';
+
+import { useState, useEffect } from 'react';
 
 interface PaginationProps {
   currentPage: number;
@@ -8,8 +9,26 @@ interface PaginationProps {
 }
 
 export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    // 초기 체크
+    checkIsMobile();
+
+    // 리사이즈 이벤트 리스너 추가
+    window.addEventListener('resize', checkIsMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+
   const getVisiblePages = () => {
-    const delta = window.innerWidth < 640 ? 1 : 2; // 모바일에서는 더 적은 페이지 표시
+    const delta = isMobile ? 1 : 2;
     const range = [];
     const rangeWithDots = [];
 
@@ -41,59 +60,80 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
   if (totalPages <= 1) return null;
 
   return (
-    <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:mt-8 sm:flex-row sm:gap-2">
-      {/* 모바일에서 현재 페이지 정보를 상단에 표시 */}
-      <div className="order-first text-sm text-gray-500 dark:text-gray-400 sm:hidden">
-        {currentPage} / {totalPages}
+    <div className="mt-12 flex flex-col items-center justify-center gap-6">
+      {/* 페이지 정보 */}
+      <div className="text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          전체 <span className="font-bold text-violet-600 dark:text-violet-400">{totalPages}</span>
+          페이지 중{' '}
+          <span className="font-bold text-violet-600 dark:text-violet-400">{currentPage}</span>
+          페이지
+        </p>
       </div>
 
-      <div className="flex items-center gap-1 sm:gap-2">
-        <Button
-          variant="outline"
-          size="sm"
+      {/* 페이지네이션 버튼들 */}
+      <div className="flex items-center gap-2">
+        <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-2 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm"
+          className={`flex h-10 w-10 items-center justify-center rounded-2xl font-medium transition-all ${
+            currentPage === 1
+              ? 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800'
+              : 'bg-white text-gray-700 shadow-md hover:scale-105 hover:bg-violet-50 hover:text-violet-600 hover:shadow-lg dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+          }`}
         >
-          <span className="hidden sm:inline">이전</span>
-          <span className="sm:hidden">‹</span>
-        </Button>
+          ‹
+        </button>
 
         {getVisiblePages().map((page, index) => (
           <div key={index}>
             {page === '...' ? (
-              <span className="px-1 py-1.5 text-xs text-gray-500 sm:px-3 sm:py-2 sm:text-sm">
-                ...
-              </span>
+              <span className="flex h-10 w-10 items-center justify-center text-gray-400">⋯</span>
             ) : (
-              <Button
-                variant={page === currentPage ? 'primary' : 'outline'}
-                size="sm"
+              <button
                 onClick={() => onPageChange(page as number)}
-                className="min-w-[2rem] px-2 py-1.5 text-xs sm:min-w-[2.5rem] sm:px-3 sm:py-2 sm:text-sm"
+                className={`flex h-10 w-10 items-center justify-center rounded-2xl font-bold transition-all ${
+                  page === currentPage
+                    ? 'scale-110 bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-300/50'
+                    : 'bg-white text-gray-700 shadow-md hover:scale-105 hover:bg-violet-50 hover:text-violet-600 hover:shadow-lg dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                }`}
               >
                 {page}
-              </Button>
+              </button>
             )}
           </div>
         ))}
 
-        <Button
-          variant="outline"
-          size="sm"
+        <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-2 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm"
+          className={`flex h-10 w-10 items-center justify-center rounded-2xl font-medium transition-all ${
+            currentPage === totalPages
+              ? 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800'
+              : 'bg-white text-gray-700 shadow-md hover:scale-105 hover:bg-violet-50 hover:text-violet-600 hover:shadow-lg dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+          }`}
         >
-          <span className="hidden sm:inline">다음</span>
-          <span className="sm:hidden">›</span>
-        </Button>
+          ›
+        </button>
       </div>
 
-      {/* 데스크톱에서 페이지 정보를 오른쪽에 표시 */}
-      <div className="ml-4 hidden text-sm text-gray-500 dark:text-gray-400 sm:block">
-        {currentPage} / {totalPages}
-      </div>
+      {/* 빠른 네비게이션 */}
+      {totalPages > 10 && (
+        <div className="flex items-center gap-3 text-sm">
+          <button
+            onClick={() => onPageChange(1)}
+            className="rounded-xl bg-gray-100 px-4 py-2 font-medium text-gray-600 transition-all hover:bg-violet-100 hover:text-violet-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+          >
+            처음
+          </button>
+          <button
+            onClick={() => onPageChange(totalPages)}
+            className="rounded-xl bg-gray-100 px-4 py-2 font-medium text-gray-600 transition-all hover:bg-violet-100 hover:text-violet-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+          >
+            마지막
+          </button>
+        </div>
+      )}
     </div>
   );
 };

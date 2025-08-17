@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Input } from '@/components/Input/Input';
 import { Button } from '@/components/Button/Button';
 import { PostFormData } from '../../types/community.types';
-import { Send, Image, AlertCircle, X } from 'lucide-react';
+import { Send, Image as ImageIcon, AlertCircle, X } from 'lucide-react';
 import NextImage from 'next/image';
 
 interface EnhancedPostFormProps {
@@ -111,7 +111,7 @@ export const EnhancedPostForm = ({
                     className="hidden"
                   />
                   <div className="flex items-center gap-1 rounded-lg bg-white px-3 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500">
-                    <Image className="h-3 w-3" />
+                    <ImageIcon className="h-3 w-3" />
                     {formData.image ? '이미지 변경' : '이미지 추가'}
                   </div>
                 </label>
