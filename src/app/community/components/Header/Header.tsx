@@ -29,17 +29,17 @@ export const Header = ({
   };
 
   const boards = [
-    { id: 'all' as const, name: '전체', icon: '📋' },
-    { id: '자유게시판' as const, name: '💬 자유게시판', icon: '💬' },
-    { id: '장비' as const, name: '📻 장비', icon: '📻' },
-    { id: '음반' as const, name: '💿 음반', icon: '💿' },
-    { id: '아티스트' as const, name: '🎤 아티스트', icon: '🎤' },
+    { id: 'all' as const, name: '전체' },
+    { id: '자유게시판' as const, name: '자유게시판' },
+    { id: '장비' as const, name: '장비' },
+    { id: '음반' as const, name: '음반' },
+    { id: '아티스트' as const, name: '아티스트' },
   ];
 
   const tags = [
-    { id: '질문' as const, name: '❓ 질문', color: 'bg-blue-500' },
-    { id: '정보' as const, name: '📢 정보', color: 'bg-green-500' },
-    { id: '홍보' as const, name: '📣 홍보', color: 'bg-orange-500' },
+    { id: '질문' as const, name: '질문', color: 'bg-blue-500' },
+    { id: '정보' as const, name: '정보', color: 'bg-green-500' },
+    { id: '홍보' as const, name: '홍보', color: 'bg-orange-500' },
   ];
 
   return (
@@ -65,7 +65,7 @@ export const Header = ({
           </div>
           <Button
             onClick={handleWriteClick}
-            className="flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-violet-600 shadow-lg transition-all hover:scale-105 hover:bg-gray-50 hover:shadow-xl"
+            className="flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-violet-600 shadow-lg transition-all hover:scale-105 hover:shadow-xl"
           >
             <PenSquare className="h-5 w-5" />
             글쓰기
@@ -88,7 +88,7 @@ export const Header = ({
 
       {/* 게시판 필터 */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">🗂️ 게시판 (주제)</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">게시판</h3>
         <div className="flex flex-wrap gap-3">
           {boards.map((board) => (
             <button
@@ -108,24 +108,26 @@ export const Header = ({
 
       {/* 글머리 필터 */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">🏷️ 글머리 (성격)</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">글머리</h3>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => onTagChange(undefined)}
             className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
               !activeTag
-                ? 'bg-gray-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 shadow-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                ? 'bg-violet-600 text-white shadow-lg'
+                : 'bg-white text-gray-700 shadow-md hover:bg-violet-50 hover:text-violet-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
             }`}
           >
-            전체 (잡담 포함)
+            전체
           </button>
           {tags.map((tag) => (
             <button
               key={tag.id}
               onClick={() => onTagChange(tag.id)}
-              className={`rounded-xl px-4 py-2 text-sm font-medium text-white transition-all ${
-                activeTag === tag.id ? `${tag.color} shadow-lg` : 'bg-gray-400 hover:bg-gray-500'
+              className={`rounded-xl px-4 py-2 text-sm font-medium text-gray-700 transition-all ${
+                activeTag === tag.id
+                  ? `${tag.color} text-white shadow-lg`
+                  : 'bg-white hover:bg-violet-50 hover:text-violet-600'
               }`}
             >
               {tag.name}

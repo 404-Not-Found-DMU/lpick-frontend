@@ -1,5 +1,5 @@
 'use client';
-import { Eye, Heart, MessageSquare, Clock, TrendingUp } from 'lucide-react';
+import { Eye, Heart, MessageSquare, Clock, TrendingUp, Bookmark } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Post, SortOption } from '../../types/community.types';
 import { CommunitySortDropdown } from '../SortDropdown';
@@ -79,16 +79,18 @@ export const PostList = ({ posts, sortBy, onSortChange }: PostListProps) => {
                     <span className="font-semibold text-gray-900 dark:text-white">
                       {post.author}
                     </span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium text-white ${getBoardColor(post.board)}`}
-                    >
-                      {post.board}
-                    </span>
+                    {post.board && (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium text-white ${getBoardColor(post.board)}`}
+                      >
+                        {post.board}
+                      </span>
+                    )}
                     {post.tag && (
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium text-white ${getTagColor(post.tag)}`}
                       >
-                        [{post.tag}]
+                        {post.tag}
                       </span>
                     )}
                   </div>
@@ -116,20 +118,31 @@ export const PostList = ({ posts, sortBy, onSortChange }: PostListProps) => {
             <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-700">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                  <Heart className="h-4 w-4" />
-                  <span className="text-sm">{post.likes}</span>
+                  <Heart className={`h-4 w-4 ${post.liked ? 'fill-red-500 text-red-500' : ''}`} />
+                  <span className="text-sm">{post.likeCount || post.likes || 0}</span>
                 </div>
                 <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
                   <MessageSquare className="h-4 w-4" />
-                  <span className="text-sm">{post.comments}</span>
+                  <span className="text-sm">{post.commentCount || post.comments || 0}</span>
                 </div>
-                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                  <Eye className="h-4 w-4" />
-                  <span className="text-sm">
-                    {post.views > 999 ? `${Math.floor(post.views / 1000)}k` : post.views}
-                  </span>
-                </div>
+                {post.views !== undefined && (
+                  <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                    <Eye className="h-4 w-4" />
+                    <span className="text-sm">
+                      {post.views > 999 ? `${Math.floor(post.views / 1000)}k` : post.views}
+                    </span>
+                  </div>
+                )}
+                {post.bookmarkCount !== undefined && (
+                  <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                    <Bookmark
+                      className={`h-4 w-4 ${post.bookmarked ? 'fill-yellow-500 text-yellow-500' : ''}`}
+                    />
+                    <span className="text-sm">{post.bookmarkCount}</span>
+                  </div>
+                )}
               </div>
+              <div className="text-xs text-gray-400">{post.date}</div>
             </div>
           </div>
         ))}

@@ -39,7 +39,7 @@ export const PostContent = ({
   return (
     <div className="overflow-hidden rounded-3xl bg-white shadow-xl dark:bg-gray-800">
       {/* 게시글 헤더 - 작성자 정보 */}
-      <div className="px-4 pb-4 sm:px-6">
+      <div className="px-4 py-4 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             {/* 프로필 아바타 */}

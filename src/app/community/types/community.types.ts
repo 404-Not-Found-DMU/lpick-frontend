@@ -1,17 +1,78 @@
-// 커뮤니티 관련 타입 정의
+// 커뮤니티 관련 타입 정의 (API 스펙 기준)
 
+// API 응답 기본 구조
+export interface ApiResponse<T> {
+  totalElements: number;
+  totalPages: number;
+  numberOfElements: number;
+  size: number;
+  content: T[];
+  number: number;
+  sort: {
+    unsorted: boolean;
+    empty: boolean;
+    sorted: boolean;
+  };
+  pageable: {
+    pageNumber: number;
+    unpaged: boolean;
+    offset: number;
+    sort: {
+      unsorted: boolean;
+      empty: boolean;
+      sorted: boolean;
+    };
+    paged: boolean;
+    pageSize: number;
+  };
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
+
+// 게시글 목록용 타입
+export interface Article {
+  articleId: string;
+  title: string;
+  likeCount: number;
+  commentCount: number;
+  bookmarkCount: number;
+  oauthId: string;
+}
+
+// 게시글 상세용 타입
+export interface ArticleDetail {
+  articleId: string;
+  title: string;
+  content: string;
+  likeCount: number;
+  commentCount: number;
+  bookmarkCount: number;
+  oauthId: string;
+  liked: boolean;
+  bookmarked: boolean;
+}
+
+// 기존 호환성을 위한 Post 인터페이스 (temp 데이터용)
 export interface Post {
   id: number;
+  articleId?: string;
   title: string;
   description?: string;
   content: string;
   author: string;
+  oauthId?: string;
   date: string;
-  views: number;
+  views?: number;
   likes: number;
+  likeCount?: number;
   comments: number;
-  board: BoardType; // 게시판 (주제)
-  tag?: TagType; // 글머리 (성격)
+  commentCount?: number;
+  bookmarkCount?: number;
+  liked?: boolean;
+  bookmarked?: boolean;
+  board?: BoardType;
+  tag?: TagType;
   image?: string;
 }
 

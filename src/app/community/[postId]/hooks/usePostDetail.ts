@@ -9,9 +9,17 @@ export const usePostDetail = (postId: number) => {
   const [newComment, setNewComment] = useState('');
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+    setLoading(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     // TODO: API에서 실제 데이터 가져오기
     const foundPost = SAMPLE_POSTS.find((p: Post) => p.id === postId);
     if (foundPost) {
@@ -23,7 +31,7 @@ export const usePostDetail = (postId: number) => {
       setComments(getSampleComments(postId));
     }
     setLoading(false);
-  }, [postId]);
+  }, [postId, isMounted]);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -44,11 +52,11 @@ export const usePostDetail = (postId: number) => {
     if (!newComment.trim()) return;
 
     const comment: Comment = {
-      id: Date.now(),
+      id: Math.floor(Math.random() * 10000) + 1000, // 더 안정적인 ID 생성
       postId: postId,
       author: '현재사용자',
       content: newComment,
-      date: new Date().toISOString().split('T')[0],
+      date: '2025-01-15', // 고정된 날짜 사용 (임시)
       likes: 0,
     };
 

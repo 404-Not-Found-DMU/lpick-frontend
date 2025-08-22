@@ -29,10 +29,18 @@ export const FeaturedSection = ({ posts }: FeaturedSectionProps) => {
 
   return (
     <div className="mb-10">
-      <div className="mb-8 text-center">
-        <p className="mt-3 text-gray-600 dark:text-gray-400">
-          커뮤니티에서 가장 인기 있는 게시물들을 만나보세요
-        </p>
+      <div className="mb-8 flex items-center gap-3">
+        <div className="rounded-2xl bg-gradient-to-r from-violet-100 to-purple-100 p-3 dark:from-violet-900/30 dark:to-purple-900/30">
+          <Heart className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">
+            인기 게시물
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            커뮤니티에서 가장 인기 있는 게시물들을 만나보세요
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -53,19 +61,23 @@ export const FeaturedSection = ({ posts }: FeaturedSectionProps) => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
                 <div className="absolute left-4 top-4">
-                  <span
-                    className={`rounded-2xl px-4 py-2 text-sm font-bold backdrop-blur-md ${getCategoryColor(post.category)}`}
-                  >
-                    {post.category}
-                  </span>
+                  {(post as any).category && (
+                    <span
+                      className={`rounded-2xl px-4 py-2 text-sm font-bold backdrop-blur-md ${getCategoryColor((post as any).category)}`}
+                    >
+                      {(post as any).category}
+                    </span>
+                  )}
                 </div>
                 <div className="absolute bottom-4 right-4">
-                  <div className="flex items-center gap-1 rounded-full bg-black/30 px-3 py-1 text-white backdrop-blur-sm">
-                    <Eye className="h-3 w-3" />
-                    <span className="text-xs font-medium">
-                      {post.views > 999 ? `${Math.floor(post.views / 1000)}k` : post.views}
-                    </span>
-                  </div>
+                  {post.views !== undefined && (
+                    <div className="flex items-center gap-1 rounded-full bg-black/30 px-3 py-1 text-white backdrop-blur-sm">
+                      <Eye className="h-3 w-3" />
+                      <span className="text-xs font-medium">
+                        {post.views > 999 ? `${Math.floor(post.views / 1000)}k` : post.views}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -99,13 +111,20 @@ export const FeaturedSection = ({ posts }: FeaturedSectionProps) => {
               <div className="mt-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1 text-gray-500 transition-colors hover:text-red-500 dark:text-gray-400">
-                    <Heart className="h-4 w-4" />
-                    <span className="text-sm font-medium">{post.likes}</span>
+                    <Heart className={`h-4 w-4 ${post.liked ? 'fill-red-500 text-red-500' : ''}`} />
+                    <span className="text-sm font-medium">{post.likeCount || post.likes || 0}</span>
                   </div>
                   <div className="flex items-center gap-1 text-gray-500 transition-colors hover:text-blue-500 dark:text-gray-400">
                     <MessageSquare className="h-4 w-4" />
-                    <span className="text-sm font-medium">{post.comments}</span>
+                    <span className="text-sm font-medium">
+                      {post.commentCount || post.comments || 0}
+                    </span>
                   </div>
+                  {post.bookmarkCount !== undefined && (
+                    <div className="flex items-center gap-1 text-gray-500 transition-colors hover:text-yellow-500 dark:text-gray-400">
+                      <span className="text-sm font-medium">📌 {post.bookmarkCount}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="text-xs text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 dark:text-gray-500">
                   자세히 보기 →

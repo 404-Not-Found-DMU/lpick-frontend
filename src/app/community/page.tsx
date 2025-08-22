@@ -20,31 +20,28 @@ const CommunityPage = () => {
   } = useCommunity();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-violet-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900/20">
-      {/* 컨테이너 - 완전한 중앙 정렬 */}
-      <div className="flex min-h-screen w-full justify-center">
-        <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
-          <Header
-            searchQuery={filters.searchQuery}
-            onSearchChange={setSearchQuery}
-            activeBoard={filters.board}
-            onBoardChange={setBoardFilter}
-            activeTag={filters.tag}
-            onTagChange={setTagFilter}
-          />
+    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900">
+      <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        <Header
+          searchQuery={filters.searchQuery}
+          onSearchChange={setSearchQuery}
+          activeBoard={filters.board}
+          onBoardChange={setBoardFilter}
+          activeTag={filters.tag}
+          onTagChange={setTagFilter}
+        />
 
-          <div className="space-y-8">
-            <FeaturedSection posts={featuredPosts} />
+        <div className="mt-8 space-y-6">
+          <FeaturedSection posts={featuredPosts} />
 
-            <PostList posts={recentPosts} sortBy={filters.sortBy} onSortChange={setSortBy} />
+          <PostList posts={recentPosts} sortBy={filters.sortBy} onSortChange={setSortBy} />
 
-            <div className="flex justify-center">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
-            </div>
+          <div className="mt-8 flex justify-center">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
       </div>
