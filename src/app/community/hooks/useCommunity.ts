@@ -61,9 +61,9 @@ export const useCommunity = () => {
     currentPage * postsPerPage,
   );
 
-  // 추천 게시물 (좋아요 순 상위 3개)
+  // 추천 게시물 (좋아요 순 상위 8개)
   const featuredPosts = useMemo(() => {
-    return FEATURED_POSTS.slice(0, 3);
+    return FEATURED_POSTS.slice(0, 8);
   }, []);
 
   const setSearchQuery = (query: string) => {

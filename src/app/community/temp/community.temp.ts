@@ -34,7 +34,7 @@ export const FEATURED_POSTS = [
     liked: false,
     bookmarked: false,
     board: '음반' as const,
-    tag: undefined,
+    tag: '정보' as const,
     category: '추천',
     image: '/lplayer/temp/images/album1.png',
     tags: ['LP', '클래식', '재즈', '추천'],
@@ -109,11 +109,202 @@ export const FEATURED_POSTS = [
     image: '/lplayer/temp/images/album3.png',
     tags: ['초보', '추천', '턴테이블'],
   },
+  {
+    id: 4,
+    articleId: 'article-005',
+    title: 'LP 음원이 디지털보다 좋은 이유',
+    description: 'LP의 아날로그 사운드가 디지털보다 우수한 이유를 설명합니다.',
+    content: `LP의 아날로그 사운드는 디지털에서는 느낄 수 없는 따뜻함과 깊이가 있습니다. 이에 대해 자세히 설명드리겠습니다.
+
+<h3>아날로그 사운드의 특징</h3>
+<ul>
+<li>연속적인 음파 표현</li>
+<li>자연스러운 하모닉스</li>
+<li>따뜻한 음색</li>
+<li>미세한 뉘앙스 표현</li>
+</ul>
+
+<h3>디지털과의 차이점</h3>
+디지털은 샘플링을 통해 음원을 저장하지만, LP는 실제 음파의 형태를 그대로 기록합니다. 이로 인해 더 풍부하고 자연스러운 소리를 재생할 수 있습니다.
+
+물론 편의성이나 휴대성 면에서는 디지털이 우수하지만, 음악 감상의 깊이와 감동 면에서는 LP가 압도적입니다.
+
+여러분의 생각은 어떠신가요?`,
+    author: '아날로그러버',
+    oauthId: 'user-005',
+    date: '2025-01-12',
+    views: 743,
+    likes: 34,
+    likeCount: 34,
+    comments: 12,
+    commentCount: 12,
+    bookmarkCount: 18,
+    liked: true,
+    bookmarked: true,
+    board: '자유게시판' as const,
+    tag: '토론' as const,
+    image: '/lplayer/temp/images/album5.png',
+  },
+  {
+    id: 5,
+    articleId: 'article-006',
+    title: '추천 재즈 LP 모음집',
+    description: '재즈 입문자와 중급자를 위한 필수 LP 앨범들을 소개합니다.',
+    content: `재즈는 LP로 들어야 제맛이라고 생각합니다. 오늘은 재즈 입문자와 중급자를 위한 필수 LP 앨범들을 소개해드리겠습니다.
+
+<h3>입문자를 위한 앨범</h3>
+<ul>
+<li>Miles Davis - Kind of Blue</li>
+<li>Dave Brubeck - Time Out</li>
+<li>Bill Evans Trio - Waltz for Debby</li>
+</ul>
+
+<h3>중급자를 위한 앨범</h3>
+<ul>
+<li>John Coltrane - A Love Supreme</li>
+<li>Charles Mingus - The Black Saint and the Sinner Lady</li>
+<li>Ornette Coleman - The Shape of Jazz to Come</li>
+</ul>
+
+각 앨범의 특징과 감상 포인트도 함께 설명드리겠습니다.`,
+    author: '재즈마니아',
+    oauthId: 'user-006',
+    date: '2025-01-11',
+    views: 421,
+    likes: 28,
+    likeCount: 28,
+    comments: 15,
+    commentCount: 15,
+    bookmarkCount: 22,
+    liked: false,
+    bookmarked: false,
+    board: '음반' as const,
+    tag: '정보' as const,
+    image: '/lplayer/temp/images/album2.png',
+  },
+  {
+    id: 6,
+    articleId: 'article-007',
+    title: '턴테이블 세팅 완벽 가이드',
+    description: '턴테이블 설치부터 최적의 음질을 위한 세팅까지 모든 것을 알려드립니다.',
+    content: `턴테이블을 새로 구입하셨거나 음질 개선을 원하시는 분들을 위한 완벽 가이드입니다.
+
+<h3>설치 환경</h3>
+<ul>
+<li>진동이 적은 견고한 받침대</li>
+<li>수평 조절의 중요성</li>
+<li>외부 진동 차단 방법</li>
+</ul>
+
+<h3>카트리지 세팅</h3>
+<ul>
+<li>트래킹 포스 조절</li>
+<li>안티 스케이팅 설정</li>
+<li>토널 암 높이 조절</li>
+</ul>
+
+세심한 세팅 하나하나가 음질에 큰 영향을 미치니 차근차근 따라해보세요!`,
+    author: '오디오매니아',
+    oauthId: 'user-007',
+    date: '2025-01-10',
+    views: 623,
+    likes: 31,
+    likeCount: 31,
+    comments: 18,
+    commentCount: 18,
+    bookmarkCount: 25,
+    liked: false,
+    bookmarked: true,
+    board: '장비' as const,
+    tag: '정보' as const,
+    image: '/lplayer/temp/images/album3.png',
+  },
+  {
+    id: 7,
+    articleId: 'article-008',
+    title: 'LP 재생기 수리점 추천',
+    description: '오래된 LP 재생기가 고장났을 때 믿을 만한 수리점들을 추천드립니다.',
+    content: `오래된 LP 재생기가 고장났을 때 믿을 만한 수리점들을 추천드립니다.
+
+<h3>서울 지역</h3>
+<ul>
+<li>종로구 - 올드 사운드 (전문 수리점)</li>
+<li>강남구 - 아날로그 메카닉</li>
+<li>마포구 - LP 닥터</li>
+</ul>
+
+<h3>경기 지역</h3>
+<ul>
+<li>수원 - 빈티지 오디오</li>
+<li>고양 - 레트로 사운드</li>
+</ul>
+
+<h3>수리 시 주의사항</h3>
+1. 사전에 견적을 꼭 받아보세요
+2. 부품 교체 시 정품 여부 확인
+3. 수리 후 보증 기간 확인
+4. 가능하면 직접 방문해서 상담
+
+좋은 수리점을 찾는 것도 LP 생활의 중요한 부분이니까요!`,
+    author: '수리전문가',
+    oauthId: 'user-008',
+    date: '2025-01-09',
+    views: 887,
+    likes: 41,
+    likeCount: 41,
+    comments: 23,
+    commentCount: 23,
+    bookmarkCount: 19,
+    liked: false,
+    bookmarked: true,
+    board: '장비' as const,
+    tag: '정보' as const,
+    image: '/lplayer/temp/images/album4.png',
+  },
+  {
+    id: 8,
+    articleId: 'article-009',
+    title: '노래추천 모아바둔거',
+    description: '오랜 시간에 걸쳐 모아둔 좋은 노래들을 여러분과 공유하고 싶습니다.',
+    content: `오랜 시간에 걸쳐 모아둔 좋은 노래들을 여러분과 공유하고 싶습니다.
+
+<h3>잔잔한 분위기</h3>
+<ul>
+<li>Billie Holiday - Strange Fruit</li>
+<li>Eva Cassidy - Fields of Gold</li>
+<li>Nick Drake - River Man</li>
+<li>Mazzy Star - Fade Into You</li>
+</ul>
+
+<h3>신나는 분위기</h3>
+<ul>
+<li>Stevie Wonder - Superstition</li>
+<li>James Brown - Get Up (I Feel Like Being a) Sex Machine</li>
+<li>Earth, Wind & Fire - September</li>
+<li>Parliament - Flash Light</li>
+</ul>
+
+감성적인 분위기부터 신나는 리듬까지 다양하게 준비했습니다!`,
+    author: '음악큐레이터',
+    oauthId: 'user-009',
+    date: '2025-01-08',
+    views: 654,
+    likes: 28,
+    likeCount: 28,
+    comments: 16,
+    commentCount: 16,
+    bookmarkCount: 24,
+    liked: false,
+    bookmarked: false,
+    board: '음반' as const,
+    tag: '정보' as const,
+    image: '/lplayer/temp/images/album5.png',
+  },
 ];
 
 export const RECENT_POSTS = [
   {
-    id: 4,
+    id: 9,
     articleId: 'article-004',
     title: '오늘은 내가 좋아하는 웹사이트',
     description: '웹개발에 유용한 참고 사이트들을 공유합니다.',
@@ -129,7 +320,7 @@ export const RECENT_POSTS = [
     liked: false,
     bookmarked: false,
     board: '자유게시판' as const,
-    tag: undefined,
+    tag: '정보' as const,
     category: '자유',
     content: `웹개발을 하다보면 좋은 레퍼런스 사이트들을 많이 찾게 되는데, 오늘은 제가 자주 사용하는 사이트들을 공유해볼까 합니다.
 
@@ -152,7 +343,7 @@ export const RECENT_POSTS = [
     tags: ['웹개발', '참고사이트', '도구'],
   },
   {
-    id: 5,
+    id: 10,
     articleId: 'article-005',
     title: 'LP 음원이 디지털보다 좋은 이유',
     description: 'LP의 아날로그 사운드가 디지털보다 우수한 이유를 설명합니다.',
@@ -168,7 +359,7 @@ export const RECENT_POSTS = [
     liked: true,
     bookmarked: true,
     board: '자유게시판' as const,
-    tag: undefined,
+    tag: '정보' as const,
     category: '토론',
     content: `LP의 아날로그 사운드는 디지털에서는 느낄 수 없는 따뜻함과 깊이가 있습니다. 이에 대해 자세히 설명드리겠습니다.
 
@@ -190,7 +381,7 @@ export const RECENT_POSTS = [
     tags: ['아날로그', '음질', '토론'],
   },
   {
-    id: 6,
+    id: 11,
     title: '추천 재즈 LP 모음집',
     description: '재즈 입문자와 중급자를 위한 필수 LP 앨범들을 소개합니다.',
     author: '재즈마니아',
@@ -199,7 +390,7 @@ export const RECENT_POSTS = [
     likes: 19,
     comments: 7,
     board: '음반' as const,
-    tag: undefined,
+    tag: '정보' as const,
     category: '추천',
     content: `재즈를 사랑하는 모든 분들에게 추천하는 명반들을 소개합니다. 마일즈 데이비스부터 존 콜트레인까지...
 
@@ -224,7 +415,7 @@ export const RECENT_POSTS = [
     tags: ['재즈', '명반', '추천'],
   },
   {
-    id: 7,
+    id: 12,
     articleId: 'article-007',
     title: '기타와 LP의 조합',
     author: '기타리스트',
@@ -239,7 +430,7 @@ export const RECENT_POSTS = [
     liked: false,
     bookmarked: false,
     board: '아티스트' as const,
-    tag: undefined,
+    tag: '정보' as const,
     category: '추천',
     content: `기타를 연주하면서 좋은 LP를 틀어놓으면 정말 환상적인 조합이 나옵니다.
 
@@ -262,7 +453,7 @@ export const RECENT_POSTS = [
     tags: ['기타', '연주', '감상'],
   },
   {
-    id: 8,
+    id: 13,
     articleId: 'article-008',
     title: 'LP 재생기 수리점 추천',
     author: '수리전문가',
@@ -313,7 +504,7 @@ export const RECENT_POSTS = [
     likes: 28,
     comments: 9,
     board: '음반' as const,
-    tag: undefined,
+    tag: '정보' as const,
     category: '추천',
     content: `오랜 시간에 걸쳐 모아둔 좋은 노래들을 여러분과 공유하고 싶습니다.
 
@@ -391,7 +582,7 @@ export const RECENT_POSTS = [
     likes: 47,
     comments: 15,
     board: '아티스트' as const,
-    tag: undefined,
+    tag: '정보' as const,
     category: '추천',
     content: `클래식 음악을 LP로 처음 접하는 분들을 위한 입문용 추천 목록입니다.
 
@@ -427,6 +618,8 @@ export const RECENT_POSTS = [
     views: 567,
     likes: 23,
     comments: 11,
+    board: '자유게시판' as const,
+    tag: '정보' as const,
     category: '자유',
     content: `LP 수집을 시작한 지 15년이 되어가는 저의 일상을 공유해봅니다.
 
@@ -462,6 +655,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 743,
     likes: 32,
     comments: 14,
+    board: '음반' as const,
+    tag: '정보' as const,
     category: '정보',
     content: `빈티지 LP를 구매할 때 꼭 체크해야 할 사항들을 정리했습니다.`,
     image: '/lplayer/temp/images/album3.png',
@@ -475,6 +670,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 1876,
     likes: 89,
     comments: 27,
+    board: '음반' as const,
+    tag: '정보' as const,
     category: '추천',
     content: `명반 중의 명반들을 소개합니다. Led Zeppelin부터 Pink Floyd까지...`,
     image: '/lplayer/temp/images/album4.png',
@@ -488,6 +685,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 2134,
     likes: 76,
     comments: 43,
+    board: '자유게시판' as const,
+    tag: '정보' as const,
     category: '정보',
     content: `LP를 처음 시작하는 분들이 흔히 하는 실수들과 해결방법을 안내합니다.`,
     image: '/lplayer/temp/images/album5.png',
@@ -501,6 +700,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 456,
     likes: 21,
     comments: 8,
+    board: '자유게시판' as const,
+    tag: '정보' as const,
     category: '자유',
     content: `오늘 레코드샵에서 발견한 보물들을 공유합니다!`,
     image: '/lplayer/temp/images/album1.png',
@@ -514,6 +715,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 1543,
     likes: 67,
     comments: 23,
+    board: '음반' as const,
+    tag: '정보' as const,
     category: '토론',
     content: `같은 곡의 다양한 LP 프레싱을 비교 분석했습니다.`,
     image: '/lplayer/temp/images/album2.png',
@@ -527,6 +730,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 987,
     likes: 45,
     comments: 16,
+    board: '음반' as const,
+    tag: '정보' as const,
     category: '추천',
     content: `추운 겨울, 마음을 따뜻하게 해주는 LP들을 추천합니다.`,
     image: '/lplayer/temp/images/album3.png',
@@ -540,6 +745,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 654,
     likes: 28,
     comments: 12,
+    board: '장비' as const,
+    tag: '정보' as const,
     category: '정보',
     content: `오르토폰 카트리지로 교체하고 나서 달라진 점들을 리뷰합니다.`,
     image: '/lplayer/temp/images/album4.png',
@@ -553,6 +760,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 823,
     likes: 39,
     comments: 19,
+    board: '음반' as const,
+    tag: '정보' as const,
     category: '자유',
     content: `제가 소장하고 있는 소울 음악 LP들을 소개합니다.`,
     image: '/lplayer/temp/images/album5.png',
@@ -566,6 +775,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 1234,
     likes: 56,
     comments: 22,
+    board: '자유게시판' as const,
+    tag: '정보' as const,
     category: '정보',
     content: `홍대 일대의 LP 매장들을 직접 방문하고 리뷰했습니다.`,
     image: '/lplayer/temp/images/album1.png',
@@ -579,6 +790,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 567,
     likes: 24,
     comments: 9,
+    board: '아티스트' as const,
+    tag: '정보' as const,
     category: '추천',
     content: `열정적인 라틴 재즈 LP들을 추천드립니다.`,
     image: '/lplayer/temp/images/album2.png',
@@ -592,6 +805,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 1876,
     likes: 98,
     comments: 34,
+    board: '자유게시판' as const,
+    tag: '정보' as const,
     category: '자유',
     content: `직접 만든 LP 보관함 제작 과정을 공유합니다.`,
     image: '/lplayer/temp/images/album3.png',
@@ -605,6 +820,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 2341,
     likes: 124,
     comments: 56,
+    board: '장비' as const,
+    tag: '정보' as const,
     category: '정보',
     content: `턴테이블 최적 셋팅을 위한 상세 가이드입니다.`,
     image: '/lplayer/temp/images/album4.png',
@@ -618,6 +835,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 765,
     likes: 43,
     comments: 18,
+    board: '음반' as const,
+    tag: '정보' as const,
     category: '추천',
     content: `크리스마스 시즌에 어울리는 LP들을 모아봤습니다.`,
     image: '/lplayer/temp/images/album5.png',
@@ -631,6 +850,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 1432,
     likes: 67,
     comments: 29,
+    board: '장비' as const,
+    tag: '정보' as const,
     category: '토론',
     content: `LP 재생을 위한 음향 시스템 업그레이드 경험을 공유합니다.`,
     image: '/lplayer/temp/images/album1.png',
@@ -645,7 +866,7 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     likes: 52,
     comments: 21,
     board: '아티스트' as const,
-    tag: undefined,
+    tag: '정보' as const,
     category: '추천',
     content: `재즈 피아노의 정수를 담은 LP 10선을 소개합니다.
 
@@ -679,6 +900,8 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     views: 1654,
     likes: 78,
     comments: 31,
+    board: '장비' as const,
+    tag: '정보' as const,
     category: '정보',
     content: `다양한 LP 청소 도구들의 성능을 비교 분석했습니다.`,
     image: '/lplayer/temp/images/album3.png',
@@ -693,7 +916,7 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     likes: 26,
     comments: 11,
     board: '아티스트' as const,
-    tag: undefined,
+    tag: '정보' as const,
     category: '추천',
     content: `일렉트로닉 음악을 LP로 들으면 또 다른 매력이 있습니다.
 
@@ -725,7 +948,7 @@ LP가 있는 삶은 정말 풍요롭습니다. 여러분의 루틴도 궁금하�
     likes: 19,
     comments: 7,
     board: '아티스트' as const,
-    tag: undefined,
+    tag: '정보' as const,
     category: '추천',
     content: `한국 인디 뮤지션들의 LP 앨범을 소개합니다.
 

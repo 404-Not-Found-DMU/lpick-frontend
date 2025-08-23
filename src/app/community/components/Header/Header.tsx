@@ -43,31 +43,31 @@ export const Header = ({
   ];
 
   return (
-    <div className="mb-8 space-y-6">
-      {/* 메인 헤더 섹션 */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 p-8 text-white shadow-2xl">
+    <div className="mb-6 space-y-4">
+      {/* 컴팩트한 메인 헤더 섹션 */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 p-6 text-white shadow-xl">
         {/* 배경 장식 */}
-        <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-white/10"></div>
-        <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-white/5"></div>
+        <div className="absolute -right-16 -top-16 h-32 w-32 rounded-full bg-white/10"></div>
+        <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-white/5"></div>
 
-        <div className="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-4">
-            <div className="rounded-2xl bg-white/20 p-3 backdrop-blur-sm">
-              <MessageCircle className="h-8 w-8 text-white" />
+        <div className="relative flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-white/20 p-2 backdrop-blur-sm">
+              <MessageCircle className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold lg:text-4xl">LPick 커뮤니티</h1>
-              <p className="mt-2 flex items-center gap-2 text-violet-100">
-                <Users className="h-4 w-4" />
+              <h1 className="text-2xl font-bold lg:text-3xl">LPick 커뮤니티</h1>
+              <p className="mt-1 flex items-center gap-2 text-sm text-violet-100">
+                <Users className="h-3 w-3" />
                 LP와 음악을 사랑하는 사람들이 모인 공간
               </p>
             </div>
           </div>
           <Button
             onClick={handleWriteClick}
-            className="flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-violet-600 shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+            className="flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-violet-600 shadow-lg transition-all hover:scale-105 hover:shadow-xl"
           >
-            <PenSquare className="h-5 w-5" />
+            <PenSquare className="h-4 w-4" />
             글쓰기
           </Button>
         </div>
@@ -82,57 +82,60 @@ export const Header = ({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="게시물 검색..."
-          className="w-full rounded-2xl border-0 bg-white py-4 pl-12 pr-4 text-gray-900 shadow-lg ring-1 ring-gray-200 transition-all focus:ring-2 focus:ring-violet-500 dark:bg-gray-800 dark:text-white dark:ring-gray-700"
+          className="w-full rounded-xl border-0 bg-white py-3 pl-12 pr-4 text-gray-900 shadow-md ring-1 ring-gray-200 transition-all focus:ring-2 focus:ring-violet-500 dark:bg-gray-800 dark:text-white dark:ring-gray-700"
         />
       </div>
 
-      {/* 게시판 필터 */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">게시판</h3>
-        <div className="flex flex-wrap gap-3">
-          {boards.map((board) => (
-            <button
-              key={board.id}
-              onClick={() => onBoardChange(board.id)}
-              className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                activeBoard === board.id
-                  ? 'bg-violet-600 text-white shadow-lg'
-                  : 'bg-white text-gray-700 shadow-md hover:bg-violet-50 hover:text-violet-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-              }`}
-            >
-              {board.name}
-            </button>
-          ))}
+      {/* 컴팩트한 필터 섹션 */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        {/* 게시판 필터 */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">게시판:</span>
+          <div className="flex flex-wrap gap-2">
+            {boards.map((board) => (
+              <button
+                key={board.id}
+                onClick={() => onBoardChange(board.id)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                  activeBoard === board.id
+                    ? 'bg-violet-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-violet-100 hover:text-violet-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                }`}
+              >
+                {board.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* 글머리 필터 */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">글머리</h3>
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => onTagChange(undefined)}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-              !activeTag
-                ? 'bg-violet-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 shadow-md hover:bg-violet-50 hover:text-violet-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-            }`}
-          >
-            전체
-          </button>
-          {tags.map((tag) => (
+        {/* 글머리 필터 */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">글머리:</span>
+          <div className="flex flex-wrap gap-2">
             <button
-              key={tag.id}
-              onClick={() => onTagChange(tag.id)}
-              className={`rounded-xl px-4 py-2 text-sm font-medium text-gray-700 transition-all ${
-                activeTag === tag.id
-                  ? `${tag.color} text-white shadow-lg`
-                  : 'bg-white hover:bg-violet-50 hover:text-violet-600'
+              onClick={() => onTagChange(undefined)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                !activeTag
+                  ? 'bg-violet-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-violet-100 hover:text-violet-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
               }`}
             >
-              {tag.name}
+              전체
             </button>
-          ))}
+            {tags.map((tag) => (
+              <button
+                key={tag.id}
+                onClick={() => onTagChange(tag.id)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                  activeTag === tag.id
+                    ? `${tag.color} text-white shadow-md`
+                    : 'bg-gray-100 text-gray-700 hover:bg-violet-100 hover:text-violet-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                }`}
+              >
+                {tag.name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -59,90 +59,107 @@ export const PostList = ({ posts, sortBy, onSortChange }: PostListProps) => {
         </div>
       </div>
 
-      {/* 심플한 게시물 목록 */}
-      <div className="space-y-4">
+      {/* 효율적인 리스트 형태 게시물 목록 */}
+      <div className="space-y-2">
         {posts.map((post) => (
           <div
             key={post.id}
-            className="group cursor-pointer overflow-hidden rounded-2xl bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl dark:bg-gray-800"
+            className="dark:hover:bg-gray-750 group cursor-pointer overflow-hidden rounded-lg bg-white p-3 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md dark:bg-gray-800 sm:p-4"
             onClick={() => handlePostClick(post.id)}
           >
-            {/* 게시물 헤더 */}
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {/* 프로필 아바타 */}
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-sm font-bold text-white">
-                  {post.author.charAt(0)}
+            <div className="flex items-start gap-3 sm:gap-4">
+              {/* 왼쪽: 썸네일 이미지 (있는 경우만) */}
+              {post.image && (
+                <div className="flex-shrink-0">
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="h-12 w-16 rounded-lg object-cover transition-transform duration-200 group-hover:scale-105 sm:h-16 sm:w-20"
+                  />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {post.author}
-                    </span>
+              )}
+
+              {/* 메인 콘텐츠 영역 */}
+              <div className="min-w-0 flex-1">
+                {/* 상단: 제목과 태그들 */}
+                <div className="mb-2 flex items-start justify-between gap-2 sm:gap-3">
+                  <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-gray-900 transition-colors group-hover:text-violet-600 dark:text-white dark:group-hover:text-violet-400 sm:text-base">
+                    {post.title}
+                  </h3>
+                  <div className="flex flex-shrink-0 items-center gap-1">
                     {post.board && (
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium text-white ${getBoardColor(post.board)}`}
+                        className={`rounded px-1.5 py-0.5 text-xs font-medium text-white sm:px-2 ${getBoardColor(post.board)}`}
                       >
                         {post.board}
                       </span>
                     )}
                     {post.tag && (
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium text-white ${getTagColor(post.tag)}`}
+                        className={`rounded px-1.5 py-0.5 text-xs font-medium text-white sm:px-2 ${getTagColor(post.tag)}`}
                       >
                         {post.tag}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                    <Clock className="h-3 w-3" />
-                    <span>{post.date}</span>
+                </div>
+
+                {/* 설명 (있는 경우만, 간략하게) */}
+                {post.description && (
+                  <p className="mb-2 line-clamp-1 text-xs text-gray-600 dark:text-gray-400 sm:text-sm">
+                    {post.description}
+                  </p>
+                )}
+
+                {/* 하단: 메타 정보 */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 sm:gap-2 sm:text-sm">
+                    {/* 작성자 */}
+                    <div className="flex items-center gap-1">
+                      <div className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-xs font-bold text-white sm:h-5 sm:w-5">
+                        {post.author.charAt(0)}
+                      </div>
+                      <span className="text-xs font-medium sm:text-sm">{post.author}</span>
+                    </div>
+
+                    {/* 시간 */}
+                    <div className="flex items-center gap-0.5">
+                      <Clock className="h-3 w-3" />
+                      <span className="text-xs">{post.date}</span>
+                    </div>
+                  </div>
+
+                  {/* 우측: 통계 정보 */}
+                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 sm:gap-3">
+                    <div className="flex items-center gap-0.5">
+                      <Heart
+                        className={`h-3 w-3 ${post.liked ? 'fill-red-500 text-red-500' : ''}`}
+                      />
+                      <span>{post.likeCount || post.likes || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-0.5">
+                      <MessageSquare className="h-3 w-3" />
+                      <span>{post.commentCount || post.comments || 0}</span>
+                    </div>
+                    {post.views !== undefined && (
+                      <div className="hidden items-center gap-0.5 sm:flex">
+                        <Eye className="h-3 w-3" />
+                        <span>
+                          {post.views > 999 ? `${Math.floor(post.views / 1000)}k` : post.views}
+                        </span>
+                      </div>
+                    )}
+                    {post.bookmarkCount !== undefined && (
+                      <div className="hidden items-center gap-0.5 sm:flex">
+                        <Bookmark
+                          className={`h-3 w-3 ${post.bookmarked ? 'fill-yellow-500 text-yellow-500' : ''}`}
+                        />
+                        <span>{post.bookmarkCount}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* 게시물 제목 */}
-            <h2 className="mb-3 text-lg font-bold leading-tight text-gray-900 transition-colors group-hover:text-violet-600 dark:text-white dark:group-hover:text-violet-400 sm:text-xl">
-              {post.title}
-            </h2>
-
-            {/* 게시물 설명 */}
-            {post.description && (
-              <p className="mb-4 line-clamp-2 text-gray-600 dark:text-gray-300">
-                {post.description}
-              </p>
-            )}
-
-            {/* 액션 버튼들 */}
-            <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-700">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                  <Heart className={`h-4 w-4 ${post.liked ? 'fill-red-500 text-red-500' : ''}`} />
-                  <span className="text-sm">{post.likeCount || post.likes || 0}</span>
-                </div>
-                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                  <MessageSquare className="h-4 w-4" />
-                  <span className="text-sm">{post.commentCount || post.comments || 0}</span>
-                </div>
-                {post.views !== undefined && (
-                  <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                    <Eye className="h-4 w-4" />
-                    <span className="text-sm">
-                      {post.views > 999 ? `${Math.floor(post.views / 1000)}k` : post.views}
-                    </span>
-                  </div>
-                )}
-                {post.bookmarkCount !== undefined && (
-                  <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                    <Bookmark
-                      className={`h-4 w-4 ${post.bookmarked ? 'fill-yellow-500 text-yellow-500' : ''}`}
-                    />
-                    <span className="text-sm">{post.bookmarkCount}</span>
-                  </div>
-                )}
-              </div>
-              <div className="text-xs text-gray-400">{post.date}</div>
             </div>
           </div>
         ))}

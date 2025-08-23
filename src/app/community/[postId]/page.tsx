@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { PostContent, CommentSection, LoadingSpinner, NotFound, Sidebar } from './components';
+import { PostContent, CommentSection, NotFound, Sidebar } from './components';
 import { usePostDetail } from './hooks/usePostDetail';
 
 const PostDetailPage = () => {
