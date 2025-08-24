@@ -122,7 +122,6 @@ export interface CommunityFilters {
 export interface PostFormData {
   title: string;
   content: string;
-  board: BoardType;
-  tag?: TagType;
-  image?: File | null;
+  category: string;
+  postType: string;
 }

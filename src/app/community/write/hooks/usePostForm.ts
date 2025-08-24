@@ -9,8 +9,7 @@ export const usePostForm = () => {
     title: '',
     content: '',
     category: '',
-    tags: [],
-    image: null,
+    postType: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
