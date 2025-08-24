@@ -1,9 +1,10 @@
 'use client';
 import { Search, PenSquare, Users, MessageCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/Button/Button';
 import { Input } from '@/components/Input/Input';
 import { BoardType, TagType } from '../../types/community.types';
+import { BOARD_OPTIONS, TAG_OPTIONS } from '../../constants';
+import { usePostNavigation } from '../../hooks/usePostNavigation';
 
 interface HeaderProps {
   searchQuery: string;
@@ -22,25 +23,7 @@ export const Header = ({
   activeTag,
   onTagChange,
 }: HeaderProps) => {
-  const router = useRouter();
-
-  const handleWriteClick = () => {
-    router.push('/community/write');
-  };
-
-  const boards = [
-    { id: 'all' as const, name: '전체' },
-    { id: '자유게시판' as const, name: '자유게시판' },
-    { id: '장비' as const, name: '장비' },
-    { id: '음반' as const, name: '음반' },
-    { id: '아티스트' as const, name: '아티스트' },
-  ];
-
-  const tags = [
-    { id: '질문' as const, name: '질문', color: 'bg-blue-500' },
-    { id: '정보' as const, name: '정보', color: 'bg-green-500' },
-    { id: '홍보' as const, name: '홍보', color: 'bg-orange-500' },
-  ];
+  const { navigateToWrite } = usePostNavigation();
 
   return (
     <div className="mb-6 space-y-4">
@@ -64,7 +47,7 @@ export const Header = ({
             </div>
           </div>
           <Button
-            onClick={handleWriteClick}
+            onClick={navigateToWrite}
             className="flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-violet-600 shadow-lg transition-all hover:scale-105 hover:shadow-xl"
           >
             <PenSquare className="h-4 w-4" />
@@ -92,7 +75,7 @@ export const Header = ({
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">게시판:</span>
           <div className="flex flex-wrap gap-2">
-            {boards.map((board) => (
+            {BOARD_OPTIONS.map((board) => (
               <button
                 key={board.id}
                 onClick={() => onBoardChange(board.id)}
@@ -122,7 +105,7 @@ export const Header = ({
             >
               전체
             </button>
-            {tags.map((tag) => (
+            {TAG_OPTIONS.map((tag) => (
               <button
                 key={tag.id}
                 onClick={() => onTagChange(tag.id)}

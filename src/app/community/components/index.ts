@@ -1,8 +1,10 @@
+// Community components exports
 export { Header } from './Header';
 export { FeaturedSection } from './FeaturedSection';
 export { PostList } from './PostList';
 export { Pagination } from './Pagination';
-export { CommunityCategoryBadge } from './CategoryBadge';
-export { CommunityCategoryFilter } from './CategoryFilter';
-export { CommunitySearchBar } from './SearchBar';
 export { CommunitySortDropdown } from './SortDropdown';
+export { CommunitySearchBar } from './SearchBar';
+export { PostCard } from './PostCard';
+export { FeaturedCard } from './FeaturedCard';
+export { EmptyState } from './EmptyState';

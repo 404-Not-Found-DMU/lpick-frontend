@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+import { MessageSquare } from 'lucide-react';
 import { Comment } from '../../types/community.types';
-import { CommentHeader } from './CommentHeader';
+import { CommentHeader, type CommentSortOption } from './CommentHeader';
 import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';
 
@@ -26,6 +28,8 @@ export const CommentSection = ({
   onCommentLike,
   onLoadMore,
 }: CommentSectionProps) => {
+  const [sortBy, setSortBy] = useState<CommentSortOption>('latest');
+
   const handleCommentLike = (commentId: number) => {
     onCommentLike?.(commentId);
   };
@@ -35,9 +39,27 @@ export const CommentSection = ({
     // TODO: 답글 로직 구현
   };
 
+  const handleSortChange = (sort: CommentSortOption) => {
+    setSortBy(sort);
+  };
+
+  // 댓글 정렬
+  const sortedComments = [...comments].sort((a, b) => {
+    if (sortBy === 'popular') {
+      return b.likes - a.likes; // 좋아요 많은 순
+    } else {
+      // 최신순 - 날짜로 정렬 (임시로 id로 정렬)
+      return b.id - a.id;
+    }
+  });
+
   return (
     <div className="rounded-3xl bg-white shadow-xl dark:bg-gray-800">
-      <CommentHeader commentCount={comments.length} />
+      <CommentHeader
+        commentCount={comments.length}
+        sortBy={sortBy}
+        onSortChange={handleSortChange}
+      />
 
       <CommentForm
         newComment={newComment}
@@ -45,7 +67,11 @@ export const CommentSection = ({
         onCommentSubmit={onCommentSubmit}
       />
 
-      <CommentList comments={comments} onCommentLike={handleCommentLike} onReply={handleReply} />
+      <CommentList
+        comments={sortedComments}
+        onCommentLike={handleCommentLike}
+        onReply={handleReply}
+      />
 
       {/* 댓글 더보기 - 페이지네이션 */}
       {hasMoreComments && (

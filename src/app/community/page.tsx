@@ -1,8 +1,5 @@
 'use client';
-import { Header } from './components/Header';
-import { FeaturedSection } from './components/FeaturedSection';
-import { PostList } from './components/PostList';
-import { Pagination } from './components/Pagination';
+import { Header, FeaturedSection, PostList, Pagination } from './components';
 import { useCommunity } from './hooks/useCommunity';
 
 const CommunityPage = () => {
