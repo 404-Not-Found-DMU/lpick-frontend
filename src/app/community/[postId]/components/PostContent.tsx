@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Hash, Clock, Edit3, Trash2, Eye, Heart, Bookmark, MessageSquare } from 'lucide-react';
+import { Clock, Edit3, Trash2, Eye, Heart, Bookmark, MessageSquare } from 'lucide-react';
 import { Post } from '../../types/community.types';
 
 interface PostContentProps {

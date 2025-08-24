@@ -3,6 +3,7 @@ import { Eye, Heart, MessageSquare, Clock, TrendingUp, Bookmark } from 'lucide-r
 import { useRouter } from 'next/navigation';
 import { Post, SortOption } from '../../types/community.types';
 import { CommunitySortDropdown } from '../SortDropdown';
+import Image from 'next/image';
 
 interface PostListProps {
   posts: Post[];
@@ -68,13 +69,15 @@ export const PostList = ({ posts, sortBy, onSortChange }: PostListProps) => {
             onClick={() => handlePostClick(post.id)}
           >
             <div className="flex items-start gap-3 sm:gap-4">
-              {/* 왼쪽: 썸네일 이미지 (있는 경우만) */}
               {post.image && (
                 <div className="flex-shrink-0">
-                  <img
+                  <Image
                     src={post.image}
                     alt={post.title}
+                    width={80}
+                    height={64}
                     className="h-12 w-16 rounded-lg object-cover transition-transform duration-200 group-hover:scale-105 sm:h-16 sm:w-20"
+                    unoptimized
                   />
                 </div>
               )}
