@@ -1,6 +1,7 @@
 // 커뮤니티 임시 데이터 (API 스펙 기준)
+import { Post } from '../types/community.types';
 
-export const FEATURED_POSTS = [
+export const FEATURED_POSTS: Post[] = [
   {
     id: 1,
     articleId: 'article-001',
@@ -35,9 +36,7 @@ export const FEATURED_POSTS = [
     bookmarked: false,
     board: '음반' as const,
     tag: '정보' as const,
-    category: '추천',
     image: '/lplayer/temp/images/album1.png',
-    tags: ['LP', '클래식', '재즈', '추천'],
   },
   {
     id: 2,
@@ -68,9 +67,7 @@ export const FEATURED_POSTS = [
     bookmarked: true,
     board: '장비' as const,
     tag: '질문' as const,
-    category: '질문',
     image: '/lplayer/temp/images/album2.png',
-    tags: ['LP관리', '보관', '질문'],
   },
   {
     id: 3,
@@ -105,9 +102,7 @@ export const FEATURED_POSTS = [
     bookmarked: false,
     board: '장비' as const,
     tag: '질문' as const,
-    category: '질문',
     image: '/lplayer/temp/images/album3.png',
-    tags: ['초보', '추천', '턴테이블'],
   },
   {
     id: 4,
@@ -142,7 +137,7 @@ export const FEATURED_POSTS = [
     liked: true,
     bookmarked: true,
     board: '자유게시판' as const,
-    tag: '토론' as const,
+    tag: '질문' as const,
     image: '/lplayer/temp/images/album5.png',
   },
   {

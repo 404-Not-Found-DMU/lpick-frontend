@@ -6,6 +6,9 @@ import { getSampleComments } from '../data/sampleComments';
 export const usePostDetail = (postId: number) => {
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [allComments, setAllComments] = useState<Comment[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [commentsPerPage] = useState(5);
   const [newComment, setNewComment] = useState('');
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -28,10 +31,20 @@ export const usePostDetail = (postId: number) => {
         content: foundPost.content || '게시글 내용이 없습니다.',
         comments: 12,
       });
-      setComments(getSampleComments(postId));
+      const allCommentsData = getSampleComments(postId);
+      setAllComments(allCommentsData);
+      // 첫 페이지 댓글만 표시
+      setComments(allCommentsData.slice(0, commentsPerPage));
     }
     setLoading(false);
-  }, [postId, isMounted]);
+  }, [postId, isMounted, commentsPerPage]);
+
+  // 페이지 변경시 댓글 업데이트
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * commentsPerPage;
+    const endIndex = startIndex + commentsPerPage;
+    setComments(allComments.slice(0, endIndex));
+  }, [currentPage, allComments, commentsPerPage]);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -76,6 +89,10 @@ export const usePostDetail = (postId: number) => {
     );
   };
 
+  const handleLoadMoreComments = () => {
+    setCurrentPage(currentPage + 1);
+  };
+
   const handleEdit = () => {
     console.log('게시글 수정');
   };
@@ -84,9 +101,19 @@ export const usePostDetail = (postId: number) => {
     console.log('게시글 삭제');
   };
 
+  const totalPages = Math.ceil(allComments.length / commentsPerPage);
+  const hasMoreComments = currentPage < totalPages;
+  const remainingComments = allComments.length - comments.length;
+
   return {
     post,
     comments,
+    allComments,
+    currentPage,
+    commentsPerPage,
+    totalPages,
+    hasMoreComments,
+    remainingComments,
     newComment,
     setNewComment,
     isLiked,
@@ -96,6 +123,7 @@ export const usePostDetail = (postId: number) => {
     handleBookmark,
     handleCommentSubmit,
     handleCommentLike,
+    handleLoadMoreComments,
     handleEdit,
     handleDelete,
   };

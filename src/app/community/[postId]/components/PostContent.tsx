@@ -25,15 +25,23 @@ export const PostContent = ({
   onDelete,
   canEdit = false,
 }: PostContentProps) => {
-  const getCategoryColor = (category: string) => {
+  const getTagColor = (tag?: string) => {
     const colors: { [key: string]: string } = {
-      추천: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white',
       질문: 'bg-gradient-to-r from-green-500 to-green-600 text-white',
-      토론: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
-      정보: 'bg-gradient-to-r from-orange-500 to-orange-600 text-white',
-      자유: 'bg-gradient-to-r from-gray-500 to-gray-600 text-white',
+      정보: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white',
+      홍보: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
     };
-    return colors[category] || colors['자유'];
+    return colors[tag || ''] || 'bg-gradient-to-r from-gray-500 to-gray-600 text-white';
+  };
+
+  const getBoardColor = (board?: string) => {
+    const colors: { [key: string]: string } = {
+      자유게시판: 'bg-gradient-to-r from-gray-500 to-gray-600 text-white',
+      장비: 'bg-gradient-to-r from-orange-500 to-orange-600 text-white',
+      음반: 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white',
+      아티스트: 'bg-gradient-to-r from-pink-500 to-pink-600 text-white',
+    };
+    return colors[board || ''] || 'bg-gradient-to-r from-gray-500 to-gray-600 text-white';
   };
 
   return (
@@ -47,13 +55,22 @@ export const PostContent = ({
               {post.author.charAt(0)}
             </div>
             <div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-bold text-gray-900 dark:text-white">{post.author}</h3>
-                <span
-                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${getCategoryColor(post.category)}`}
-                >
-                  {post.category}
-                </span>
+                {post.board && (
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${getBoardColor(post.board)}`}
+                  >
+                    {post.board}
+                  </span>
+                )}
+                {post.tag && (
+                  <span
+                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getTagColor(post.tag)}`}
+                  >
+                    {post.tag}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-1">
@@ -62,7 +79,11 @@ export const PostContent = ({
                 </div>
                 <div className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
-                  <span>{post.views > 999 ? `${Math.floor(post.views / 1000)}k` : post.views}</span>
+                  <span>
+                    {post.views && post.views > 999
+                      ? `${Math.floor(post.views / 1000)}k`
+                      : post.views || 0}
+                  </span>
                 </div>
               </div>
             </div>
@@ -91,21 +112,6 @@ export const PostContent = ({
         <h1 className="mb-4 text-xl font-bold leading-tight text-gray-900 dark:text-white sm:text-2xl lg:text-3xl">
           {post.title}
         </h1>
-
-        {/* 태그 */}
-        {post.tags && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-              >
-                <Hash className="h-3 w-3" />
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* 이미지 */}

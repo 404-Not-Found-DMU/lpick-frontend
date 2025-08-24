@@ -13,6 +13,8 @@ const PostDetailPage = () => {
   const {
     post,
     comments,
+    hasMoreComments,
+    remainingComments,
     newComment,
     setNewComment,
     isLiked,
@@ -22,6 +24,7 @@ const PostDetailPage = () => {
     handleBookmark,
     handleCommentSubmit,
     handleCommentLike,
+    handleLoadMoreComments,
     handleEdit,
     handleDelete,
   } = usePostDetail(postId);
@@ -30,7 +33,7 @@ const PostDetailPage = () => {
     setIsMounted(true);
   }, []);
 
-  // 하이드레이션 에러 방지: 마운트되기 전까지는 동일한 로딩 UI 표시
+  // 마운트되기 전까지는 동일한 로딩 UI 표시
   if (!isMounted || loading) {
     return (
       <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900">
@@ -57,11 +60,8 @@ const PostDetailPage = () => {
 
   return (
     <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900">
-      {/* 컨테이너 - 완전한 중앙 정렬 */}
       <div className="flex min-h-screen w-full justify-center px-4 py-6 sm:px-6 lg:px-8">
-        {/* Instagram 스타일 레이아웃 - 반응형 */}
         <div className="flex w-full max-w-6xl flex-col gap-6 lg:flex-row lg:gap-8">
-          {/* 메인 콘텐츠 영역 - 반응형 */}
           <div className="w-full max-w-2xl flex-1">
             <PostContent
               post={post}
@@ -77,10 +77,13 @@ const PostDetailPage = () => {
             <div className="mt-6">
               <CommentSection
                 comments={comments}
+                hasMoreComments={hasMoreComments}
+                remainingComments={remainingComments}
                 newComment={newComment}
                 onCommentChange={setNewComment}
                 onCommentSubmit={handleCommentSubmit}
                 onCommentLike={handleCommentLike}
+                onLoadMore={handleLoadMoreComments}
               />
             </div>
           </div>
