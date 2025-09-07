@@ -1,0 +1,184 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { Input } from '@/components/Input/Input';
+import { Button } from '@/components/Button/Button';
+import { RichTextEditor } from '@/components/RichTextEditor';
+import { PostFormData } from '../../types/community.types';
+import { Send, AlertCircle, Hash, FileText, Tag } from 'lucide-react';
+
+interface EnhancedPostFormProps {
+  formData: PostFormData;
+  updateFormData: (updates: Partial<PostFormData>) => void;
+  onSubmit: () => void;
+  isSubmitting: boolean;
+}
+
+const CATEGORIES = [
+  { id: 'all', label: '전체' },
+  { id: 'free', label: '자유게시판' },
+  { id: 'equipment', label: '장비' },
+  { id: 'record', label: '음반' },
+  { id: 'artist', label: '아티스트' },
+];
+
+const POST_TYPES = [
+  { id: 'all', label: '전체' },
+  { id: 'question', label: '질문' },
+  { id: 'info', label: '정보' },
+  { id: 'promotion', label: '홍보' },
+];
+
+export const EnhancedPostForm = ({
+  formData,
+  updateFormData,
+  onSubmit,
+  isSubmitting,
+}: EnhancedPostFormProps) => {
+  const [wordCount, setWordCount] = useState(0);
+
+  useEffect(() => {
+    // Markdown에서 실제 텍스트 길이 계산
+    const textContent = formData.content
+      .replace(/[#*_~`\[\]]/g, '') // 마크다운 문법 제거
+      .replace(/\n/g, ' ')
+      .trim();
+    setWordCount(textContent.length);
+  }, [formData.content]);
+
+  const isFormComplete =
+    formData.title.trim() && formData.content.trim() && formData.category && formData.postType;
+  const titleLength = formData.title.length;
+
+  return (
+    <div className="mx-auto max-w-4xl">
+      <div className="space-y-6">
+        {/* 제목 섹션 */}
+        <div>
+          <div className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <FileText className="h-4 w-4" />
+            제목
+          </div>
+          <Input
+            placeholder="제목을 입력하세요..."
+            value={formData.title}
+            onChange={(e) => updateFormData({ title: e.target.value })}
+            className="w-full border-2 bg-white px-4 py-3 text-lg font-medium transition-all duration-200 focus:border-violet-500 focus:shadow-sm dark:bg-gray-800"
+          />
+          <div className="mt-1 flex items-center justify-between text-sm">
+            <span className={titleLength > 80 ? 'text-orange-500' : 'text-gray-500'}>
+              {titleLength}/100자
+            </span>
+            {titleLength > 80 && (
+              <div className="flex items-center gap-1 text-orange-500">
+                <AlertCircle className="h-4 w-4" />
+                <span>제목이 너무 길어요</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 게시판 및 글머리 섹션 */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* 게시판 선택 */}
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Hash className="h-4 w-4" />
+              게시판
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.slice(1).map(
+                (
+                  category, // '전체' 제외하고 표시
+                ) => (
+                  <button
+                    key={category.id}
+                    onClick={() => updateFormData({ category: category.id })}
+                    className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
+                      formData.category === category.id
+                        ? 'border-violet-500 bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500'
+                    }`}
+                  >
+                    {category.label}
+                  </button>
+                ),
+              )}
+            </div>
+          </div>
+
+          {/* 글머리 선택 */}
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Tag className="h-4 w-4" />
+              글머리
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {POST_TYPES.slice(1).map(
+                (
+                  postType, // '전체' 제외하고 표시
+                ) => (
+                  <button
+                    key={postType.id}
+                    onClick={() => updateFormData({ postType: postType.id })}
+                    className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
+                      formData.postType === postType.id
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500'
+                    }`}
+                  >
+                    {postType.label}
+                  </button>
+                ),
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 에디터 섹션 */}
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <FileText className="h-4 w-4" />
+              내용
+            </div>
+            <span className="text-xs text-gray-500">{wordCount}자</span>
+          </div>
+
+          <div className="overflow-hidden rounded-lg border-2 bg-white shadow-sm transition-all focus-within:border-violet-500 focus-within:shadow-md dark:bg-gray-800">
+            <RichTextEditor
+              value={formData.content}
+              onChange={(value) => updateFormData({ content: value })}
+              placeholder="당신의 이야기를 들려주세요... 마크다운 문법을 사용할 수 있고, 에디터에서 이미지도 첨부할 수 있습니다."
+              className="border-0"
+            />
+          </div>
+        </div>
+
+        {/* 게시 버튼 */}
+        <div className="pt-4 text-center">
+          <Button
+            onClick={onSubmit}
+            disabled={isSubmitting || !isFormComplete}
+            className={`rounded-lg px-8 py-3 text-base font-semibold transition-all duration-200 ${
+              isFormComplete
+                ? 'bg-violet-600 text-white shadow-md hover:bg-violet-700 hover:shadow-lg'
+                : 'cursor-not-allowed bg-gray-200 text-gray-500'
+            }`}
+          >
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                게시하는 중...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Send className="h-4 w-4" />
+                게시하기
+              </div>
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
