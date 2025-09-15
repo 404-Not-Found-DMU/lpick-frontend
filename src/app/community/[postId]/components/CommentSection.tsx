@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageSquare } from 'lucide-react';
 import { Comment } from '../../types/community.types';
 import { CommentHeader, type CommentSortOption } from './CommentHeader';
 import { CommentForm } from './CommentForm';
