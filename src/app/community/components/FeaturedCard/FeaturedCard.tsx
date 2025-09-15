@@ -60,30 +60,30 @@ export const FeaturedCard = ({ post }: FeaturedCardProps) => {
             {post.description}
           </p>
         )}
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-          <div className="flex items-center gap-1">
-            <div className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-xs font-bold text-white">
+        <div className="flex items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
+          <div className="flex items-center gap-1 overflow-hidden">
+            <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-xs font-bold text-white">
               {post.author.charAt(0)}
             </div>
-            <span className="font-medium">{post.author}</span>
-            <Clock className="ml-1 h-3 w-3" />
-            <span>{post.date}</span>
+            <span className="max-w-[60px] truncate font-medium sm:max-w-[80px]">{post.author}</span>
+            <Clock className="ml-1 h-3 w-3 flex-shrink-0" />
+            <span className="flex-shrink-0 text-xs">{post.date}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-2">
             <div className="flex items-center gap-0.5">
               <Heart className={`h-3 w-3 ${post.liked ? 'fill-red-500 text-red-500' : ''}`} />
-              <span>{post.likeCount || post.likes || 0}</span>
+              <span className="text-xs">{post.likeCount || post.likes || 0}</span>
             </div>
             <div className="flex items-center gap-0.5">
               <MessageSquare className="h-3 w-3" />
-              <span>{post.commentCount || post.comments || 0}</span>
+              <span className="text-xs">{post.commentCount || post.comments || 0}</span>
             </div>
             {post.bookmarkCount !== undefined && (
               <div className="flex items-center gap-0.5">
                 <Bookmark
                   className={`h-3 w-3 ${post.bookmarked ? 'fill-yellow-500 text-yellow-500' : ''}`}
                 />
-                <span>{post.bookmarkCount}</span>
+                <span className="text-xs">{post.bookmarkCount}</span>
               </div>
             )}
           </div>

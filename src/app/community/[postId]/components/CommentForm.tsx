@@ -6,24 +6,6 @@ interface CommentFormProps {
   onCommentSubmit: (e: React.FormEvent) => void;
 }
 
-// @멘션 미리보기를 렌더링하는 함수
-const renderMentionPreview = (content: string) => {
-  const mentionRegex = /@([^\s@]+)/g;
-  const parts = content.split(mentionRegex);
-
-  return parts.map((part, index) => {
-    // 홀수 인덱스는 멘션된 사용자명
-    if (index % 2 === 1) {
-      return (
-        <span key={index} className="font-semibold text-violet-600 dark:text-violet-400">
-          @{part}
-        </span>
-      );
-    }
-    return part;
-  });
-};
-
 export const CommentForm = ({ newComment, onCommentChange, onCommentSubmit }: CommentFormProps) => {
   return (
     <div className="border-b border-gray-100 p-4 dark:border-gray-700 sm:p-6">
