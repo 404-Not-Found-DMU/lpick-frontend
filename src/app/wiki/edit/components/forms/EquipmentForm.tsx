@@ -10,7 +10,7 @@ export function EquipmentForm({ data, onUpdate }: EquipmentFormProps) {
   };
 
   const handleTypeSpecificChange = (type: string, field: string, value: unknown) => {
-    const typeInfo = data[`${type}Info` as keyof EquipmentInfo] as Record<string, unknown>;
+    const typeInfo = data[`${type}Info` as keyof EquipmentInfo] as unknown as Record<string, unknown>;
     const updatedTypeInfo = { ...typeInfo, [field]: value };
     handleFieldChange(`${type}Info` as keyof EquipmentInfo, updatedTypeInfo);
   };
