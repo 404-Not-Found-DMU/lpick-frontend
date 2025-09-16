@@ -98,7 +98,7 @@ export interface TextBlock {
 
   // 디스코그래피 항목
   export interface DiscographyItem {
-    id?: string // 백엔드에서 생성하므로 옵셔널
+    id: string // 프론트엔드에서 nanoid로 생성
     title: string
     releaseDate: string
     type: string // "앨범", "싱글", "EP", "컴필레이션" 등
@@ -107,7 +107,7 @@ export interface TextBlock {
 
   // 활동 이력 항목
   export interface ActivityItem {
-    id?: string // 백엔드에서 생성하므로 옵셔널
+    id: string // 프론트엔드에서 nanoid로 생성
     year: string
     title: string
     description: string
