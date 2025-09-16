@@ -4,7 +4,7 @@ import FeatureCard from './components/FeatureCard';
 
 const LoginPage = () => {
   return (
-    <div className="relative flex min-h-0 w-full bg-gradient-to-br from-lavender-50 via-white to-indigo-50 px-4 py-4 dark:from-gray-900 dark:via-gray-800 dark:to-lavender-900/20 sm:px-8 sm:py-6 lg:px-12 lg:py-8">
+    <div className="relative flex-1 flex min-h-0 w-full bg-gradient-to-br from-lavender-50 via-white to-indigo-50 px-4 py-4 dark:from-gray-900 dark:via-gray-800 dark:to-lavender-900/20 sm:px-8 sm:py-6 lg:px-12 lg:py-8">
       {/* 배경 장식 요소들 (떠다니는 음표만 남김) */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {/* 떠다니는 음표 아이콘 */}

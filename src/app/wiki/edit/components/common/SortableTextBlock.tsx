@@ -1,5 +1,7 @@
 "use client"
 
+import React, { useState } from "react"
+import type { TextBlock } from "@/types/hierarchical.editor.types"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { GripVertical, Trash2 } from "lucide-react"
@@ -8,7 +10,7 @@ import { Input } from "@/components/Input"
 import { Textarea } from "@/components/textarea"
 import { RadioGroupItem } from "@/components/radio-group"
 import { Label } from "@/components/label"
-import type { TextBlock } from "@/types/hierarchical.editor.types"
+import { DeleteConfirmModal } from "./DeleteConfirmModal"
 
 interface SortableTextBlockProps {
   block: TextBlock
@@ -18,6 +20,7 @@ interface SortableTextBlockProps {
 }
 
 export function SortableTextBlock({ block, numbering, onUpdate, onDelete }: SortableTextBlockProps) {
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
     id: block.id
   })
@@ -59,19 +62,19 @@ export function SortableTextBlock({ block, numbering, onUpdate, onDelete }: Sort
             </div>
             <Button
               variant="ghost"
-              size="sm"
-              className="h-8 w-8 opacity-0 group-hover:opacity-100"
-              onClick={() => onDelete(block.id)}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setShowDeleteModal(true)}
               aria-label="Delete section"
             >
-              <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-500" />
+              <Trash2 className="w-3 h-3 text-lavender-400" />
             </Button>
           </div>
           <Textarea
             value={block.content}
             onChange={(e) => onUpdate(block.id, block.title, e.target.value, block.depth)}
             placeholder="내용을 입력하세요 (Markdown 지원)"
-            className="min-h-[80px] border-none focus:ring-0 p-0 bg-transparent"
+            className="min-h-[120px] border-none focus:ring-0 p-0 bg-transparent"
           />
           <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center space-x-4">
@@ -91,6 +94,14 @@ export function SortableTextBlock({ block, numbering, onUpdate, onDelete }: Sort
           </div>
         </div>
       </div>
+      
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => onDelete(block.id)}
+        title="텍스트 블록 삭제"
+        message={`"${block.title}" 블록을 정말 삭제하시겠습니까?`}
+      />
     </div>
   )
 }
