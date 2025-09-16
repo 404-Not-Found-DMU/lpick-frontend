@@ -71,7 +71,7 @@ export const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
     return (
       <div
         ref={ref}
-        className={`p-6 pt-0 ${className}`}
+        className={`p-6 pt- justify-center items-center ${className}`}
         {...props}
       />
     )
