@@ -1,44 +1,10 @@
 "use client"
 
-import { Plus, TrendingUp, Clock, Music, FileText, Guitar, User } from "lucide-react"
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Badge, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components"
-import { useState } from "react"
+import { Plus, TrendingUp, Clock } from "lucide-react"
+import { Button, Card, CardContent, CardHeader, CardTitle, Badge } from "@/components"
 import Link from "next/link"
 
-const categories = [
-  {
-    id: "lp",
-    title: "LP (음반)",
-    description: "LP 음반에 대한 정보를 작성합니다",
-    icon: <Music className="w-8 h-8 text-violet-500" />,
-    color: "bg-violet-50 hover:bg-violet-100 border-violet-200",
-    href: "/wiki/edit",
-  },
-  {
-    id: "equipment",
-    title: "장비 (Equipment)",
-    description: "음악 장비에 대한 정보를 작성합니다",
-    icon: <Guitar className="w-8 h-8 text-green-500" />,
-    color: "bg-green-50 hover:bg-green-100 border-green-200",
-    href: "/wiki/edit/equipment",
-  },
-  {
-    id: "artist",
-    title: "아티스트 (Artist)",
-    description: "아티스트에 대한 정보를 작성합니다",
-    icon: <User className="w-8 h-8 text-purple-500" />,
-    color: "bg-purple-50 hover:bg-purple-100 border-purple-200",
-    href: "/wiki/edit/artist",
-  },
-  {
-    id: "other",
-    title: "기타 (Other)",
-    description: "레이블, 장르, 기타 음악 관련 정보를 작성합니다",
-    icon: <FileText className="w-8 h-8 text-orange-500" />,
-    color: "bg-orange-50 hover:bg-orange-100 border-orange-200",
-    href: "/wiki/edit/other",
-  },
-]
+
 
 const recentArticles = [
   { title: "Pink Floyd - The Dark Side of the Moon", category: "LP", time: "5분 전", author: "음악덕후" },
@@ -59,7 +25,6 @@ const popularArticles = [
 
 
 const WikiRootPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
     <div className="min-h-screen">
@@ -74,34 +39,11 @@ const WikiRootPage = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto mb-8 items-center justify-center">
-              <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogTrigger>
-                  <Button size="lg">
-                    <Plus className="w-5 h-5 mr-2" />새 문서 만들기
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-4xl max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl">새 문서 만들기</DialogTitle>
-                    <p className="text-gray-600 dark:text-gray-400">작성할 문서의 카테고리를 선택해주세요.</p>
-                  </DialogHeader>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6">
-                    {categories.map((category) => (
-                      <Link key={category.id} href={category.href} onClick={() => setIsModalOpen(false)}>
-                        <Card
-                          className={`h-full cursor-pointer transition-all duration-200 hover:shadow-lg ${category.color} border-2`}
-                        >
-                          <CardHeader className="text-center pb-4">
-                            <div className="flex justify-center mb-3">{category.icon}</div>
-                            <CardTitle className="text-lg">{category.title}</CardTitle>
-                            <CardDescription className="text-sm">{category.description}</CardDescription>
-                          </CardHeader>
-                        </Card>
-                      </Link>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <Link href="/wiki/edit">
+                <Button size="lg">
+                  <Plus className="w-5 h-5 mr-2" />새 문서 만들기
+                </Button>
+              </Link>
             </div>
           </div>
         </section>

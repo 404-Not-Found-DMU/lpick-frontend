@@ -28,11 +28,8 @@ export function useWikiEditor({ category, initialData, onSave }: UseWikiEditorPr
   );
 
   // 카테고리 데이터 업데이트
-  const updateCategoryData = useCallback((newData: Partial<CategoryData>) => {
-    setCategoryData(prev => ({
-      ...prev,
-      ...newData
-    }));
+  const updateCategoryData = useCallback((newData: CategoryData) => {
+    setCategoryData(newData);
   }, []);
 
   // 텍스트 블록 업데이트
@@ -98,13 +95,25 @@ export function useWikiEditor({ category, initialData, onSave }: UseWikiEditorPr
   const getDocumentTitle = useCallback((): string => {
     switch (category) {
       case 'lp':
-        return categoryData.data.infobox?.title || '새 LP';
+        if (categoryData.type === 'lp') {
+          return categoryData.data.infobox.title || '새 LP';
+        }
+        return '새 LP';
       case 'artist':
-        return categoryData.data.name || '새 아티스트';
+        if (categoryData.type === 'artist') {
+          return categoryData.data.name || '새 아티스트';
+        }
+        return '새 아티스트';
       case 'equipment':
-        return categoryData.data.name || '새 장비';
+        if (categoryData.type === 'equipment') {
+          return categoryData.data.name || '새 장비';
+        }
+        return '새 장비';
       case 'other':
-        return categoryData.data.title || '새 기타 항목';
+        if (categoryData.type === 'other') {
+          return categoryData.data.title || '새 기타 항목';
+        }
+        return '새 기타 항목';
       default:
         return '새 위키';
     }

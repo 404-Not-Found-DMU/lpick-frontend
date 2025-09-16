@@ -29,7 +29,7 @@ export default function CategoryEditorPage() {
   };
 
   return (
-    <div className="h-screen">
+    <div className="flex-1">
       <UniversalWikiEditor 
         category={category}
         initialData={initialData}
