@@ -12,7 +12,7 @@ const iconMap = {
 export function ContactCards() {
   return (
     <section className="py-6">
-      <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="container mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-4">
         {CONTACT_CARDS.map((card) => {
           const Icon = iconMap[card.id as keyof typeof iconMap]
           return (

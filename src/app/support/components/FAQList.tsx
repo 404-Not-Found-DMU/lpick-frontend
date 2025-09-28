@@ -41,7 +41,7 @@ function getTagBadgeStyles(tag: string) {
 export function FAQList({ items }: FAQListProps) {
   return (
     <section className="py-12">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-6 md:px-8">
         <div className="mb-4">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">자주 묻는 질문</h2>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">

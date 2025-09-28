@@ -18,7 +18,7 @@ type QuickActionsProps = {
 export function QuickActions({ onSearch }: QuickActionsProps) {
   return (
     <section className="py-12">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-6 md:px-8">
         <h1 className="text-3xl font-extrabold text-center text-gray-900 dark:text-gray-100 tracking-tight">고객센터</h1>
         <p className="text-center text-gray-500 dark:text-gray-400 mt-2">
           LPick 서비스 이용에 도움이 필요하신가요? 아래에서 주제를 선택해 주세요.
@@ -58,7 +58,7 @@ export function QuickActions({ onSearch }: QuickActionsProps) {
             return (
               <Link
                 key={item.id}
-                href="#"
+                href={item.id === 'expert' ? '/support/expert' : '#'}
                 className={`rounded-2xl ${accent.cardBg} ${accent.cardBorder} border p-6 text-center shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
               >
                 <div className={`mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full ${accent.iconBg}`}>
