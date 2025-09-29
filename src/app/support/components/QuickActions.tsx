@@ -58,7 +58,7 @@ export function QuickActions({ onSearch }: QuickActionsProps) {
             return (
               <Link
                 key={item.id}
-                href={item.id === 'expert' ? '/support/expert' : item.id === 'faq' ? '/support/notices' : '#'}
+                href={item.id === 'expert' ? '/support/expert' : item.id === 'faq' ? '/support/notices' : item.id === 'qna' ? '/support/inquiry' : '#'}
                 className={`group rounded-2xl ${accent.cardBg} ${accent.cardBorder} border p-6 text-center shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
               >
                 <div className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full ${accent.iconBg}`}>
