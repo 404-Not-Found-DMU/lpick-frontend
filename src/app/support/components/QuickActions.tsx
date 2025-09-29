@@ -1,6 +1,6 @@
 'use client'
 
-import { HelpCircle, MessageCircle, BookOpen, ShieldCheck, Search, ArrowRight } from 'lucide-react'
+import { HelpCircle, MessageCircle, BookOpen, ShieldCheck, Search } from 'lucide-react'
 import Link from 'next/link'
 import { QUICK_ACTIONS } from '../constants'
 

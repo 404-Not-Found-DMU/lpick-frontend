@@ -1,6 +1,6 @@
 'use client'
 
-import { BadgeCheck, CheckCircle2, FileUp, Info, Mail, MapPin, Phone, Star, ArrowLeft } from 'lucide-react'
+import { BadgeCheck, CheckCircle2, FileUp, Info, Star, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ExpertApplyPage() {
