@@ -58,16 +58,16 @@ export function QuickActions({ onSearch }: QuickActionsProps) {
             return (
               <Link
                 key={item.id}
-                href={item.id === 'expert' ? '/support/expert' : item.id === 'faq' ? '/support/faq' : '#'}
-                className={`rounded-2xl ${accent.cardBg} ${accent.cardBorder} border p-6 text-center shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
+                href={item.id === 'expert' ? '/support/expert' : item.id === 'faq' ? '/support/notices' : '#'}
+                className={`group rounded-2xl ${accent.cardBg} ${accent.cardBorder} border p-6 text-center shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
               >
-                <div className={`mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full ${accent.iconBg}`}>
-                  <Icon className={`h-5 w-5 ${accent.iconColor}`} />
+                <div className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full ${accent.iconBg}`}>
+                  <Icon className={`h-6 w-6 ${accent.iconColor}`} />
                 </div>
-                <div className="font-semibold text-gray-900 dark:text-gray-100">{item.label}</div>
+                <div className="font-semibold text-gray-900 dark:text-gray-100">{item.id === 'faq' ? '공지사항' : item.label}</div>
                 {('desc' in item) && (
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                    {item.desc as string}
+                    {item.id === 'faq' ? 'LPick의 소식과 점검/업데이트 안내' : (item.desc as string)}
                   </p>
                 )}
               </Link>
