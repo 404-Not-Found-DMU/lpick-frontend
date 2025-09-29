@@ -42,11 +42,20 @@ export function FAQList({ items }: FAQListProps) {
   return (
     <section className="py-12">
       <div className="container mx-auto px-6 md:px-8">
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">자주 묻는 질문</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            LPick 서비스 이용에 대해 가장 많이 문의하시는 내용들입니다.
-          </p>
+        <div className="mb-4 flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">자주 묻는 질문</h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              LPick 서비스 이용에 대해 가장 많이 문의하시는 내용들입니다.
+            </p>
+          </div>
+          <Link
+            href="/support/faq"
+            className="inline-flex items-center text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 text-sm"
+          >
+            자세히 보기
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Link>
         </div>
 
         <div className="divide-y divide-gray-100 dark:divide-gray-700 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
@@ -72,7 +81,7 @@ export function FAQList({ items }: FAQListProps) {
                   <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{faq.excerpt}</p>
                 </div>
 
-                {/* right: badges + link */}
+                {/* right: badges */}
                 <div className="md:ml-6 flex md:flex-col items-end gap-2 md:gap-3 md:justify-between">
                   <div className="flex items-center gap-2">
                     {faq.popular && (
@@ -84,13 +93,7 @@ export function FAQList({ items }: FAQListProps) {
                       {faq.visibility}
                     </span>
                   </div>
-                  <Link
-                    href="#"
-                    className="inline-flex items-center text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 text-sm"
-                  >
-                    자세히 보기
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </Link>
+                  {/* per-row link 제거 - 상단 우측 링크 사용 */}
                 </div>
               </div>
             </div>
