@@ -1,17 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Eye, UserRound, CalendarClock } from 'lucide-react'
 
 export default function NoticeDetailPage({ params }: { params: { id: string } }) {
   const { id } = params
   // 실제 구현 시 id로 서버 데이터 fetch
   const notice = {
     id,
-    title: `공지사항 #${id} 상세 제목입니다`,
-    date: '2025-03-12',
-    content:
-      '안정적인 서비스 제공을 위한 점검을 진행합니다. 점검 시간 동안 일부 기능이 제한될 수 있습니다. 이용에 불편을 드려 죄송합니다.',
+    title: `홈페이지 공지 안내`,
+    author: '총관리자',
+    views: 332,
+    date: '2025. 08. 02. 오전 09:00',
+    content: '홈페이지1 공지입니다.',
   }
 
   return (
@@ -19,21 +20,35 @@ export default function NoticeDetailPage({ params }: { params: { id: string } })
       <div className="container mx-auto px-6 md:px-8 py-10">
         <div className="max-w-[1440px] mx-auto">
           {/* 돌아가기 */}
-          <div className="mb-8">
-            <Link href="/support/notices" className="inline-flex items-center gap-2 text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+          <div className="mb-6">
+            <Link href="/support/notices" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100">
               <ArrowLeft className="h-4 w-4" />
-              <span className="text-sm font-medium">공지사항 목록으로</span>
+              <span className="text-sm">뒤로가기</span>
             </Link>
           </div>
 
-          {/* 본문 */}
-          <article className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm">
-            <header className="mb-4">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{notice.title}</h1>
-              <time className="text-sm text-gray-400 dark:text-gray-500">{notice.date}</time>
-            </header>
-            <div className="prose prose-sm md:prose-base max-w-none text-gray-700 dark:prose-invert dark:text-gray-300">
-              <p>{notice.content}</p>
+          {/* 본문 카드 */}
+          <article className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
+            {/* 제목 영역 */}
+            <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">{notice.title}</h1>
+              <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
+                <span className="inline-flex items-center gap-1"><UserRound className="h-4 w-4" /> 작성자: {notice.author}</span>
+                <span className="inline-flex items-center gap-1"><Eye className="h-4 w-4" /> 조회수: {notice.views}</span>
+                <span className="inline-flex items-center gap-1"><CalendarClock className="h-4 w-4" /> 작성일: {notice.date}</span>
+              </div>
+            </div>
+
+            {/* 내용 영역 */}
+            <div className="px-6 py-6">
+              <div className="min-h-[320px] rounded-md bg-gray-50 dark:bg-gray-900/20 p-6">
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{notice.content}</p>
+              </div>
+              <div className="mt-8 flex justify-center">
+                <Link href="/support/notices" className="rounded-md bg-gray-700 text-white px-5 py-2 text-sm hover:bg-gray-800">
+                  뒤로가기
+                </Link>
+              </div>
             </div>
           </article>
         </div>
