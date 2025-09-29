@@ -118,7 +118,9 @@ export default function InquiryPage() {
                     <div className="col-span-1 flex items-center justify-center text-sm text-gray-500">{totalThreads - ((page - 1) * pageSize + idx)}</div>
                     <div className="col-span-7">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white bg-blue-500">문의</span>
+                        <span className="w-12 flex justify-start">
+                          <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white bg-blue-500">문의</span>
+                        </span>
                         <h3 className="font-medium text-gray-900 dark:text-gray-100 leading-tight">{t.question.title}</h3>
                       </div>
                     </div>
@@ -132,8 +134,11 @@ export default function InquiryPage() {
                     <div className={`grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/60 ${idx % 2 === 1 ? 'bg-gray-50/40 dark:bg-gray-800/30' : ''} border-b last:border-0 border-gray-100 dark:border-gray-700`}>
                       <div className="col-span-1" />
                       <div className="col-span-7">
-                        <div className="flex items-center gap-2 ml-6">
-                          <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white bg-green-500">답변</span>
+                        <div className="flex items-center gap-2">
+                          <span className="w-12 flex justify-start">
+                            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white bg-green-500">답변</span>
+                          </span>
+                          <span className="w-4 text-gray-400 select-none">↳</span>
                           <h4 className="font-medium text-gray-900 dark:text-gray-100 leading-tight">{t.answer.title}</h4>
                         </div>
                       </div>
