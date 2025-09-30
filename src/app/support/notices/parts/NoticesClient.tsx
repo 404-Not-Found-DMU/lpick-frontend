@@ -2,17 +2,9 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import type { NoticeItem } from '../../types'
 
-type Notice = {
-  id: number
-  title: string
-  date: string
-  summary: string
-  type?: '공지' | '대회' | '이벤트'
-  views?: number
-}
-
-export default function NoticesClient({ notices }: { notices: Notice[] }) {
+export default function NoticesClient({ notices }: { notices: NoticeItem[] }) {
   const [page, setPage] = useState(1)
   const pageSize = 10
   const total = notices.length

@@ -16,17 +16,18 @@ export default async function InquiryDetailPage({
   const baseUrl = `/support/inquiry/${threadId}`
 
   // 실제 구현 시 threadId로 원글+답변 fetch
+  // 프로젝트 톤에 맞춘 더미 데이터
   const question = {
-    title: '기록증이 제대로 표기되지 않습니다.',
-    author: '문**',
+    title: '앨범 상세 페이지에서 자켓 이미지가 보이지 않아요.',
+    author: '김**',
     date: '2025-08-03 10:12',
-    content: '마라톤 기록증 시간 표기가 이상합니다. 확인 부탁드립니다.',
+    content: '위키 문서 편집 후 자켓 이미지가 간헐적으로 사라집니다. 캐시 삭제 후에도 동일해요. 확인 부탁드립니다.',
   }
   const answer = {
-    title: '[RE] 기록증이 제대로 표기되지 않습니다.',
-    author: '총관리자',
+    title: '[RE] 앨범 상세 페이지에서 자켓 이미지가 보이지 않아요.',
+    author: '운영팀',
     date: '2025-08-03 12:20',
-    content: '안녕하세요. 기록증 시스템 업데이트 이후 반영 지연이 있었습니다. 현재 정상화되었습니다.',
+    content: '안녕하세요. 이미지 CDN 갱신 지연 이슈가 있어 캐시 무효화를 적용했습니다. 새로고침 후에도 문제 시 캡처와 URL을 함께 문의 부탁드립니다.',
   }
 
   return (
