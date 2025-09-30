@@ -2,21 +2,25 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import KakaoIcon from '@/assets/icons/KakaoIcon';
-import { fetcher } from '@/hooks/api/fetchers';
+import { useRouter } from 'next/navigation';
+// import { fetcher } from '@/hooks/api/fetchers';
 
 const LoginCard = () => {
+  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleKakaoLogin = async () => {
     setIsLoading(true);
     try {
-      console.log('카카오 로그인 시도');
+      // console.log('카카오 로그인 시도');
 
-      const res = await fetcher('/api/v1/developer-token', {
-      method: 'POST',
-      });
-      console.log('응답:', res);
-      
+      // const res = await fetcher('/api/v1/developer-token', {
+      // method: 'POST',
+      // });
+      // console.log('응답:', res);
+
+      router.push('/signup');
     } catch (error) {
       console.error('로그인 오류:', error);
     } finally {
@@ -68,11 +72,17 @@ const LoginCard = () => {
         <div className="mt-4 border-t border-gray-200 pt-3 dark:border-gray-600 sm:mt-6 sm:pt-4 lg:mt-8 lg:pt-6">
           <p className="text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">
             로그인 시 LPick의{' '}
-            <Link href="/terms" className="text-lavender-500 hover:underline dark:text-lavender-400">
+            <Link
+              href="/terms"
+              className="text-lavender-500 hover:underline dark:text-lavender-400"
+            >
               이용약관
             </Link>{' '}
             및{' '}
-            <Link href="/privacy" className="text-lavender-500 hover:underline dark:text-lavender-400">
+            <Link
+              href="/privacy"
+              className="text-lavender-500 hover:underline dark:text-lavender-400"
+            >
               개인정보처리방침
             </Link>
             에 동의하시는 것으로 간주합니다.
