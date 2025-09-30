@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { MouseEvent, useMemo, useState } from 'react'
+import { Modal } from '@/components/Modal'
 
 export type InquiryItem = {
   id: number
@@ -11,6 +12,8 @@ export type InquiryItem = {
   author: string
   date: string
   views: number
+  isSecret?: boolean
+  authorId?: string
 }
 
 type Thread = { threadId: number; question: InquiryItem; answer?: InquiryItem }
@@ -26,8 +29,9 @@ function buildThreads(items: InquiryItem[]): Thread[] {
   return Array.from(map.values()).sort((a, b) => b.threadId - a.threadId)
 }
 
-export default function InquiryListClient({ items }: { items: InquiryItem[] }) {
+export default function InquiryListClient({ items, currentUserId = 'guest' }: { items: InquiryItem[]; currentUserId?: string }) {
   const [page, setPage] = useState(1)
+  const [secretOpen, setSecretOpen] = useState(false)
   const pageSize = 10
   const threads = useMemo(() => buildThreads(items), [items])
   const totalThreads = threads.length
@@ -37,6 +41,15 @@ export default function InquiryListClient({ items }: { items: InquiryItem[] }) {
     const start = (page - 1) * pageSize
     return threads.slice(start, start + pageSize)
   }, [page, threads])
+
+  const handleGuard = (e: MouseEvent, t: Thread) => {
+    const isSecret = t.question.isSecret === true
+    const isOwner = !!t.question.authorId && t.question.authorId === currentUserId
+    if (isSecret && !isOwner) {
+      e.preventDefault()
+      setSecretOpen(true)
+    }
+  }
 
   return (
     <>
@@ -49,7 +62,7 @@ export default function InquiryListClient({ items }: { items: InquiryItem[] }) {
         </div>
         {current.map((t, idx) => (
           <div key={t.threadId}>
-            <Link href={`/support/inquiry/${t.threadId}?type=question`} className="block">
+            <Link href={`/support/inquiry/${t.threadId}?type=question`} className="block" onClick={(e) => handleGuard(e, t)}>
               <div className={`grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/60 ${idx % 2 === 1 ? 'bg-gray-50/40 dark:bg-gray-800/30' : ''} border-b border-gray-100 dark:border-gray-700`}>
                 <div className="col-span-1 flex items-center justify-center text-sm text-gray-500">{totalThreads - ((page - 1) * pageSize + idx)}</div>
                 <div className="col-span-7">
@@ -65,7 +78,7 @@ export default function InquiryListClient({ items }: { items: InquiryItem[] }) {
               </div>
             </Link>
             {t.answer && (
-              <Link href={`/support/inquiry/${t.threadId}?type=answer`} className="block">
+              <Link href={`/support/inquiry/${t.threadId}?type=answer`} className="block" onClick={(e) => handleGuard(e, t)}>
                 <div className={`grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/60 ${idx % 2 === 1 ? 'bg-gray-50/40 dark:bg-gray-800/30' : ''} border-b last:border-0 border-gray-100 dark:border-gray-700`}>
                   <div className="col-span-1" />
                   <div className="col-span-7">
@@ -99,6 +112,14 @@ export default function InquiryListClient({ items }: { items: InquiryItem[] }) {
         </div>
         <div className="text-gray-500 dark:text-gray-400">페이지 {page}/{pageCount}</div>
       </div>
+
+      <Modal
+        open={secretOpen}
+        onClose={() => setSecretOpen(false)}
+        title="비밀글입니다!"
+        description={<span>이 글은 비밀글로 설정되어 있어 작성자만 볼 수 있습니다.</span>}
+        confirmText="확인"
+      />
     </>
   )
 }
