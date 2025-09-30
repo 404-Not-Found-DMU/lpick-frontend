@@ -12,7 +12,7 @@ const recentArticles = [
     category: "LP", 
     time: "5분 전", 
     author: "음악덕후",
-    slug: "pink-floyd-dark-side-of-the-moon",
+    slug: "lp/pink-floyd-dark-side-of-the-moon",
     description: "1973년 발매된 Pink Floyd의 대표작으로, 프로그레시브 록의 걸작으로 평가받는 앨범입니다."
   },
   { 
@@ -20,7 +20,7 @@ const recentArticles = [
     category: "아티스트", 
     time: "1시간 전", 
     author: "글램러버",
-    slug: "david-bowie",
+    slug: "artist/david-bowie",
     description: "영국의 전설적인 뮤지션으로, 글램 록의 선구자이자 현대 음악계의 아이콘입니다."
   },
   { 
@@ -28,7 +28,7 @@ const recentArticles = [
     category: "장비", 
     time: "2시간 전", 
     author: "기타마스터",
-    slug: "fender-stratocaster",
+    slug: "equipment/fender-stratocaster",
     description: "1954년에 출시된 세계에서 가장 유명한 일렉트릭 기타 중 하나입니다."
   },
   { 
@@ -36,7 +36,7 @@ const recentArticles = [
     category: "기타", 
     time: "3시간 전", 
     author: "록히스토리안",
-    slug: "rock-music-history",
+    slug: "other/rock-music-history",
     description: "1950년대부터 시작되어 현대 음악의 중요한 장르로 발전한 록 음악의 역사를 다룹니다."
   },
 ]
