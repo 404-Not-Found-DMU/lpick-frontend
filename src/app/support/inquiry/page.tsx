@@ -116,7 +116,7 @@ export default function InquiryPage() {
             {current.map((t, idx) => (
               <div key={t.threadId}>
                 {/* 문의(원글) */}
-                <Link href={`/support/inquiry/${t.threadId}`} className="block">
+                <Link href={`/support/inquiry/${t.threadId}?type=question`} className="block">
                   <div className={`grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/60 ${idx % 2 === 1 ? 'bg-gray-50/40 dark:bg-gray-800/30' : ''} border-b border-gray-100 dark:border-gray-700`}>
                     <div className="col-span-1 flex items-center justify-center text-sm text-gray-500">{totalThreads - ((page - 1) * pageSize + idx)}</div>
                     <div className="col-span-7">
@@ -133,7 +133,7 @@ export default function InquiryPage() {
                 </Link>
                 {/* 답변 (있으면) */}
                 {t.answer && (
-                  <Link href={`/support/inquiry/${t.threadId}`} className="block">
+                  <Link href={`/support/inquiry/${t.threadId}?type=answer`} className="block">
                     <div className={`grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/60 ${idx % 2 === 1 ? 'bg-gray-50/40 dark:bg-gray-800/30' : ''} border-b last:border-0 border-gray-100 dark:border-gray-700`}>
                       <div className="col-span-1" />
                       <div className="col-span-7">
