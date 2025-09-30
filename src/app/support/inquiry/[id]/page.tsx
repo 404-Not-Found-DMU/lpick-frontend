@@ -6,6 +6,7 @@ import { ArrowLeft, CalendarClock, MessageSquare, Reply } from 'lucide-react'
 export default function InquiryDetailPage({ params, searchParams }: { params: { id: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
   const threadId = params.id
   const viewType = typeof searchParams?.type === 'string' ? searchParams.type : 'answer'
+  const baseUrl = `/support/inquiry/${threadId}`
 
   // 실제 구현 시 threadId로 원글+답변 fetch
   const question = {
@@ -29,6 +30,22 @@ export default function InquiryDetailPage({ params, searchParams }: { params: { 
             <Link href="/support/inquiry" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100">
               <ArrowLeft className="h-4 w-4" />
               <span className="text-sm">목록으로</span>
+            </Link>
+          </div>
+
+          {/* 상단 토글 */}
+          <div className="mb-4 flex items-center justify-end gap-2">
+            <Link
+              href={`${baseUrl}?type=answer`}
+              className={`px-3 py-1.5 rounded-md text-sm ${viewType === 'answer' ? 'bg-violet-600 text-white' : 'border border-gray-300 text-gray-700 dark:text-gray-300'}`}
+            >
+              둘 다 보기
+            </Link>
+            <Link
+              href={`${baseUrl}?type=question`}
+              className={`px-3 py-1.5 rounded-md text-sm ${viewType === 'question' ? 'bg-violet-600 text-white' : 'border border-gray-300 text-gray-700 dark:text-gray-300'}`}
+            >
+              답변만 보기
             </Link>
           </div>
 
