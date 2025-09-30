@@ -7,12 +7,38 @@ import Link from "next/link"
 
 
 const recentArticles = [
-  { title: "Pink Floyd - The Dark Side of the Moon", category: "LP", time: "5분 전", author: "음악덕후" },
-  { title: "Fender Stratocaster", category: "장비", time: "1시간 전", author: "기타마스터" },
-  { title: "The Beatles", category: "아티스트", time: "2시간 전", author: "팝러버" },
-  { title: "Blue Note Records", category: "기타", time: "3시간 전", author: "재즈러버" },
-  { title: "Miles Davis - Kind of Blue", category: "LP", time: "4시간 전", author: "재즈마스터" },
-  { title: "Marshall JCM800", category: "장비", time: "5시간 전", author: "앰프매니아" },
+  { 
+    title: "Pink Floyd - The Dark Side of the Moon", 
+    category: "LP", 
+    time: "5분 전", 
+    author: "음악덕후",
+    slug: "lp/pink-floyd-dark-side-of-the-moon",
+    description: "1973년 발매된 Pink Floyd의 대표작으로, 프로그레시브 록의 걸작으로 평가받는 앨범입니다."
+  },
+  { 
+    title: "David Bowie", 
+    category: "아티스트", 
+    time: "1시간 전", 
+    author: "글램러버",
+    slug: "artist/david-bowie",
+    description: "영국의 전설적인 뮤지션으로, 글램 록의 선구자이자 현대 음악계의 아이콘입니다."
+  },
+  { 
+    title: "Fender Stratocaster", 
+    category: "장비", 
+    time: "2시간 전", 
+    author: "기타마스터",
+    slug: "equipment/fender-stratocaster",
+    description: "1954년에 출시된 세계에서 가장 유명한 일렉트릭 기타 중 하나입니다."
+  },
+  { 
+    title: "록 음악의 역사", 
+    category: "기타", 
+    time: "3시간 전", 
+    author: "록히스토리안",
+    slug: "other/rock-music-history",
+    description: "1950년대부터 시작되어 현대 음악의 중요한 장르로 발전한 록 음악의 역사를 다룹니다."
+  },
 ]
 
 const popularArticles = [
@@ -66,23 +92,28 @@ const WikiRootPage = () => {
                       {recentArticles.map((article, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                          className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors border border-gray-100 dark:border-gray-700"
                         >
-                          <div className="flex-1">
-                            <Link
-                              href="#"
-                              className="font-medium text-gray-900 dark:text-gray-100 hover:text-violet-500"
-                            >
-                              {article.title}
-                            </Link>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="outline" className="text-xs">
-                                {article.category}
-                              </Badge>
-                              <span className="text-xs text-gray-500">by {article.author}</span>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <Link
+                                href={`/wiki/${article.slug}`}
+                                className="font-semibold text-gray-900 dark:text-gray-100 hover:text-violet-500 text-lg block mb-2"
+                              >
+                                {article.title}
+                              </Link>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                                {article.description}
+                              </p>
+                              <div className="flex items-center gap-3">
+                                <Badge variant="outline" className="text-xs">
+                                  {article.category}
+                                </Badge>
+                                <span className="text-xs text-gray-500">by {article.author}</span>
+                              </div>
                             </div>
+                            <span className="text-sm text-gray-400 ml-4 flex-shrink-0">{article.time}</span>
                           </div>
-                          <span className="text-sm text-gray-400">{article.time}</span>
                         </div>
                       ))}
                     </div>

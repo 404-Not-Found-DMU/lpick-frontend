@@ -21,36 +21,33 @@ import { LivePreview } from "@/app/wiki/edit/components/preview/LivePreview"
 import { getDummyData } from "@/app/wiki/edit/data/dummyData"
 import type { WikiCategory } from "@/types/hierarchical.editor.types"
 
-export default function WikiViewPage() {
+export default function WikiEquipmentPage() {
   const [showTableOfContents, setShowTableOfContents] = useState(true)
 
   // 더미 데이터 사용
-  const wikiData = getDummyData('lp')
-  const category: WikiCategory = 'lp'
+  const wikiData = getDummyData('equipment')
+  const category: WikiCategory = 'equipment'
   const categoryData = wikiData.categoryData
   const textBlocks = wikiData.textBlocks
 
   // 위키 메타데이터
   const wikiMeta = {
-    title: categoryData.type === 'lp' 
-      ? (categoryData.data as { infobox: { title: string } }).infobox.title
-      : "The Dark Side of the Moon",
-    category: "음반",
-    lastUpdated: "2023년 5월 20일",
-    views: 1245,
-    contributors: 24,
+    title: categoryData.data.name,
+    category: "장비",
+    lastUpdated: "2023년 5월 15일",
+    views: 634,
+    contributors: 12,
     relatedPages: [
-      { title: "Pink Floyd", slug: "pink-floyd" },
-      { title: "Roger Waters", slug: "roger-waters" },
-      { title: "David Gilmour", slug: "david-gilmour" },
-      { title: "프로그레시브 록", slug: "progressive-rock" },
-      { title: "1970년대 음악", slug: "1970s-music" },
+      { title: "Fender", slug: "other/fender" },
+      { title: "일렉트릭 기타", slug: "other/electric-guitar" },
+      { title: "Gibson Les Paul", slug: "equipment/gibson-les-paul" },
+      { title: "Fender Telecaster", slug: "equipment/fender-telecaster" },
+      { title: "기타 역사", slug: "other/guitar-history" },
     ],
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-
       <main className="container px-4 py-8 mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* 메인 콘텐츠 */}
@@ -58,7 +55,7 @@ export default function WikiViewPage() {
             {/* 문서 헤더 */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
               <div className="flex items-center mb-2">
-                <Badge className="bg-violet-500/10 text-violet-500 font-normal mr-2">{wikiMeta.category}</Badge>
+                <Badge className="bg-green-500/10 text-green-500 font-normal mr-2">{wikiMeta.category}</Badge>
                 <span className="text-sm text-gray-500 dark:text-gray-400">최근 수정: {wikiMeta.lastUpdated}</span>
               </div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{wikiMeta.title}</h1>
@@ -110,7 +107,7 @@ export default function WikiViewPage() {
                   <ol className="list-decimal list-inside space-y-2">
                     {textBlocks.map((block, index) => (
                       <li key={block.id}>
-                        <a href={`#${block.id}`} className="text-violet-500 hover:underline">
+                        <a href={`#${block.id}`} className="text-green-500 hover:underline">
                           {index + 1}. {block.title}
                         </a>
                       </li>
@@ -135,7 +132,7 @@ export default function WikiViewPage() {
             {/* 문서 정보 */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                <Info className="w-5 h-5 mr-2 text-violet-500" />
+                <Info className="w-5 h-5 mr-2 text-green-500" />
                 문서 정보
               </h3>
               <div className="space-y-3">
@@ -157,13 +154,13 @@ export default function WikiViewPage() {
             {/* 관련 문서 */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-violet-500" />
+                <FileText className="w-5 h-5 mr-2 text-green-500" />
                 관련 문서
               </h3>
               <ul className="space-y-2">
                 {wikiMeta.relatedPages.map((page) => (
                   <li key={page.slug}>
-                    <Link href={`/wiki/${page.slug}`} className="flex items-center text-violet-500 hover:underline">
+                    <Link href={`/wiki/${page.slug}`} className="flex items-center text-green-500 hover:underline">
                       <ChevronRight className="w-4 h-4 mr-1 flex-shrink-0" />
                       <span>{page.title}</span>
                     </Link>
@@ -175,25 +172,25 @@ export default function WikiViewPage() {
             {/* 최근 수정된 문서 */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-violet-500" />
+                <Clock className="w-5 h-5 mr-2 text-green-500" />
                 최근 수정된 문서
               </h3>
               <ul className="space-y-3">
                 <li>
-                  <Link href="/wiki/miles-davis-kind-of-blue" className="block group">
-                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">Miles Davis - Kind of Blue</h4>
+                  <Link href="/wiki/equipment/marshall-jcm800" className="block group">
+                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-green-500 font-medium">Marshall JCM800</h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">1시간 전</p>
                   </Link>
                 </li>
                 <li>
-                  <Link href="/wiki/technics-sl-1200mk7" className="block group">
-                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">Technics SL-1200MK7</h4>
+                  <Link href="/wiki/equipment/vox-ac30" className="block group">
+                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-green-500 font-medium">Vox AC30</h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">3시간 전</p>
                   </Link>
                 </li>
                 <li>
-                  <Link href="/wiki/the-beatles-abbey-road" className="block group">
-                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">The Beatles - Abbey Road</h4>
+                  <Link href="/wiki/lp/led-zeppelin-iv" className="block group">
+                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-green-500 font-medium">Led Zeppelin IV</h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">5시간 전</p>
                   </Link>
                 </li>
@@ -201,7 +198,7 @@ export default function WikiViewPage() {
             </div>
           </div>
         </div>
-    </main>
+      </main>
 
       {/* 푸터 */}
       <footer className="py-12 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">

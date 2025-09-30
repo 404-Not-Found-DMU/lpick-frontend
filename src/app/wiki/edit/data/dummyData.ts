@@ -189,6 +189,6 @@ export const dummyDataMap = {
 } as const;
 
 // 타입 안전한 더미 데이터 가져오기 함수
-export const getDummyData = (category: keyof typeof dummyDataMap) => {
+export const getDummyData = <C extends keyof typeof dummyDataMap>(category: C) => {
   return dummyDataMap[category];
-}; 
+};

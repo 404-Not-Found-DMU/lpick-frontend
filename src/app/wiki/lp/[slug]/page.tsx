@@ -21,7 +21,7 @@ import { LivePreview } from "@/app/wiki/edit/components/preview/LivePreview"
 import { getDummyData } from "@/app/wiki/edit/data/dummyData"
 import type { WikiCategory } from "@/types/hierarchical.editor.types"
 
-export default function WikiViewPage() {
+export default function WikiLPPage() {
   const [showTableOfContents, setShowTableOfContents] = useState(true)
 
   // 더미 데이터 사용
@@ -32,25 +32,22 @@ export default function WikiViewPage() {
 
   // 위키 메타데이터
   const wikiMeta = {
-    title: categoryData.type === 'lp' 
-      ? (categoryData.data as { infobox: { title: string } }).infobox.title
-      : "The Dark Side of the Moon",
+    title: categoryData.data.infobox.title,
     category: "음반",
     lastUpdated: "2023년 5월 20일",
     views: 1245,
     contributors: 24,
     relatedPages: [
-      { title: "Pink Floyd", slug: "pink-floyd" },
-      { title: "Roger Waters", slug: "roger-waters" },
-      { title: "David Gilmour", slug: "david-gilmour" },
-      { title: "프로그레시브 록", slug: "progressive-rock" },
-      { title: "1970년대 음악", slug: "1970s-music" },
+      { title: "Pink Floyd", slug: "artist/pink-floyd" },
+      { title: "Roger Waters", slug: "artist/roger-waters" },
+      { title: "David Gilmour", slug: "artist/david-gilmour" },
+      { title: "프로그레시브 록", slug: "other/progressive-rock" },
+      { title: "1970년대 음악", slug: "other/1970s-music" },
     ],
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-
       <main className="container px-4 py-8 mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* 메인 콘텐츠 */}
@@ -180,19 +177,19 @@ export default function WikiViewPage() {
               </h3>
               <ul className="space-y-3">
                 <li>
-                  <Link href="/wiki/miles-davis-kind-of-blue" className="block group">
+                  <Link href="/wiki/lp/miles-davis-kind-of-blue" className="block group">
                     <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">Miles Davis - Kind of Blue</h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">1시간 전</p>
                   </Link>
                 </li>
                 <li>
-                  <Link href="/wiki/technics-sl-1200mk7" className="block group">
+                  <Link href="/wiki/equipment/technics-sl-1200mk7" className="block group">
                     <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">Technics SL-1200MK7</h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">3시간 전</p>
                   </Link>
                 </li>
                 <li>
-                  <Link href="/wiki/the-beatles-abbey-road" className="block group">
+                  <Link href="/wiki/lp/the-beatles-abbey-road" className="block group">
                     <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">The Beatles - Abbey Road</h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">5시간 전</p>
                   </Link>
@@ -201,7 +198,7 @@ export default function WikiViewPage() {
             </div>
           </div>
         </div>
-    </main>
+      </main>
 
       {/* 푸터 */}
       <footer className="py-12 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
