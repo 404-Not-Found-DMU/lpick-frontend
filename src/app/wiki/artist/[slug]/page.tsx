@@ -21,13 +21,7 @@ import { LivePreview } from "@/app/wiki/edit/components/preview/LivePreview"
 import { getDummyData } from "@/app/wiki/edit/data/dummyData"
 import type { WikiCategory } from "@/types/hierarchical.editor.types"
 
-interface WikiPageProps {
-  params: {
-    slug: string
-  }
-}
-
-export default function WikiArtistPage({ params }: WikiPageProps) {
+export default function WikiArtistPage() {
   const [showTableOfContents, setShowTableOfContents] = useState(true)
 
   // 더미 데이터 사용
