@@ -1,5 +1,3 @@
-'use client'
-
 import { Phone, Mail, Clock } from 'lucide-react'
 import { CONTACT_CARDS } from '../constants'
 

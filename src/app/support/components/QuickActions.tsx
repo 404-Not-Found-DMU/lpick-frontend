@@ -1,6 +1,4 @@
-'use client'
-
-import { HelpCircle, MessageCircle, BookOpen, ShieldCheck, Search } from 'lucide-react'
+import { HelpCircle, MessageCircle, BookOpen, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { QUICK_ACTIONS } from '../constants'
 
@@ -11,11 +9,7 @@ const iconMap = {
   ShieldCheck,
 } as const
 
-type QuickActionsProps = {
-  onSearch?: (value: string) => void
-}
-
-export function QuickActions({ onSearch }: QuickActionsProps) {
+export function QuickActions() {
   return (
     <section className="py-12">
       <div className="container mx-auto px-6 md:px-8">
@@ -24,23 +18,10 @@ export function QuickActions({ onSearch }: QuickActionsProps) {
           LPick 서비스 이용에 도움이 필요하신가요? 아래에서 주제를 선택해 주세요.
         </p>
 
-        <div className="mt-6 max-w-3xl mx-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="궁금한 내용을 검색해보세요..."
-              className="w-full rounded-full border border-gray-200 bg-white px-10 py-3 text-sm placeholder-gray-400 shadow-sm hover:shadow focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-              onChange={(e) => onSearch?.(e.target.value)}
-            />
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-8">
           {QUICK_ACTIONS.map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap]
 
-            // 시안과 동일한 톤을 위해 동적 클래스 대신 정적 매핑 사용
             const accent = item.accent === 'amber'
               ? {
                   cardBg: 'bg-amber-50 dark:bg-amber-900/10',
