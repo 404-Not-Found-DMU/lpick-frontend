@@ -14,6 +14,7 @@ export interface TextBlock {
     weight: string
     pressingCountry: string
     pressingInfo: string
+    condition: string
     isColored: boolean
     labelType: string
     format: string
@@ -27,6 +28,7 @@ export interface TextBlock {
     releaseDate: string
     genre: string
     label: string
+    tableColor: string
     lpInfos: LPInfo[] // 여러 LP 정보를 배열로 관리
   }
   

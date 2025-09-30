@@ -248,6 +248,7 @@ export function InfoboxForm({ data, onUpdate }: InfoboxFormProps) {
       weight: "",
       pressingCountry: "",
       pressingInfo: "",
+      condition: "",
       isColored: false,
       labelType: "",
       format: "",
