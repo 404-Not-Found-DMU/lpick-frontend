@@ -12,7 +12,7 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
-    ignores: ['node_modules', 'build', '.next', 'coverage', '.github', 'docs'], // 무시할 폴더
+    ignores: ['node_modules', 'build', '.next', 'coverage', '.github', 'docs', 'next-env.d.ts'], // 무시할 폴더 및 자동 생성 파일
   },
 ];
 
