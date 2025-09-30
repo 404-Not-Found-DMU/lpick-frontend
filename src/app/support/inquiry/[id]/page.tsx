@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import { ArrowLeft, CalendarClock, MessageSquare, Reply } from 'lucide-react'
 
-export default function InquiryDetailPage({ params }: { params: { id: string } }) {
+export default function InquiryDetailPage({ params, searchParams }: { params: { id: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
   const threadId = params.id
+  const viewType = typeof searchParams?.type === 'string' ? searchParams.type : 'answer'
 
   // 실제 구현 시 threadId로 원글+답변 fetch
   const question = {
@@ -47,24 +48,26 @@ export default function InquiryDetailPage({ params }: { params: { id: string } }
             </div>
           </article>
 
-          {/* 답변 */}
-          <article className="rounded-2xl border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-green-50/60 dark:bg-green-900/20">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2"><Reply className="h-5 w-5 text-green-600" /> {answer.title}</h2>
-              <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                <span>작성자: {answer.author}</span>
-                <span className="inline-flex items-center gap-1"><CalendarClock className="h-4 w-4" /> {answer.date}</span>
+          {/* 답변: type=answer 일 때만 노출 */}
+          {viewType === 'answer' && (
+            <article className="rounded-2xl border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-green-50/60 dark:bg-green-900/20">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2"><Reply className="h-5 w-5 text-green-600" /> {answer.title}</h2>
+                <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                  <span>작성자: {answer.author}</span>
+                  <span className="inline-flex items-center gap-1"><CalendarClock className="h-4 w-4" /> {answer.date}</span>
+                </div>
               </div>
-            </div>
-            <div className="px-6 py-6">
-              <div className="min-h-[160px] rounded-md bg-gray-50 dark:bg-gray-900/20 p-6">
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{answer.content}</p>
+              <div className="px-6 py-6">
+                <div className="min-h-[160px] rounded-md bg-gray-50 dark:bg-gray-900/20 p-6">
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{answer.content}</p>
+                </div>
+                <div className="mt-8 flex justify-center">
+                  <Link href="/support/inquiry" className="rounded-md bg-gray-700 text-white px-5 py-2 text-sm hover:bg-gray-800">목록으로</Link>
+                </div>
               </div>
-              <div className="mt-8 flex justify-center">
-                <Link href="/support/inquiry" className="rounded-md bg-gray-700 text-white px-5 py-2 text-sm hover:bg-gray-800">목록으로</Link>
-              </div>
-            </div>
-          </article>
+            </article>
+          )}
         </div>
       </div>
     </div>
