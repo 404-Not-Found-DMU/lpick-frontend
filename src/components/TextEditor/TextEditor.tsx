@@ -477,7 +477,10 @@ const TextEditor: React.FC<TextEditorProps> = ({
   showFontSize = true,
   showTextColor = true,
   showImageUpload = true,
+  // 퍼블리싱 단계에서만 사용: 타입 유지용(미사용)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   imageDomainType = 'NOTICE',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   imageServerType = 'admin',
   onChange,
   onEditorReady,
@@ -742,7 +745,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
           <div className="w-px h-6 bg-gray-300" />
           <button
             onClick={() => {
-              const { from: _from, to: _to } = editor.state.selection;
               editor.chain().focus().updateAttributes('paragraph', { textAlign: 'left' }).run();
             }}
             className={`p-2 rounded-md transition-colors ${
@@ -756,7 +758,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
           </button>
           <button
             onClick={() => {
-              const { from: _from, to: _to } = editor.state.selection;
               editor.chain().focus().updateAttributes('paragraph', { textAlign: 'center' }).run();
             }}
             className={`p-2 rounded-md transition-colors ${
@@ -770,7 +771,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
           </button>
           <button
             onClick={() => {
-              const { from: _from, to: _to } = editor.state.selection;
               editor.chain().focus().updateAttributes('paragraph', { textAlign: 'right' }).run();
             }}
             className={`p-2 rounded-md transition-colors ${
@@ -784,7 +784,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
           </button>
           <button
             onClick={() => {
-              const { from: _from, to: _to } = editor.state.selection;
               editor.chain().focus().updateAttributes('paragraph', { textAlign: 'justify' }).run();
             }}
             className={`p-2 rounded-md transition-colors ${

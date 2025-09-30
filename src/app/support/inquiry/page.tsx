@@ -68,10 +68,11 @@ export default function InquiryPage() {
     return threads.slice(start, start + pageSize)
   }, [page, threads])
 
-  const goFirst = () => setPage(1)
-  const goPrev = () => setPage((p) => Math.max(1, p - 1))
-  const goNext = () => setPage((p) => Math.min(pageCount, p + 1))
-  const goLast = () => setPage(pageCount)
+  // 페이지 이동 핸들러 (UI 노출 시 사용)
+  // const goFirst = () => setPage(1)
+  // const goPrev = () => setPage((p) => Math.max(1, p - 1))
+  // const goNext = () => setPage((p) => Math.min(pageCount, p + 1))
+  // const goLast = () => setPage(pageCount)
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
