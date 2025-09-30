@@ -5,10 +5,10 @@ import InquiryListClient, { InquiryItem } from './parts/InquiryListClient'
 
 // 원시 데이터: 같은 threadId의 문의/답변이 한 묶음
 const RAW_INQUIRIES: InquiryItem[] = [
-  { id: 701, threadId: 701, type: '문의', title: '비밀글입니다.', author: '김**', date: '2025-09-27', views: 0 },
-  { id: 600, threadId: 600, type: '문의', title: '홈페이지 문의', author: '김현수', date: '2025-08-03', views: 0 },
+  { id: 701, threadId: 701, type: '문의', title: '비밀글입니다.', author: '김**', date: '2025-09-27', views: 0, isSecret: true, authorId: 'user-1' },
+  { id: 600, threadId: 600, type: '문의', title: '홈페이지 문의', author: '김현수', date: '2025-08-03', views: 0, authorId: 'user-2' },
   { id: 601, threadId: 600, type: '답변', title: '[RE] 홈페이지 문의', author: '총관리자', date: '2025-08-03', views: 0 },
-  { id: 500, threadId: 500, type: '문의', title: '비밀글입니다.', author: '김**', date: '2025-08-03', views: 0 },
+  { id: 500, threadId: 500, type: '문의', title: '비밀글입니다.', author: '김**', date: '2025-08-03', views: 0, isSecret: true, authorId: 'user-3' },
 ]
 
 const MORE_THREADS: InquiryItem[] = Array.from({ length: 15 }).flatMap((_, i) => {
@@ -21,6 +21,8 @@ const MORE_THREADS: InquiryItem[] = Array.from({ length: 15 }).flatMap((_, i) =>
     author: '이**',
     date: '2025-08-03',
     views: 0,
+    isSecret: i % 5 === 0,
+    authorId: i % 5 === 0 ? 'user-secret' : 'user-normal'
   }
   const answered = i % 3 === 0
   return answered
@@ -64,7 +66,8 @@ export default function InquiryPage() {
             </div>
           </div>
 
-          <InquiryListClient items={ALL_ITEMS} />
+          {/* currentUserId는 로그인 연동 시 실제 사용자 ID로 교체 */}
+          <InquiryListClient items={ALL_ITEMS} currentUserId="user-normal" />
         </div>
       </div>
     </div>
