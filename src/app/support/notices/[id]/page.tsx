@@ -1,10 +1,11 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Eye, UserRound, CalendarClock } from 'lucide-react'
 
-export default function NoticeDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default function NoticeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params)
   // 실제 구현 시 id로 서버 데이터 fetch
   const notice = {
     id,
