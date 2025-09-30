@@ -12,6 +12,7 @@ export const dummyLPData = {
         releaseDate: '1973-03-01',
         genre: 'Progressive Rock',
         label: 'Harvest Records',
+        tableColor: '#f3e8ff',
         lpInfos: [
           {
             id: '1',
@@ -22,6 +23,7 @@ export const dummyLPData = {
             weight: '180g',
             pressingCountry: 'UK',
             pressingInfo: 'Original pressing',
+            condition: 'Mint',
             isColored: false,
             labelType: 'Standard',
             format: 'LP',

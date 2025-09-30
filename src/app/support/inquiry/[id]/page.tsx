@@ -1,19 +1,17 @@
-'use client'
-
 import Link from 'next/link'
 import { ArrowLeft, CalendarClock, MessageSquare, Reply } from 'lucide-react'
 
 import React from 'react'
 
-export default function InquiryDetailPage({
+export default async function InquiryDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const { id: threadId } = React.use(params)
-  const sp = React.use(searchParams)
+  const { id: threadId } = await params
+  const sp = await searchParams
   const viewType = typeof sp?.type === 'string' ? (sp.type as string) : 'answer'
   const baseUrl = `/support/inquiry/${threadId}`
 
