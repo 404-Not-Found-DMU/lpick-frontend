@@ -3,7 +3,11 @@ export async function fetcher<T>(
     path: string,
     options: RequestInit = {}
 ): Promise<T> {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    
+    if (!baseUrl) {
+        throw new Error('API Base URL이 설정되지 않았습니다.');
+    }
     
     // 환경 변수 디버깅
     if (typeof window !== 'undefined') {

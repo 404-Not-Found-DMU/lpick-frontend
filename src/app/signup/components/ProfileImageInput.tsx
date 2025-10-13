@@ -4,7 +4,7 @@ import { useRef } from 'react';
 
 interface ProfileImageInputProps {
   value: string | null;
-  onChange: (img: string | null) => void;
+  onChange: (img: string | null, file: File | null) => void;
 }
 
 const ProfileImageInput: React.FC<ProfileImageInputProps> = ({ value, onChange }) => {
@@ -14,7 +14,7 @@ const ProfileImageInput: React.FC<ProfileImageInputProps> = ({ value, onChange }
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (ev) => onChange(ev.target?.result as string);
+      reader.onload = (ev) => onChange(ev.target?.result as string, file);
       reader.readAsDataURL(file);
     }
   };
