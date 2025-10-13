@@ -2,28 +2,19 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import KakaoIcon from '@/assets/icons/KakaoIcon';
-import { useRouter } from 'next/navigation';
+import { redirectToKakaoLogin } from '../hooks/auth.api';
 // import { fetcher } from '@/hooks/api/fetchers';
 
 const LoginCard = () => {
-  const router = useRouter();
-
   const [isLoading, setIsLoading] = useState(false);
 
   const handleKakaoLogin = async () => {
     setIsLoading(true);
     try {
-      // console.log('카카오 로그인 시도');
-
-      // const res = await fetcher('/api/v1/developer-token', {
-      // method: 'POST',
-      // });
-      // console.log('응답:', res);
-
-      router.push('/signup');
+      // 카카오 OAuth URL로 리다이렉트
+      redirectToKakaoLogin();
     } catch (error) {
       console.error('로그인 오류:', error);
-    } finally {
       setIsLoading(false);
     }
   };
