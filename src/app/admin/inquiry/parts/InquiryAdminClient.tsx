@@ -5,6 +5,7 @@ import DataTable from '../../components/DataTable'
 import FilterBar from '../../components/FilterBar'
 import Paginator from '../../components/Paginator'
 import ConfirmModal from '../../components/ConfirmModal'
+import { ChevronDown } from 'lucide-react'
 
 type InquiryRow = {
   id: number
@@ -40,18 +41,21 @@ export default function InquiryAdminClient({ items }: { items: InquiryRow[] }) {
       <FilterBar
         right={
           <div className="flex items-center gap-2">
-            <select
-              className="rounded-full border px-3 py-2 text-sm"
-              value={status}
-              onChange={(e) => {
-                setPage(1)
-                setStatus(e.target.value as any)
-              }}
-            >
-              <option value="전체">전체</option>
-              <option value="대기">대기</option>
-              <option value="완료">완료</option>
-            </select>
+            <div className="relative">
+              <select
+                className="min-w-[120px] appearance-none rounded-full border pl-3 pr-12 py-2 text-sm bg-white dark:bg-gray-800"
+                value={status}
+                onChange={(e) => {
+                  setPage(1)
+                  setStatus(e.target.value as any)
+                }}
+              >
+                <option value="전체">전체</option>
+                <option value="대기">대기</option>
+                <option value="완료">완료</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            </div>
             <input
               placeholder="검색..."
               className="w-64 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm placeholder-gray-400 shadow-sm hover:shadow focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
@@ -68,14 +72,14 @@ export default function InquiryAdminClient({ items }: { items: InquiryRow[] }) {
       <DataTable
         columns={[
           { key: 'id', header: '번호', className: 'text-center text-gray-500', span: 1 },
-          { key: 'title', header: '제목', span: 6, render: (_, r) => (
-            <Link className="text-violet-600 hover:underline block truncate" href={`/admin/inquiry/${r.id}`}>{r.title}</Link>
+          { key: 'title', header: '제목', span: 7, render: (_, r) => (
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${r.status === '완료' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}`}>{r.status}</span>
+              <Link className="text-violet-600 hover:underline block truncate" href={`/admin/inquiry/${r.id}`}>{r.title}</Link>
+            </div>
           ) },
-          { key: 'author', header: '작성자', className: 'text-center whitespace-nowrap', span: 2 },
-          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', span: 2 },
-          { key: 'status', header: '상태', className: 'text-center', span: 1, render: (v) => (
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${v === '완료' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}`}>{v}</span>
-          ) },
+          { key: 'author', header: '작성자', className: 'text-center whitespace-nowrap', span: 1 },
+          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', span: 1 },
           { key: 'views', header: '조회수', className: 'text-right whitespace-nowrap', span: 1 },
           { key: 'id', header: '메션', className: 'text-right', span: 1, render: (_, r) => (
             <div className="flex justify-end gap-1">
