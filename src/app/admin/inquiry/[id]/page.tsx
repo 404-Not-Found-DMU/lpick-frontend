@@ -1,8 +1,11 @@
 import Link from 'next/link'
 import { getInquiryById, updateInquiry } from '@/app/api/admin/inquiries/store'
+import { redirect } from 'next/navigation'
 
-export default async function AdminInquiryDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AdminInquiryDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { id } = await params
+  const sp = await searchParams
+  const saved = sp.saved === '1'
   const item = getInquiryById(Number(id))
   return (
     <div className="space-y-6">
@@ -10,6 +13,9 @@ export default async function AdminInquiryDetailPage({ params }: { params: Promi
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">문의 상세 #{id}</h2>
         <Link href="/admin/inquiry" className="rounded-md bg-gray-800 text-white px-3 py-2 text-sm">목록</Link>
       </div>
+      {saved ? (
+        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">답변이 저장되었습니다.</div>
+      ) : null}
       {!item ? (
         <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">존재하지 않는 문의입니다.</div>
       ) : (
@@ -36,6 +42,7 @@ function AnswerForm({ id, initial, status }: { id: number; initial: string; stat
     const answer = String(formData.get('answer') ?? '')
     const nextStatus = (formData.get('status') as '대기' | '완료') ?? status
     updateInquiry(id, { answer: answer || undefined, status: nextStatus })
+    redirect(`/admin/inquiry/${id}?saved=1`)
   }
 
   return (
