@@ -144,6 +144,7 @@ export default function ExpertAdminClient({ items, total, q: initialQ = '', stat
           setConfirm({ open: false })
           setBanner(confirm.type === 'approve' ? '승인되었습니다.' : '반려 처리되었습니다.')
           setTimeout(() => setBanner(null), 2000)
+          router.refresh()
         }}
       />
     </div>
