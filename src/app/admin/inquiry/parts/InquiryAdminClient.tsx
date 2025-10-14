@@ -1,11 +1,12 @@
 "use client"
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import DataTable from '../../components/DataTable'
 import FilterBar from '../../components/FilterBar'
 import Paginator from '../../components/Paginator'
 import ConfirmModal from '../../components/ConfirmModal'
 import { ChevronDown } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 type InquiryRow = {
   id: number
@@ -14,25 +15,27 @@ type InquiryRow = {
   date: string
   status: '대기' | '완료'
   views: number
+  secret?: boolean
 }
 
-export default function InquiryAdminClient({ items }: { items: InquiryRow[] }) {
-  const [q, setQ] = useState('')
-  const [status, setStatus] = useState<'전체' | '대기' | '완료'>('전체')
-  const [page, setPage] = useState(1)
-  const pageSize = 10
-  const filtered = useMemo(() => {
-    const s = q.trim().toLowerCase()
-    return items.filter((n) => {
-      const passQ = s ? [n.title, n.author].some((t) => t.toLowerCase().includes(s)) : true
-      const passStatus = status === '전체' ? true : n.status === status
-      return passQ && passStatus
-    })
-  }, [q, status, items])
-  const current = useMemo(() => {
-    const start = (page - 1) * pageSize
-    return filtered.slice(start, start + pageSize)
-  }, [filtered, page])
+export default function InquiryAdminClient({ items, total, q: initialQ = '', status: initialStatus = '전체', page: initialPage = 1, pageSize: initialPageSize = 10 }: { items: InquiryRow[]; total: number; q?: string; status?: '전체' | '대기' | '완료'; page?: number; pageSize?: number }) {
+  const router = useRouter()
+  const [q, setQ] = useState(initialQ)
+  const [status, setStatus] = useState<'전체' | '대기' | '완료'>(initialStatus)
+  const [page, setPage] = useState(initialPage)
+  const [pageSize, setPageSize] = useState(initialPageSize)
+  const filtered = items
+  const current = filtered
+
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (q) params.set('q', q)
+    if (status !== '전체') params.set('status', status)
+    if (page > 1) params.set('page', String(page))
+    if (pageSize !== 10) params.set('pageSize', String(pageSize))
+    const qs = params.toString()
+    router.replace(`/admin/inquiry${qs ? `?${qs}` : ''}`)
+  }, [q, status, page, pageSize, router])
 
   const [confirm, setConfirm] = useState<{ open: boolean; id?: number }>({ open: false })
 
@@ -56,6 +59,21 @@ export default function InquiryAdminClient({ items }: { items: InquiryRow[] }) {
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             </div>
+            <div className="relative">
+              <select
+                className="min-w-[100px] appearance-none rounded-full border pl-3 pr-10 py-2 text-sm bg-white dark:bg-gray-800"
+                value={pageSize}
+                onChange={(e) => {
+                  setPage(1)
+                  setPageSize(Number(e.target.value))
+                }}
+              >
+                <option value={10}>10개</option>
+                <option value={20}>20개</option>
+                <option value={50}>50개</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            </div>
             <input
               placeholder="검색..."
               className="w-64 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm placeholder-gray-400 shadow-sm hover:shadow focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
@@ -76,7 +94,10 @@ export default function InquiryAdminClient({ items }: { items: InquiryRow[] }) {
             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${v === '완료' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}`}>{v}</span>
           ) },
           { key: 'title', header: '제목', headerClassName: 'text-center', span: 7, render: (_, r) => (
-            <Link className="text-violet-600 hover:underline block truncate" href={`/admin/inquiry/${r.id}`}>{r.title}</Link>
+            <Link className="text-violet-600 hover:underline block truncate" href={`/admin/inquiry/${r.id}`}>
+              {r.secret ? <span className="mr-2 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-600 align-middle">비밀</span> : null}
+              {r.title}
+            </Link>
           ) },
           { key: 'author', header: '작성자', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1 },
           { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1 },
@@ -90,7 +111,7 @@ export default function InquiryAdminClient({ items }: { items: InquiryRow[] }) {
         rows={current}
       />
 
-      <Paginator page={page} total={filtered.length} pageSize={pageSize} onChange={setPage} />
+      <Paginator page={page} total={total} pageSize={pageSize} onChange={setPage} />
 
       <ConfirmModal
         open={confirm.open}
