@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import SideNav from './parts/SideNav'
+import { ToastProvider } from '@/components/Toast/ToastProvider'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -25,9 +26,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </header>
 
-          <div className="container mx-auto max-w-[1440px] px-6 md:px-8 py-8">
-            {children}
-          </div>
+          <ToastProvider>
+            <div className="container mx-auto max-w-[1440px] px-6 md:px-8 py-8">
+              {children}
+            </div>
+          </ToastProvider>
         </main>
       </div>
     </div>
