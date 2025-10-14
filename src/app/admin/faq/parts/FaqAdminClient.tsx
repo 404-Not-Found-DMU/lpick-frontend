@@ -51,13 +51,13 @@ export default function FaqAdminClient({ items, total }: { items: FaqRow[]; tota
 
       <DataTable
         columns={[
-          { key: 'id', header: '번호', className: 'text-center text-gray-500', span: 1 },
-          { key: 'question', header: '질문', span: 7, render: (_, r) => (
+          { key: 'id', header: '번호', className: 'text-center text-gray-500', headerClassName: 'text-center', span: 1 },
+          { key: 'question', header: '질문', headerClassName: 'text-center', span: 7, render: (_, r) => (
             <Link className="text-violet-600 hover:underline block truncate" href={`/admin/faq/${r.id}`}>{r.question}</Link>
           ) },
-          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', span: 2 },
-          { key: 'views', header: '조회수', className: 'text-right whitespace-nowrap', span: 1 },
-          { key: 'id', header: '메션', className: 'text-right', span: 1, render: (_, r) => (
+          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 2 },
+          { key: 'views', header: '조회수', className: 'text-right whitespace-nowrap', headerClassName: 'text-right', span: 1 },
+          { key: 'id', header: '작업', className: 'text-right', headerClassName: 'text-center', span: 1, render: (_, r) => (
             <div className="flex justify-end gap-1">
               <Link href={`/admin/faq/${r.id}/edit`} className="rounded-md border px-2 py-1 text-xs">수정</Link>
               <button onClick={() => setConfirm({ open: true, id: r.id })} className="rounded-md border px-2 py-1 text-xs text-red-600">삭제</button>

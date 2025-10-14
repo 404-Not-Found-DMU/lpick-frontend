@@ -16,7 +16,7 @@ export default async function AdminInquiryDetailPage({ params }: { params: Promi
         <div className="space-y-6">
           <article className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{item.title}</h3>
-            <p className="mt-1 text-sm text-gray-500">{item.author} · {item.date} · 조회수 {item.views.toLocaleString()}</p>
+            <p className="mt-1 text-sm text-gray-500">{item.author} · {item.date}</p>
             <div className="mt-4 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{item.question}</div>
           </article>
           <article className="rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-900/20 p-6 shadow-sm">

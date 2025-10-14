@@ -71,20 +71,20 @@ export default function NoticesAdminClient({ items, q: initialQ = '', page: init
 
       <DataTable
         columns={[
-          { key: 'id', header: '번호', className: 'text-center text-gray-500', span: 1 },
-          { key: 'type', header: '구분', className: 'text-center', span: 1, render: (v) => (
+          { key: 'id', header: '번호', className: 'text-center text-gray-500', headerClassName: 'text-center', span: 1 },
+          { key: 'type', header: '구분', className: 'text-center', headerClassName: 'text-center', span: 1, render: (v) => (
             v ? (
               <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                 v === '공지' ? 'bg-violet-100 text-violet-700' : v === '대회' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'
               }`}>{v}</span>
             ) : <span className="text-gray-400">-</span>
           ) },
-          { key: 'title', header: '제목', span: 7, render: (_, r) => (
+          { key: 'title', header: '제목', headerClassName: 'text-center', span: 7, render: (_, r) => (
             <Link className="text-violet-600 hover:underline block truncate" href={`/admin/notices/${r.id}`}>{r.title}</Link>
           ) },
-          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', span: 1 },
-          { key: 'views', header: '조회수', className: 'text-right whitespace-nowrap', span: 1 },
-          { key: 'id', header: '메션', className: 'text-right', span: 1, render: (_, r) => (
+          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1 },
+          { key: 'views', header: '조회수', className: 'text-right whitespace-nowrap', headerClassName: 'text-right', span: 1 },
+          { key: 'id', header: '작업', className: 'text-right', headerClassName: 'text-center', span: 1, render: (_, r) => (
             <div className="flex justify-end gap-1">
               <Link href={`/admin/notices/${r.id}/edit`} className="rounded-md border px-2 py-1 text-xs">수정</Link>
               <button onClick={() => setConfirm({ open: true, id: r.id as number })} className="rounded-md border px-2 py-1 text-xs text-red-600">삭제</button>

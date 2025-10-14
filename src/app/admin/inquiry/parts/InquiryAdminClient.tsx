@@ -71,17 +71,16 @@ export default function InquiryAdminClient({ items }: { items: InquiryRow[] }) {
 
       <DataTable
         columns={[
-          { key: 'id', header: '번호', className: 'text-center text-gray-500', span: 1 },
-          { key: 'title', header: '제목', span: 7, render: (_, r) => (
-            <div className="flex items-center gap-2">
-              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${r.status === '완료' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}`}>{r.status}</span>
-              <Link className="text-violet-600 hover:underline block truncate" href={`/admin/inquiry/${r.id}`}>{r.title}</Link>
-            </div>
+          { key: 'id', header: '번호', className: 'text-center text-gray-500', headerClassName: 'text-center', span: 1 },
+          { key: 'status', header: '상태', className: 'text-center', headerClassName: 'text-center', span: 1, render: (v) => (
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${v === '완료' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}`}>{v}</span>
           ) },
-          { key: 'author', header: '작성자', className: 'text-center whitespace-nowrap', span: 1 },
-          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', span: 1 },
-          { key: 'views', header: '조회수', className: 'text-right whitespace-nowrap', span: 1 },
-          { key: 'id', header: '메션', className: 'text-right', span: 1, render: (_, r) => (
+          { key: 'title', header: '제목', headerClassName: 'text-center', span: 7, render: (_, r) => (
+            <Link className="text-violet-600 hover:underline block truncate" href={`/admin/inquiry/${r.id}`}>{r.title}</Link>
+          ) },
+          { key: 'author', header: '작성자', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1 },
+          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1 },
+          { key: 'id', header: '작업', className: 'text-right', headerClassName: 'text-center', span: 1, render: (_, r) => (
             <div className="flex justify-end gap-1">
               <Link href={`/admin/inquiry/${r.id}/edit`} className="rounded-md border px-2 py-1 text-xs">수정</Link>
               <button onClick={() => setConfirm({ open: true, id: r.id })} className="rounded-md border px-2 py-1 text-xs text-red-600">삭제</button>
@@ -108,5 +107,6 @@ export default function InquiryAdminClient({ items }: { items: InquiryRow[] }) {
     </div>
   )
 }
+
 
 
