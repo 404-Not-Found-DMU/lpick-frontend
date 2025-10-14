@@ -70,7 +70,7 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
               </select>
               <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             </div>
-            <input placeholder="검색..." className="w-64 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm placeholder-gray-400 shadow-sm hover:shadow focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" value={q} onChange={(e) => { setPage(1); setQ(e.target.value) }} />
+            <input placeholder="검색..." className="w-72 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm placeholder-gray-400 shadow-sm hover:shadow focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" value={q} onChange={(e) => { setPage(1); setQ(e.target.value) }} />
           </div>
         }
       />
@@ -78,14 +78,14 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
       <DataTable
         columns={[
           { key: 'id', header: '번호', className: 'text-center text-gray-500', headerClassName: 'text-center', span: 1 },
-          { key: 'name', header: '이름', span: 2 },
-          { key: 'email', header: '이메일', span: 3 },
+          { key: 'name', header: '이름', span: 1 },
+          { key: 'email', header: '이메일', span: 6 },
           { key: 'role', header: '권한', className: 'text-center', headerClassName: 'text-center', span: 1 },
           { key: 'status', header: '상태', className: 'text-center', headerClassName: 'text-center', span: 1, render: (v) => (
             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${v === 'blocked' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>{v === 'blocked' ? '차단' : '활성'}</span>
           ) },
-          { key: 'joinedAt', header: '가입일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 2 },
-          { key: 'id', header: '작업', className: 'text-right', headerClassName: 'text-center', span: 2, render: (_, r) => (
+          { key: 'joinedAt', header: '가입일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1 },
+          { key: 'id', header: '작업', className: 'text-right', headerClassName: 'text-center', span: 1, render: (_, r) => (
             <div className="flex justify-end gap-1">
               {r.status === 'blocked' ? (
                 <button onClick={() => setConfirm({ open: true, id: r.id, action: 'unblock' })} className="rounded-md border px-2 py-1 text-xs text-emerald-700">해제</button>

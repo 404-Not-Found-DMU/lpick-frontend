@@ -20,8 +20,12 @@ export default function DataTable<T extends { id?: string | number }>({
         {columns.map((c, colIdx) => {
           const span = c.span ?? 12 / columns.length
           return (
-            <div key={`${String(c.key)}-${colIdx}`} className={`col-span-${span} min-w-0 ${c.headerClassName ?? c.className ?? ''}`.trim()}>
-            {c.header}
+            <div
+              key={`${String(c.key)}-${colIdx}`}
+              style={{ gridColumn: `span ${span} / span ${span}` }}
+              className={`min-w-0 ${c.headerClassName ?? c.className ?? ''}`.trim()}
+            >
+              {c.header}
             </div>
           )
         })}
@@ -37,7 +41,11 @@ export default function DataTable<T extends { id?: string | number }>({
             const value = row[c.key]
             const span = c.span ?? 12 / columns.length
             return (
-              <div key={`${String(c.key)}-${colIdx}`} className={`col-span-${span} min-w-0 truncate ${c.className ?? ''}`.trim()}>
+              <div
+                key={`${String(c.key)}-${colIdx}`}
+                style={{ gridColumn: `span ${span} / span ${span}` }}
+                className={`min-w-0 truncate ${c.className ?? ''}`.trim()}
+              >
                 {c.render ? c.render(value, row) : (value as React.ReactNode)}
               </div>
             )
