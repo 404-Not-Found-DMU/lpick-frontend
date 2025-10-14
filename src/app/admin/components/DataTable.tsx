@@ -4,6 +4,7 @@ type Column<T> = {
   className?: string
   render?: (value: T[keyof T], row: T) => React.ReactNode
   span?: number
+  headerClassName?: string
 }
 
 export default function DataTable<T extends { id?: string | number }>({
@@ -19,7 +20,7 @@ export default function DataTable<T extends { id?: string | number }>({
         {columns.map((c, colIdx) => {
           const span = c.span ?? 12 / columns.length
           return (
-            <div key={`${String(c.key)}-${colIdx}`} className={`col-span-${span} min-w-0 ${c.className ?? ''}`.trim()}>
+            <div key={`${String(c.key)}-${colIdx}`} className={`col-span-${span} min-w-0 ${c.headerClassName ?? c.className ?? ''}`.trim()}>
             {c.header}
             </div>
           )
