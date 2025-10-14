@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import DataTable from '../../components/DataTable'
 import FilterBar from '../../components/FilterBar'
 import Paginator from '../../components/Paginator'
@@ -26,6 +27,8 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
   const [page, setPage] = useState(initialPage)
   const [pageSize, setPageSize] = useState(initialPageSize)
   const [confirm, setConfirm] = useState<{ open: boolean; id?: number; action?: 'block' | 'unblock' }>(() => ({ open: false }))
+  const [bulk, setBulk] = useState<Set<number>>(new Set())
+  const [confirmBulk, setConfirmBulk] = useState<{ open: boolean; action?: 'block' | 'unblock' }>({ open: false })
 
   const filtered = useMemo(() => items, [items])
   const current = filtered
@@ -41,9 +44,42 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
     router.replace(`/admin/users${qs ? `?${qs}` : ''}`)
   }, [q, status, role, page, pageSize, router])
 
+  const toggleAllCurrent = (checked: boolean) => {
+    const ids = current.map((u) => u.id)
+    setBulk((prev) => {
+      const next = new Set(prev)
+      ids.forEach((id) => (checked ? next.add(id) : next.delete(id)))
+      return next
+    })
+  }
+
   return (
     <div>
       <FilterBar
+        children={
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={current.length > 0 && current.every((u) => bulk.has(u.id))}
+              onChange={(e) => toggleAllCurrent(e.target.checked)}
+            />
+            <button
+              className="rounded-md border px-3 py-1.5 text-xs disabled:opacity-50"
+              disabled={bulk.size === 0}
+              onClick={() => setConfirmBulk({ open: true, action: 'block' })}
+            >
+              선택 차단
+            </button>
+            <button
+              className="rounded-md border px-3 py-1.5 text-xs disabled:opacity-50"
+              disabled={bulk.size === 0}
+              onClick={() => setConfirmBulk({ open: true, action: 'unblock' })}
+            >
+              선택 해제
+            </button>
+          </div>
+        }
         right={
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -78,9 +114,46 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
       <DataTable
         columns={[
           { key: 'id', header: '번호', className: 'text-center text-gray-500', headerClassName: 'text-center', span: 1 },
-          { key: 'name', header: '이름', span: 1 },
-          { key: 'email', header: '이메일', span: 6 },
-          { key: 'role', header: '권한', className: 'text-center', headerClassName: 'text-center', span: 1 },
+          { key: 'id', header: (
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={current.length > 0 && current.every((u) => bulk.has(u.id))}
+              onChange={(e) => toggleAllCurrent((e.target as HTMLInputElement).checked)}
+            />
+          ) as unknown as string, span: 1, render: (_, r) => (
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={bulk.has(r.id)}
+              onChange={(e) => {
+                const checked = e.target.checked
+                setBulk((prev) => {
+                  const next = new Set(prev)
+                  if (checked) next.add(r.id)
+                  else next.delete(r.id)
+                  return next
+                })
+              }}
+            />
+          ) },
+          { key: 'name', header: '이름', span: 1, render: (_, r) => <Link href={`/admin/users/${r.id}`} className="text-violet-600 hover:underline">{r.name}</Link> },
+          { key: 'email', header: '이메일', span: 5 },
+          { key: 'role', header: '권한', className: 'text-center', headerClassName: 'text-center', span: 1, render: (v, r) => (
+            <select
+              className="mx-auto block rounded border px-2 py-1 text-xs"
+              defaultValue={String(v)}
+              onChange={async (e) => {
+                const role = e.target.value as 'user' | 'admin'
+                await fetch(`/api/admin/users/${r.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role }) })
+                push('권한을 변경했습니다.', 'success')
+                router.refresh()
+              }}
+            >
+              <option value="user">user</option>
+              <option value="admin">admin</option>
+            </select>
+          ) },
           { key: 'status', header: '상태', className: 'text-center', headerClassName: 'text-center', span: 1, render: (v) => (
             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${v === 'blocked' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>{v === 'blocked' ? '차단' : '활성'}</span>
           ) },
@@ -110,6 +183,30 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
           await fetch(`/api/admin/users/${confirm.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: confirm.action === 'block' ? 'blocked' : 'active' }) })
           push(confirm.action === 'block' ? '사용자를 차단했습니다.' : '차단을 해제했습니다.', 'success')
           setConfirm({ open: false })
+          router.refresh()
+        }}
+      />
+
+      <ConfirmModal
+        open={confirmBulk.open}
+        title={confirmBulk.action === 'block' ? '선택 사용자 차단' : '선택 사용자 차단 해제'}
+        message={`선택된 ${bulk.size}명에 대해 ${confirmBulk.action === 'block' ? '차단' : '해제'} 처리합니다.`}
+        onClose={() => setConfirmBulk({ open: false })}
+        onConfirm={async () => {
+          const action = confirmBulk.action
+          if (!action || bulk.size === 0) return
+          await Promise.all(
+            Array.from(bulk).map((id) =>
+              fetch(`/api/admin/users/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: action === 'block' ? 'blocked' : 'active' }),
+              }),
+            ),
+          )
+          push(action === 'block' ? '선택 사용자를 차단했습니다.' : '선택 사용자 차단을 해제했습니다.', 'success')
+          setConfirmBulk({ open: false })
+          setBulk(new Set())
           router.refresh()
         }}
       />
