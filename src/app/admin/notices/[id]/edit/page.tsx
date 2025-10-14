@@ -1,7 +1,11 @@
 import Link from 'next/link'
+import NoticeFormClient from '../../parts/NoticeFormClient'
+import { getNoticeById } from '@/app/api/admin/notices/store'
+import { redirect } from 'next/navigation'
 
 export default async function AdminNoticeEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const item = getNoticeById(Number(id))
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -9,20 +13,15 @@ export default async function AdminNoticeEditPage({ params }: { params: Promise<
         <Link href={`/admin/notices/${id}`} className="rounded-md bg-gray-800 text-white px-3 py-2 text-sm">상세</Link>
       </div>
       <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
-        <div className="grid gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">제목</label>
-            <input defaultValue="LPick 서비스 점검 안내" className="w-full rounded-md border px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">내용</label>
-            <textarea defaultValue={"안녕하세요, LPick입니다.\n점검 안내 드립니다."} className="min-h-[240px] w-full rounded-md border px-3 py-2 text-sm" />
-          </div>
-          <div className="flex justify-end gap-2">
-            <Link href={`/admin/notices/${id}`} className="rounded-md border px-4 py-2 text-sm">취소</Link>
-            <button className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white">저장</button>
-          </div>
-        </div>
+        {!item ? (
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">존재하지 않는 공지입니다.</div>
+        ) : (
+          <NoticeFormClient
+            submitText="수정"
+            initial={{ title: item.title, summary: item.summary, content: item.content, date: item.date, type: item.type }}
+            onSaved={() => redirect(`/admin/notices/${id}`)}
+          />
+        )}
       </div>
     </div>
   )
