@@ -1,10 +1,12 @@
 "use client"
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import DataTable from '../../components/DataTable'
 import FilterBar from '../../components/FilterBar'
 import Paginator from '../../components/Paginator'
 import ConfirmModal from '../../components/ConfirmModal'
+import { ChevronDown } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 type ExpertRow = {
   id: number
@@ -15,11 +17,13 @@ type ExpertRow = {
   fields: string[]
 }
 
-export default function ExpertAdminClient({ items, total }: { items: ExpertRow[]; total: number }) {
-  const [q, setQ] = useState('')
-  const [status, setStatus] = useState<'전체' | '대기' | '승인' | '반려'>('전체')
-  const [page, setPage] = useState(1)
-  const pageSize = 10
+export default function ExpertAdminClient({ items, total, q: initialQ = '', status: initialStatus = '전체', page: initialPage = 1, pageSize: initialPageSize = 10 }: { items: ExpertRow[]; total: number; q?: string; status?: '전체' | '대기' | '승인' | '반려'; page?: number; pageSize?: number }) {
+  const router = useRouter()
+  const [q, setQ] = useState(initialQ)
+  const [status, setStatus] = useState<'전체' | '대기' | '승인' | '반려'>(initialStatus)
+  const [page, setPage] = useState(initialPage)
+  const [pageSize, setPageSize] = useState(initialPageSize)
+  const [banner, setBanner] = useState<string | null>(null)
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase()
     return items.filter((n) => {
@@ -31,7 +35,17 @@ export default function ExpertAdminClient({ items, total }: { items: ExpertRow[]
   const current = useMemo(() => {
     const start = (page - 1) * pageSize
     return filtered.slice(start, start + pageSize)
-  }, [filtered, page])
+  }, [filtered, page, pageSize])
+
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (q) params.set('q', q)
+    if (status !== '전체') params.set('status', status)
+    if (page > 1) params.set('page', String(page))
+    if (pageSize !== 10) params.set('pageSize', String(pageSize))
+    const qs = params.toString()
+    router.replace(`/admin/expert${qs ? `?${qs}` : ''}`)
+  }, [q, status, page, pageSize, router])
 
   const [confirm, setConfirm] = useState<{ open: boolean; id?: number; type?: 'approve' | 'reject' }>(
     { open: false },
@@ -42,19 +56,37 @@ export default function ExpertAdminClient({ items, total }: { items: ExpertRow[]
       <FilterBar
         right={
           <div className="flex items-center gap-2">
-            <select
-              className="rounded-full border px-3 py-2 text-sm"
-              value={status}
-              onChange={(e) => {
-                setPage(1)
-                setStatus(e.target.value as any)
-              }}
-            >
-              <option value="전체">전체</option>
-              <option value="대기">대기</option>
-              <option value="승인">승인</option>
-              <option value="반려">반려</option>
-            </select>
+            <div className="relative">
+              <select
+                className="min-w-[120px] appearance-none rounded-full border pl-3 pr-12 py-2 text-sm bg-white dark:bg-gray-800"
+                value={status}
+                onChange={(e) => {
+                  setPage(1)
+                  setStatus(e.target.value as any)
+                }}
+              >
+                <option value="전체">전체</option>
+                <option value="대기">대기</option>
+                <option value="승인">승인</option>
+                <option value="반려">반려</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            </div>
+            <div className="relative">
+              <select
+                className="min-w-[100px] appearance-none rounded-full border pl-3 pr-10 py-2 text-sm bg-white dark:bg-gray-800"
+                value={pageSize}
+                onChange={(e) => {
+                  setPage(1)
+                  setPageSize(Number(e.target.value))
+                }}
+              >
+                <option value={10}>10개</option>
+                <option value={20}>20개</option>
+                <option value={50}>50개</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            </div>
             <input
               placeholder="검색..."
               className="w-64 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm placeholder-gray-400 shadow-sm hover:shadow focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
@@ -67,6 +99,10 @@ export default function ExpertAdminClient({ items, total }: { items: ExpertRow[]
           </div>
         }
       />
+
+      {banner ? (
+        <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">{banner}</div>
+      ) : null}
 
       <DataTable
         columns={[
@@ -91,7 +127,7 @@ export default function ExpertAdminClient({ items, total }: { items: ExpertRow[]
         rows={current}
       />
 
-      <Paginator page={page} total={filtered.length} pageSize={pageSize} onChange={setPage} />
+      <Paginator page={page} total={total} pageSize={pageSize} onChange={setPage} />
 
       <ConfirmModal
         open={confirm.open}
@@ -106,7 +142,8 @@ export default function ExpertAdminClient({ items, total }: { items: ExpertRow[]
             body: JSON.stringify({ status: confirm.type === 'approve' ? '승인' : '반려' }),
           })
           setConfirm({ open: false })
-          setPage(1)
+          setBanner(confirm.type === 'approve' ? '승인되었습니다.' : '반려 처리되었습니다.')
+          setTimeout(() => setBanner(null), 2000)
         }}
       />
     </div>

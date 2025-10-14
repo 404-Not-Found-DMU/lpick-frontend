@@ -40,9 +40,15 @@ export default async function AdminExpertDetailPage({ params, searchParams }: { 
             </div>
             <div className="mt-6">
               <div className="text-sm font-semibold text-gray-700 dark:text-gray-200">첨부 문서</div>
-              <ul className="mt-2 list-disc pl-5 text-sm text-gray-600 dark:text-gray-300">
+              <ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {item.docs.map((d, i) => (
-                  <li key={`${d}-${i}`}>{d}</li>
+                  <li key={`${d}-${i}`} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
+                    <span className="truncate pr-3 text-gray-700 dark:text-gray-300">{d}</span>
+                    <div className="flex gap-2">
+                      <a href="#" className="rounded-md border px-2 py-1 text-xs">미리보기</a>
+                      <a href="#" download className="rounded-md border px-2 py-1 text-xs">다운로드</a>
+                    </div>
+                  </li>
                 ))}
               </ul>
             </div>
