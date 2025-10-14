@@ -1,23 +1,44 @@
 import NoticesAdminClient from './parts/NoticesAdminClient'
 import type { NoticeItem } from '@/app/support/types'
+import { listNotices } from '@/app/api/admin/notices/store'
 
-const MOCK: NoticeItem[] = Array.from({ length: 27 }, (_, i) => ({
-  id: i + 1,
-  title: `공지 ${i + 1} - LPick 운영 안내`,
-  date: '2025-08-10',
-  summary: '서비스 점검 및 업데이트 관련 안내입니다.',
-  type: i % 5 === 0 ? '공지' : i % 3 === 0 ? '이벤트' : undefined,
-  views: 1000 + i * 7,
-}))
-
-export default function AdminNoticesPage() {
+export default async function AdminNoticesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const sp = await searchParams
+  const q = (sp.q as string) ?? ''
+  const page = Number((sp.page as string) ?? '1')
+  const pageSize = Number((sp.pageSize as string) ?? '10')
+  const sortBy = (sp.sortBy as 'date' | 'views') ?? 'date'
+  const sortDir = (sp.sortDir as 'asc' | 'desc') ?? 'desc'
+  const { items, total } = listNotices({
+    q,
+    page: Number.isFinite(page) ? page : 1,
+    pageSize: Number.isFinite(pageSize) ? pageSize : 10,
+    sortBy,
+    sortDir,
+  })
+  const mapped: NoticeItem[] = items.map((n) => ({
+    id: n.id,
+    title: n.title,
+    summary: n.summary,
+    date: n.date,
+    type: n.type,
+    views: n.views,
+  }))
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">공지사항 관리</h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">공지 목록/작성/수정을 관리합니다.</p>
       </div>
-      <NoticesAdminClient items={MOCK} />
+      <NoticesAdminClient
+        items={mapped}
+        q={q}
+        page={Number.isFinite(page) ? page : 1}
+        total={total}
+        pageSize={Number.isFinite(pageSize) ? pageSize : 10}
+        sortBy={sortBy}
+        sortDir={sortDir}
+      />
     </div>
   )
 }
