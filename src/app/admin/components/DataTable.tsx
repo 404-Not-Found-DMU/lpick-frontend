@@ -2,7 +2,7 @@ type Column<T> = {
   key: keyof T
   header: string
   className?: string
-  render?: (value: any, row: T) => React.ReactNode
+  render?: (value: T[keyof T], row: T) => React.ReactNode
 }
 
 export default function DataTable<T extends { id?: string | number }>({
@@ -15,7 +15,7 @@ export default function DataTable<T extends { id?: string | number }>({
   return (
     <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
       <div className="grid grid-cols-12 px-6 py-3 text-[13px] font-semibold text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-100 dark:border-gray-700">
-        {columns.map((c, i) => (
+        {columns.map((c) => (
           <div key={String(c.key)} className={`col-span-${12 / columns.length} ${c.className ?? ''}`.trim()}>
             {c.header}
           </div>
