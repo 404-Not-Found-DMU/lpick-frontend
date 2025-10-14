@@ -5,6 +5,7 @@ import DataTable from '../../components/DataTable'
 import FilterBar from '../../components/FilterBar'
 import Paginator from '../../components/Paginator'
 import ConfirmModal from '../../components/ConfirmModal'
+import { useToast } from '@/components/Toast/ToastProvider'
 import { ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -19,6 +20,7 @@ type ExpertRow = {
 
 export default function ExpertAdminClient({ items, total, q: initialQ = '', status: initialStatus = '전체', page: initialPage = 1, pageSize: initialPageSize = 10 }: { items: ExpertRow[]; total: number; q?: string; status?: '전체' | '대기' | '승인' | '반려'; page?: number; pageSize?: number }) {
   const router = useRouter()
+  const { push } = useToast()
   const [q, setQ] = useState(initialQ)
   const [status, setStatus] = useState<'전체' | '대기' | '승인' | '반려'>(initialStatus)
   const [page, setPage] = useState(initialPage)
@@ -143,6 +145,7 @@ export default function ExpertAdminClient({ items, total, q: initialQ = '', stat
           })
           setConfirm({ open: false })
           setBanner(confirm.type === 'approve' ? '승인되었습니다.' : '반려 처리되었습니다.')
+          push(confirm.type === 'approve' ? '승인되었습니다.' : '반려 처리되었습니다.', 'success')
           setTimeout(() => setBanner(null), 2000)
           router.refresh()
         }}
