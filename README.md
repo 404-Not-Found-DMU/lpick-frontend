@@ -56,6 +56,25 @@ yarn dev
 
 개발 서버: [http://localhost:3000](http://localhost:3000)
 
+## 🔐 관리자(Admin) 섹션
+
+- 라우트 맵
+  - `/admin` 대시보드
+  - `/admin/notices` 공지사항 관리
+  - `/admin/faq` FAQ 관리
+  - `/admin/inquiry` 1:1 문의 관리
+  - `/admin/expert` 전문가 등업 심사
+  - `/admin/wiki-review` 위키 편집 검수
+  - `/admin/users` 사용자 관리
+
+- 접근 가드(임시)
+  - `src/middleware.ts`에서 `/admin/**` 접근 시 쿠키 `role=admin` 또는 `NEXT_PUBLIC_ADMIN_MOCK=1`일 때만 통과
+  - 비관리자는 `/login?redirect=/admin...`로 리다이렉트
+
+- 구현 원칙
+  - `page.tsx`는 서버 컴포넌트, 상호작용은 `parts/*Client.tsx`
+  - 테이블/필터/페이지네이션/모달 등 공통 컴포넌트 재사용
+
 ## 📦 배포 및 인프라
 
 ### Vercel 배포
