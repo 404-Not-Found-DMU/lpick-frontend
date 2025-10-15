@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import NoticeFormClient from '../../parts/NoticeFormClient'
 import { getNoticeById } from '@/app/api/admin/notices/store'
-import { redirect } from 'next/navigation'
 
 export default async function AdminNoticeEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -16,11 +15,7 @@ export default async function AdminNoticeEditPage({ params }: { params: Promise<
         {!item ? (
           <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">존재하지 않는 공지입니다.</div>
         ) : (
-          <NoticeFormClient
-            submitText="수정"
-            initial={{ title: item.title, summary: item.summary, content: item.content, date: item.date, type: item.type }}
-            onSaved={() => redirect(`/admin/notices/${id}`)}
-          />
+          <NoticeFormClient submitText="수정" initial={{ title: item.title, summary: item.summary, content: item.content, date: item.date, type: item.type }} />
         )}
       </div>
     </div>

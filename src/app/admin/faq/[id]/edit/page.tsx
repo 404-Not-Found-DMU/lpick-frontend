@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import FaqFormClient from '../../parts/FaqFormClient'
 import { getFaqById } from '@/app/api/admin/faqs/store'
-import { redirect } from 'next/navigation'
 
 export default async function AdminFaqEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -20,7 +19,6 @@ export default async function AdminFaqEditPage({ params }: { params: Promise<{ i
             id={item.id}
             submitText="수정"
             initial={{ question: item.question, answer: item.answer, tags: item.tags, visibility: item.visibility, date: item.date }}
-            onSaved={() => redirect(`/admin/faq/${id}`)}
           />
         )}
       </div>

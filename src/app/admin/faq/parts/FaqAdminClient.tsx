@@ -14,7 +14,7 @@ type FaqRow = {
   tags?: string[]
 }
 
-export default function FaqAdminClient({ items, total }: { items: FaqRow[]; total: number }) {
+export default function FaqAdminClient({ items }: { items: FaqRow[]; total: number }) {
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
   const pageSize = 10

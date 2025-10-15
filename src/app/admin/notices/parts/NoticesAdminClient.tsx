@@ -1,5 +1,5 @@
 "use client"
-import { useMemo, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import DataTable from '../../components/DataTable'

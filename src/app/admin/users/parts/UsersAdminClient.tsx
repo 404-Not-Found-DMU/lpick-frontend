@@ -56,34 +56,10 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
   return (
     <div>
       <FilterBar
-        children={
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              className="h-4 w-4"
-              checked={current.length > 0 && current.every((u) => bulk.has(u.id))}
-              onChange={(e) => toggleAllCurrent(e.target.checked)}
-            />
-            <button
-              className="rounded-md border px-3 py-1.5 text-xs disabled:opacity-50"
-              disabled={bulk.size === 0}
-              onClick={() => setConfirmBulk({ open: true, action: 'block' })}
-            >
-              선택 차단
-            </button>
-            <button
-              className="rounded-md border px-3 py-1.5 text-xs disabled:opacity-50"
-              disabled={bulk.size === 0}
-              onClick={() => setConfirmBulk({ open: true, action: 'unblock' })}
-            >
-              선택 해제
-            </button>
-          </div>
-        }
         right={
           <div className="flex items-center gap-2">
             <div className="relative">
-              <select className="min-w-[120px] appearance-none rounded-full border pl-3 pr-12 py-2 text-sm bg-white dark:bg-gray-800" value={status} onChange={(e) => { setPage(1); setStatus(e.target.value as any) }}>
+              <select className="min-w-[120px] appearance-none rounded-full border pl-3 pr-12 py-2 text-sm bg-white dark:bg-gray-800" value={status} onChange={(e) => { setPage(1); setStatus(e.target.value as 'all' | 'active' | 'blocked') }}>
                 <option value="all">상태: 전체</option>
                 <option value="active">활성</option>
                 <option value="blocked">차단</option>
@@ -91,7 +67,7 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             </div>
             <div className="relative">
-              <select className="min-w-[120px] appearance-none rounded-full border pl-3 pr-12 py-2 text-sm bg-white dark:bg-gray-800" value={role} onChange={(e) => { setPage(1); setRole(e.target.value as any) }}>
+              <select className="min-w-[120px] appearance-none rounded-full border pl-3 pr-12 py-2 text-sm bg-white dark:bg-gray-800" value={role} onChange={(e) => { setPage(1); setRole(e.target.value as 'all' | 'user' | 'admin') }}>
                 <option value="all">권한: 전체</option>
                 <option value="user">일반</option>
                 <option value="admin">관리자</option>
@@ -109,11 +85,33 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
             <input placeholder="검색..." className="w-72 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm placeholder-gray-400 shadow-sm hover:shadow focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" value={q} onChange={(e) => { setPage(1); setQ(e.target.value) }} />
           </div>
         }
-      />
+      >
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            className="h-4 w-4"
+            checked={current.length > 0 && current.every((u) => bulk.has(u.id))}
+            onChange={(e) => toggleAllCurrent(e.target.checked)}
+          />
+          <button
+            className="rounded-md border px-3 py-1.5 text-xs disabled:opacity-50"
+            disabled={bulk.size === 0}
+            onClick={() => setConfirmBulk({ open: true, action: 'block' })}
+          >
+            선택 차단
+          </button>
+          <button
+            className="rounded-md border px-3 py-1.5 text-xs disabled:opacity-50"
+            disabled={bulk.size === 0}
+            onClick={() => setConfirmBulk({ open: true, action: 'unblock' })}
+          >
+            선택 해제
+          </button>
+        </div>
+      </FilterBar>
 
       <DataTable
         columns={[
-          { key: 'id', header: '번호', className: 'text-center text-gray-500', headerClassName: 'text-center', span: 1 },
           { key: 'id', header: (
             <input
               type="checkbox"
@@ -137,6 +135,7 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
               }}
             />
           ) },
+          { key: 'id', header: '번호', className: 'text-left text-gray-500', headerClassName: 'text-left', span: 1 },
           { key: 'name', header: '이름', span: 1, render: (_, r) => <Link href={`/admin/users/${r.id}`} className="text-violet-600 hover:underline">{r.name}</Link> },
           { key: 'email', header: '이메일', span: 5 },
           { key: 'role', header: '권한', className: 'text-center', headerClassName: 'text-center', span: 1, render: (v, r) => (

@@ -64,7 +64,7 @@ export default function ExpertAdminClient({ items, total, q: initialQ = '', stat
                 value={status}
                 onChange={(e) => {
                   setPage(1)
-                  setStatus(e.target.value as any)
+                  setStatus(e.target.value as '전체' | '대기' | '승인' | '반려')
                 }}
               >
                 <option value="전체">전체</option>

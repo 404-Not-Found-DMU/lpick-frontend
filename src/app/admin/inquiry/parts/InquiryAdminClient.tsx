@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import DataTable from '../../components/DataTable'
 import FilterBar from '../../components/FilterBar'
@@ -50,7 +50,7 @@ export default function InquiryAdminClient({ items, total, q: initialQ = '', sta
                 value={status}
                 onChange={(e) => {
                   setPage(1)
-                  setStatus(e.target.value as any)
+                  setStatus(e.target.value as '전체' | '대기' | '완료')
                 }}
               >
                 <option value="전체">전체</option>
