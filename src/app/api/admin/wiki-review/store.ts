@@ -6,6 +6,7 @@ export interface WikiReviewItem {
   author: string
   date: string // YYYY-MM-DD
   status: ReviewStatus
+  category: 'lp' | 'equipment' | 'artist' | 'other'
   beforeContent: string
   afterContent: string
 }
@@ -17,12 +18,15 @@ function seedOnce() {
   if (store.length > 0) return
   const now = '2025-08-10'
   for (let i = 0; i < 14; i += 1) {
+    const categories: Array<'lp' | 'equipment' | 'artist' | 'other'> = ['lp', 'equipment', 'artist', 'other']
+    const category = categories[i % categories.length]
     store.push({
       id: autoIncrementId++,
       title: `위키 문서 제안 ${i + 1}`,
       author: i % 2 === 0 ? 'lpick_user' : 'guest',
       date: now,
       status: i % 5 === 0 ? '승인' : i % 7 === 0 ? '반려' : '대기',
+      category,
       beforeContent: '기존 내용\n- 문장 A\n- 문장 B',
       afterContent: '수정 내용\n- 문장 A(개선)\n- 문장 B(보강)',
     })
@@ -34,17 +38,19 @@ seedOnce()
 export type ListParams = {
   q?: string
   status?: ReviewStatus | '전체'
+  category?: 'all' | 'lp' | 'equipment' | 'artist' | 'other'
   page?: number
   pageSize?: number
 }
 
 export function listReviews(params: ListParams = {}) {
-  const { q = '', status = '전체', page = 1, pageSize = 10 } = params
+  const { q = '', status = '전체', category = 'all', page = 1, pageSize = 10 } = params
   const s = q.trim().toLowerCase()
   const filtered = store.filter((n) => {
     const passQ = s ? [n.title, n.author].some((t) => t.toLowerCase().includes(s)) : true
     const passStatus = status === '전체' ? true : n.status === status
-    return passQ && passStatus
+    const passCategory = category === 'all' ? true : n.category === category
+    return passQ && passStatus && passCategory
   })
   const start = (page - 1) * pageSize
   const items = filtered.slice(start, start + pageSize)
