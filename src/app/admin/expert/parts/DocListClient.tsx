@@ -36,12 +36,10 @@ export default function DocListClient({ docs }: { docs: string[] }) {
       <Modal
         open={open}
         title={current ?? ''}
-        message={''}
+        description={''}
         onClose={() => setOpen(false)}
-        onConfirm={() => setOpen(false)}
         confirmText="닫기"
-      >
-      </Modal>
+      />
       {open && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
           <div className="pointer-events-auto max-w-3xl w-full">

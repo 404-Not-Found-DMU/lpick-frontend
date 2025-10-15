@@ -1,5 +1,6 @@
 "use client"
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export type NoticeFormValues = {
   title: string
@@ -11,13 +12,12 @@ export type NoticeFormValues = {
 
 export default function NoticeFormClient({
   initial,
-  onSaved,
   submitText = '저장',
 }: {
   initial?: NoticeFormValues
-  onSaved?: (id: number) => void
   submitText?: string
 }) {
+  const router = useRouter()
   const [values, setValues] = useState<NoticeFormValues>(
     initial ?? { title: '', summary: '', content: '', date: undefined, type: undefined },
   )
@@ -29,7 +29,7 @@ export default function NoticeFormClient({
     setError(null)
     try {
       const method = initial ? 'PUT' : 'POST'
-      const url = initial ? `/api/admin/notices/${(initial as any).id ?? ''}` : '/api/admin/notices'
+      const url = initial && (initial as unknown as { id?: number }).id ? `/api/admin/notices/${(initial as unknown as { id?: number }).id}` : '/api/admin/notices'
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -37,9 +37,10 @@ export default function NoticeFormClient({
       })
       if (!res.ok) throw new Error('저장 실패')
       const data = await res.json()
-      onSaved?.(data.id)
-    } catch (e: any) {
-      setError(e.message ?? '에러가 발생했습니다')
+      router.push(`/admin/notices/${data.id}`)
+    } catch (e) {
+      const err = e as Error
+      setError(err.message ?? '에러가 발생했습니다')
     } finally {
       setSaving(false)
     }
@@ -82,7 +83,7 @@ export default function NoticeFormClient({
         <select
           className="rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-4 focus:ring-violet-500/20 focus:border-violet-500"
           value={values.type ?? ''}
-          onChange={(e) => setValues({ ...values, type: (e.target.value || undefined) as any })}
+          onChange={(e) => setValues({ ...values, type: (e.target.value || undefined) as '공지' | '대회' | '이벤트' | undefined })}
         >
           <option value="">구분 없음</option>
           <option value="공지">공지</option>

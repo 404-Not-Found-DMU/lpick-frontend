@@ -1,5 +1,6 @@
 "use client"
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export type FaqFormValues = {
   question: string
@@ -11,15 +12,14 @@ export type FaqFormValues = {
 
 export default function FaqFormClient({
   initial,
-  onSaved,
   submitText = '저장',
   id,
 }: {
   initial?: FaqFormValues
-  onSaved?: (id: number) => void
   submitText?: string
   id?: number
 }) {
+  const router = useRouter()
   const [values, setValues] = useState<FaqFormValues>(
     initial ?? { question: '', answer: '', tags: [], visibility: '모든 사용자', date: undefined },
   )
@@ -47,9 +47,10 @@ export default function FaqFormClient({
       })
       if (!res.ok) throw new Error('저장 실패')
       const data = await res.json()
-      onSaved?.(data.id)
-    } catch (e: any) {
-      setError(e.message ?? '에러가 발생했습니다')
+      router.push(`/admin/faq/${data.id}`)
+    } catch (e) {
+      const err = e as Error
+      setError(err.message ?? '에러가 발생했습니다')
     } finally {
       setSaving(false)
     }
@@ -94,7 +95,7 @@ export default function FaqFormClient({
           <select
             className="w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-4 focus:ring-violet-500/20 focus:border-violet-500"
             value={values.visibility ?? '모든 사용자'}
-            onChange={(e) => setValues({ ...values, visibility: e.target.value as any })}
+            onChange={(e) => setValues({ ...values, visibility: e.target.value as '모든 사용자' | '회원' | '비회원' })}
           >
             <option value="모든 사용자">모든 사용자</option>
             <option value="회원">회원</option>
