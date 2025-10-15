@@ -21,14 +21,17 @@ export default async function AdminWikiReviewDetailPage({ params, searchParams }
       ) : (
         <div className="space-y-6">
           <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
+            <div className="mb-3 flex justify-end gap-2">
+              <a href="#" onClick={(e) => { e.preventDefault(); const a=document.getElementById('before'); const b=document.getElementById('after'); if(a&&b){ b.scrollTop=a.scrollTop=0 } }} className="text-sm text-violet-600 hover:underline">동기화 스크롤</a>
+            </div>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <section>
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">기존 내용</h3>
-                <pre className="mt-2 rounded-md border bg-gray-50 p-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 whitespace-pre-wrap">{item.beforeContent}</pre>
+                <pre id="before" className="mt-2 max-h-80 overflow-auto rounded-md border bg-gray-50 p-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 whitespace-pre-wrap">{item.beforeContent}</pre>
               </section>
               <section>
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">수정 내용</h3>
-                <pre className="mt-2 rounded-md border bg-emerald-50/40 p-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 whitespace-pre-wrap">{item.afterContent}</pre>
+                <pre id="after" className="mt-2 max-h-80 overflow-auto rounded-md border bg-emerald-50/40 p-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 whitespace-pre-wrap">{item.afterContent}</pre>
               </section>
             </div>
           </div>

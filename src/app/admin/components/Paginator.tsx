@@ -6,11 +6,13 @@ export default function Paginator({
   total,
   pageSize,
   onChange,
+  onChangePageSize,
 }: {
   page: number
   total: number
   pageSize: number
   onChange: (page: number) => void
+  onChangePageSize?: (size: number) => void
 }) {
   const pageCount = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize])
   return (
@@ -33,7 +35,18 @@ export default function Paginator({
         <button onClick={() => onChange(Math.min(pageCount, page + 1))} disabled={page === pageCount} className="h-8 w-8 rounded border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40">〉</button>
         <button onClick={() => onChange(pageCount)} disabled={page === pageCount} className="h-8 w-8 rounded border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40">⏭︎</button>
       </div>
-      <div className="text-gray-500 dark:text-gray-400">페이지 {page}/{pageCount}</div>
+      <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400">
+        {onChangePageSize ? (
+          <div className="relative">
+            <select className="appearance-none rounded-full border pl-3 pr-10 py-1.5 text-xs bg-white dark:bg-gray-800" value={pageSize} onChange={(e) => onChangePageSize(Number(e.target.value))}>
+              <option value={10}>10개</option>
+              <option value={20}>20개</option>
+              <option value={50}>50개</option>
+            </select>
+          </div>
+        ) : null}
+        <div>페이지 {page}/{pageCount}</div>
+      </div>
     </div>
   )
 }

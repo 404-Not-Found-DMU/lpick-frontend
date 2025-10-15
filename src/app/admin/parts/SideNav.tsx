@@ -10,6 +10,9 @@ const NAV_ITEMS = [
   { href: '/admin/expert', label: '전문가 등업' },
   { href: '/admin/wiki-review', label: '위키 검수' },
   { href: '/admin/users', label: '사용자 관리' },
+  { href: '/admin/settings/branding', label: '설정 · 브랜딩' },
+  { href: '/admin/settings/roles', label: '설정 · 권한' },
+  { href: '/admin/settings/emails', label: '설정 · 이메일' },
 ]
 
 export default function SideNav() {

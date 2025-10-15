@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getExpertById, updateExpert } from '@/app/api/admin/experts/store'
 import DocListClient from '../parts/DocListClient'
 import { redirect } from 'next/navigation'
+import DecisionClient from '../parts/DecisionClient'
 
 export default async function AdminExpertDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { id } = await params
@@ -68,26 +69,19 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 function Actions({ id, status }: { id: number; status: '대기' | '승인' | '반려' }) {
-  async function approve() {
+  async function approve(formData: FormData) {
     'use server'
+    formData.get('reason')
     updateExpert(id, { status: '승인' })
     redirect(`/admin/expert/${id}?saved=1`)
   }
-  async function reject() {
+  async function reject(formData: FormData) {
     'use server'
+    formData.get('reason')
     updateExpert(id, { status: '반려' })
     redirect(`/admin/expert/${id}?saved=1`)
   }
-  return (
-    <form action={approve} className="flex flex-wrap items-center gap-2">
-      <button type="submit" className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50" disabled={status === '승인'}>
-        승인
-      </button>
-      <button formAction={reject} className="rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50" disabled={status === '반려'}>
-        반려
-      </button>
-    </form>
-  )
+  return <DecisionClient status={status} onApprove={approve} onReject={reject} />
 }
 
 
