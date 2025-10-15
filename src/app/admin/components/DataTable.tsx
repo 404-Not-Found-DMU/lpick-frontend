@@ -5,6 +5,11 @@ type Column<T> = {
   render?: (value: T[keyof T], row: T) => React.ReactNode
   span?: number
   headerClassName?: string
+  sortable?: boolean
+  sortActive?: boolean
+  sortDir?: 'asc' | 'desc'
+  onSort?: () => void
+  stickyLeft?: boolean
 }
 
 export default function DataTable<T extends { id?: string | number }>({
@@ -25,7 +30,28 @@ export default function DataTable<T extends { id?: string | number }>({
               style={{ gridColumn: `span ${span} / span ${span}` }}
               className={`min-w-0 ${c.headerClassName ?? c.className ?? ''}`.trim()}
             >
-              {c.header}
+              {c.sortable ? (
+                <button
+                  type="button"
+                  onClick={c.onSort}
+                  className="inline-flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100"
+                >
+                  <span>{c.header}</span>
+                  <span className="inline-flex h-4 w-4 items-center justify-center">
+                    {c.sortActive ? (
+                      c.sortDir === 'asc' ? (
+                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor"><path d="M7 14l5-5 5 5H7z"/></svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor"><path d="M7 10l5 5 5-5H7z"/></svg>
+                      )
+                    ) : (
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor"><path d="M7 10h10l-5-5-5 5zm0 4l5 5 5-5H7z"/></svg>
+                    )}
+                  </span>
+                </button>
+              ) : (
+                c.header
+              )}
             </div>
           )
         })}

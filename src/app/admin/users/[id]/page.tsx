@@ -29,6 +29,17 @@ export default async function AdminUserDetailPage({ params, searchParams }: { pa
               <Field label="가입일" value={item.joinedAt} />
             </div>
           </section>
+          <section className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">최근 활동 로그</h3>
+            <div className="mt-3 divide-y divide-gray-100 text-sm dark:divide-gray-700">
+              {[1,2,3,4,5].map((i) => (
+                <div key={i} className="flex items-center justify-between py-2">
+                  <span className="truncate pr-3 text-gray-800 dark:text-gray-200">샘플 로그 항목 {i}</span>
+                  <span className="text-gray-400">2025-08-10</span>
+                </div>
+              ))}
+            </div>
+          </section>
           <Actions id={item.id} role={item.role} status={item.status} />
         </div>
       )}

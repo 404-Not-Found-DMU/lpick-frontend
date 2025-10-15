@@ -1,4 +1,13 @@
+import Link from 'next/link'
+import { listNotices } from '@/app/api/admin/notices/store'
+import { listFaqs } from '@/app/api/admin/faqs/store'
+import { listInquiries } from '@/app/api/admin/inquiries/store'
+
 export default function AdminDashboardPage() {
+  const recentNotices = listNotices({ page: 1, pageSize: 3, sortBy: 'date', sortDir: 'desc' }).items
+  const recentFaqs = listFaqs({ page: 1, pageSize: 3 }).items
+  const recentInquiries = listInquiries({ page: 1, pageSize: 3 }).items
+
   return (
     <div className="space-y-8">
       <div>
@@ -20,13 +29,57 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">최근 활동</h3>
-        <ul className="mt-3 text-sm text-gray-600 dark:text-gray-400 space-y-2">
-          <li>공지사항 1건이 공개되었습니다.</li>
-          <li>전문가 등업 신청 2건이 접수되었습니다.</li>
-          <li>1:1 문의 3건에 답변이 등록되었습니다.</li>
-        </ul>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">최근 공지</h3>
+            <Link href="/admin/notices" className="text-sm text-violet-600 hover:underline">전체 보기</Link>
+          </div>
+          <div className="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+            {recentNotices.map((n) => (
+              <div key={n.id} className="py-2 flex items-center justify-between">
+                <Link href={`/admin/notices/${n.id}`} className="truncate pr-3 text-gray-800 dark:text-gray-200 hover:underline">
+                  {n.title}
+                </Link>
+                <span className="text-gray-400">{n.date}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">최근 FAQ</h3>
+            <Link href="/admin/faq" className="text-sm text-violet-600 hover:underline">전체 보기</Link>
+          </div>
+          <div className="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+            {recentFaqs.map((f) => (
+              <div key={f.id} className="py-2 flex items-center justify-between">
+                <Link href={`/admin/faq/${f.id}`} className="truncate pr-3 text-gray-800 dark:text-gray-200 hover:underline">
+                  {f.question}
+                </Link>
+                <span className="text-gray-400">{f.date}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">최근 문의</h3>
+            <Link href="/admin/inquiry" className="text-sm text-violet-600 hover:underline">전체 보기</Link>
+          </div>
+          <div className="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+            {recentInquiries.map((q) => (
+              <div key={q.id} className="py-2 flex items-center justify-between">
+                <Link href={`/admin/inquiry/${q.id}`} className="truncate pr-3 text-gray-800 dark:text-gray-200 hover:underline">
+                  {q.title}
+                </Link>
+                <span className="text-gray-400">{q.date}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

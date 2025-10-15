@@ -24,8 +24,11 @@ export default function InquiryAdminClient({ items, total, q: initialQ = '', sta
   const [status, setStatus] = useState<'전체' | '대기' | '완료'>(initialStatus)
   const [page, setPage] = useState(initialPage)
   const [pageSize, setPageSize] = useState(initialPageSize)
+  const [sortBy, setSortBy] = useState<'date' | 'views'>('date')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const filtered = items
-  const current = filtered
+  const sorted = filtered
+  const current = sorted
 
   useEffect(() => {
     const params = new URLSearchParams()
@@ -33,9 +36,11 @@ export default function InquiryAdminClient({ items, total, q: initialQ = '', sta
     if (status !== '전체') params.set('status', status)
     if (page > 1) params.set('page', String(page))
     if (pageSize !== 10) params.set('pageSize', String(pageSize))
+    if (sortBy !== 'date') params.set('sortBy', sortBy)
+    if (sortDir !== 'desc') params.set('sortDir', sortDir)
     const qs = params.toString()
     router.replace(`/admin/inquiry${qs ? `?${qs}` : ''}`)
-  }, [q, status, page, pageSize, router])
+  }, [q, status, page, pageSize, sortBy, sortDir, router])
 
   const [confirm, setConfirm] = useState<{ open: boolean; id?: number }>({ open: false })
 
@@ -100,7 +105,7 @@ export default function InquiryAdminClient({ items, total, q: initialQ = '', sta
             </Link>
           ) },
           { key: 'author', header: '작성자', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1 },
-          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1 },
+          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1, sortable: true, sortActive: sortBy === 'date', sortDir: sortDir, onSort: () => { setPage(1); setSortBy('date'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc') } },
           { key: 'id', header: '작업', className: 'text-right', headerClassName: 'text-center', span: 1, render: (_, r) => (
             <div className="flex justify-end gap-1">
               <Link href={`/admin/inquiry/${r.id}/edit`} className="rounded-md border px-2 py-1 text-xs">수정</Link>
@@ -111,7 +116,7 @@ export default function InquiryAdminClient({ items, total, q: initialQ = '', sta
         rows={current}
       />
 
-      <Paginator page={page} total={total} pageSize={pageSize} onChange={setPage} />
+      <Paginator page={page} total={total} pageSize={pageSize} onChange={setPage} onChangePageSize={(s) => { setPage(1); setPageSize(s) }} />
 
       <ConfirmModal
         open={confirm.open}

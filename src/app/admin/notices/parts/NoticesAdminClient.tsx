@@ -16,7 +16,7 @@ export default function NoticesAdminClient({ items, q: initialQ = '', page: init
   const [sortBy, setSortBy] = useState<'date' | 'views'>(initialSortBy)
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(initialSortDir)
   const [confirm, setConfirm] = useState<{ open: boolean; id?: number }>({ open: false })
-  const _pageSize = pageSize
+  const [_pageSize, _setPageSize] = useState(pageSize)
 
   const filtered = items // 서버에서 필터/페이지 처리됨
   const current = filtered
@@ -82,8 +82,8 @@ export default function NoticesAdminClient({ items, q: initialQ = '', page: init
           { key: 'title', header: '제목', headerClassName: 'text-center', span: 7, render: (_, r) => (
             <Link className="text-violet-600 hover:underline block truncate" href={`/admin/notices/${r.id}`}>{r.title}</Link>
           ) },
-          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1 },
-          { key: 'views', header: '조회수', className: 'text-right whitespace-nowrap', headerClassName: 'text-right', span: 1 },
+          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1, sortable: true, sortActive: sortBy === 'date', sortDir: sortDir, onSort: () => { setPage(1); setSortBy('date'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc') } },
+          { key: 'views', header: '조회수', className: 'text-right whitespace-nowrap', headerClassName: 'text-right', span: 1, sortable: true, sortActive: sortBy === 'views', sortDir: sortDir, onSort: () => { setPage(1); setSortBy('views'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc') } },
           { key: 'id', header: '작업', className: 'text-right', headerClassName: 'text-center', span: 1, render: (_, r) => (
             <div className="flex justify-end gap-1">
               <Link href={`/admin/notices/${r.id}/edit`} className="rounded-md border px-2 py-1 text-xs">수정</Link>
@@ -100,7 +100,7 @@ export default function NoticesAdminClient({ items, q: initialQ = '', page: init
         </div>
       )}
 
-      <Paginator page={page} total={total} pageSize={_pageSize} onChange={setPage} />
+      <Paginator page={page} total={total} pageSize={_pageSize} onChange={setPage} onChangePageSize={(s) => { setPage(1); _setPageSize(s) }} />
 
       <ConfirmModal
         open={confirm.open}
