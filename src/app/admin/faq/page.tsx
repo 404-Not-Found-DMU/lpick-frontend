@@ -1,7 +1,8 @@
 import FaqAdminClient from './parts/FaqAdminClient'
+import ClientSuperadminGate from '../parts/ClientSuperadminGate'
 import { listFaqs } from '@/app/api/admin/faqs/store'
 
-export default function AdminFaqPage() {
+function AdminFaqPageImpl() {
   const { items, total } = listFaqs({ page: 1, pageSize: 1000 })
   return (
     <div className="space-y-6">
@@ -11,6 +12,14 @@ export default function AdminFaqPage() {
       </div>
       <FaqAdminClient items={items} total={total} />
     </div>
+  )
+}
+
+export default function AdminFaqPage() {
+  return (
+    <ClientSuperadminGate>
+      <AdminFaqPageImpl />
+    </ClientSuperadminGate>
   )
 }
 

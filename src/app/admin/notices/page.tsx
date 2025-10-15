@@ -1,8 +1,9 @@
 import NoticesAdminClient from './parts/NoticesAdminClient'
+import ClientSuperadminGate from '../parts/ClientSuperadminGate'
 import type { NoticeItem } from '@/app/support/types'
 import { listNotices } from '@/app/api/admin/notices/store'
 
-export default async function AdminNoticesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+async function AdminNoticesPageImpl({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams
   const q = (sp.q as string) ?? ''
   const page = Number((sp.page as string) ?? '1')
@@ -40,6 +41,14 @@ export default async function AdminNoticesPage({ searchParams }: { searchParams:
         sortDir={sortDir}
       />
     </div>
+  )
+}
+
+export default function AdminNoticesPage(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  return (
+    <ClientSuperadminGate>
+      <AdminNoticesPageImpl {...props} />
+    </ClientSuperadminGate>
   )
 }
 
