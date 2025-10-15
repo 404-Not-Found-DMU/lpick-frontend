@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: '/admin/expert', label: '전문가 등업' },
   { href: '/admin/wiki-review', label: '위키 검수' },
   { href: '/admin/users', label: '사용자 관리' },
+  { href: '/admin/admins', label: '관리자 관리' },
   { href: '/admin/lplayer', label: 'LPlayer 관리' },
   { href: '/admin/posts', label: '게시물 관리' },
   { href: '/admin/comments', label: '댓글 관리' },

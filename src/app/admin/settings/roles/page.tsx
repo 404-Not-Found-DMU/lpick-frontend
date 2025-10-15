@@ -15,6 +15,7 @@ export default function AdminRolesSettingsPage() {
                 <th className="px-3 py-2">일반 사용자</th>
                 <th className="px-3 py-2">전문가</th>
                 <th className="px-3 py-2">관리자</th>
+                <th className="px-3 py-2">총관리자</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -32,6 +33,7 @@ export default function AdminRolesSettingsPage() {
                   <td className="px-3 py-2"><input type="checkbox" defaultChecked={row.k === 'wikiPropose'} disabled={row.k !== 'wikiPropose'} /></td>
                   <td className="px-3 py-2"><input type="checkbox" defaultChecked={['wikiPropose'].includes(row.k)} disabled={row.k !== 'wikiPropose'} /></td>
                   <td className="px-3 py-2"><input type="checkbox" defaultChecked /></td>
+                  <td className="px-3 py-2"><input type="checkbox" defaultChecked disabled /></td>
                 </tr>
               ))}
             </tbody>

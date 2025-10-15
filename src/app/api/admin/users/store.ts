@@ -1,5 +1,5 @@
 export type UserStatus = 'active' | 'blocked'
-export type UserRole = 'user' | 'admin'
+export type UserRole = 'user' | 'admin' | 'superadmin'
 
 export interface AdminUserItem {
   id: number
@@ -21,7 +21,7 @@ function seedOnce() {
       id: autoIncrementId++,
       name: i % 2 === 0 ? '홍길동' : '김유저',
       email: `member${i + 1}@lpick.com`,
-      role: i % 10 === 0 ? 'admin' : 'user',
+      role: i === 0 ? 'superadmin' : i % 10 === 0 ? 'admin' : 'user',
       status: i % 7 === 0 ? 'blocked' : 'active',
       joinedAt: now,
     })
