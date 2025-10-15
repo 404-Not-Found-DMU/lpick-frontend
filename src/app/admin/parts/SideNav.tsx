@@ -1,6 +1,7 @@
 "use client"
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useZustandStore } from '@/store/zustandStore'
 
 const NAV_ITEMS = [
   { href: '/admin', label: '대시보드' },
@@ -21,9 +22,21 @@ const NAV_ITEMS = [
 
 export default function SideNav() {
   const pathname = usePathname()
+  const role = useZustandStore((s) => s.adminRole)
   return (
     <nav className="p-2">
       {NAV_ITEMS.map((item) => {
+        // superadmin은 모든 메뉴, 일반 admin은 제한된 메뉴만 노출
+        const isRestricted = [
+          '/admin/users',
+          '/admin/admins',
+          '/admin/settings/roles',
+          '/admin/settings/emails',
+          '/admin/notices',
+          '/admin/faq',
+          '/admin/inquiry',
+        ].includes(item.href)
+        if (role === 'admin' && isRestricted) return null
         const active = pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))
         return (
           <Link

@@ -1,7 +1,8 @@
 import InquiryAdminClient from './parts/InquiryAdminClient'
+import ClientSuperadminGate from '../parts/ClientSuperadminGate'
 import { listInquiries } from '@/app/api/admin/inquiries/store'
 
-export default async function AdminInquiryPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+async function AdminInquiryPageImpl({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams
   const q = (sp.q as string) ?? ''
   const status = ((sp.status as string) as '전체' | '대기' | '완료') ?? '전체'
@@ -16,6 +17,14 @@ export default async function AdminInquiryPage({ searchParams }: { searchParams:
       </div>
       <InquiryAdminClient items={items} total={total} q={q} status={status} page={Number.isFinite(page) ? page : 1} pageSize={Number.isFinite(pageSize) ? pageSize : 10} />
     </div>
+  )
+}
+
+export default function AdminInquiryPage(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  return (
+    <ClientSuperadminGate>
+      <AdminInquiryPageImpl {...props} />
+    </ClientSuperadminGate>
   )
 }
 
