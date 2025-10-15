@@ -11,7 +11,6 @@ const NAV_ITEMS = [
   { href: '/admin/wiki-review', label: '위키 검수' },
   { href: '/admin/users', label: '사용자 관리' },
   { href: '/admin/lplayer', label: 'LPlayer 관리' },
-  { href: '/admin/settings/branding', label: '설정 · 브랜딩' },
   { href: '/admin/settings/roles', label: '설정 · 권한' },
   { href: '/admin/settings/emails', label: '설정 · 이메일' },
 ]
