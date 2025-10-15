@@ -97,10 +97,29 @@ export default function RoleToggle() {
     return `${m}:${String(s).padStart(2, '0')}`
   }
 
+  function extendTime() {
+    if (adminRole !== 'superadmin') return
+    const base = (() => {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem('superadminExpiresAt') : null
+      const exp = raw ? Number(raw) : 0
+      return exp > Date.now() ? exp : Date.now()
+    })()
+    const newExpiresAt = base + 30 * 60 * 1000
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('adminRole', 'superadmin')
+      localStorage.setItem('superadminExpiresAt', String(newExpiresAt))
+    }
+    scheduleExpiryCheck(newExpiresAt)
+    push('총관리자 시간이 30분 연장되었습니다.', 'success')
+  }
+
   return (
     <div className="flex items-center gap-2 text-xs relative">
       {adminRole === 'superadmin' && remainingMs !== null && (
-        <span className="rounded-full bg-rose-100 px-2 py-0.5 text-rose-700">{formatRemaining(remainingMs)}</span>
+        <>
+          <span className="rounded-full bg-rose-100 px-2 py-0.5 text-rose-700">{formatRemaining(remainingMs)}</span>
+          <button className="rounded border px-2 py-0.5 text-xs" onClick={extendTime}>연장</button>
+        </>
       )}
       <span className="text-gray-500 dark:text-gray-400">역할:</span>
       <select
