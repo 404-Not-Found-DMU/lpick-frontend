@@ -13,17 +13,17 @@ type UserRow = {
   id: number
   name: string
   email: string
-  role: 'user' | 'admin'
+  role: 'user' | 'admin' | 'superadmin'
   status: 'active' | 'blocked'
   joinedAt: string
 }
 
-export default function UsersAdminClient({ items, total, q: initialQ = '', status: initialStatus = 'all', role: initialRole = 'all', page: initialPage = 1, pageSize: initialPageSize = 10 }: { items: UserRow[]; total: number; q?: string; status?: 'all' | 'active' | 'blocked'; role?: 'all' | 'user' | 'admin'; page?: number; pageSize?: number }) {
+export default function UsersAdminClient({ items, total, q: initialQ = '', status: initialStatus = 'all', role: initialRole = 'all', page: initialPage = 1, pageSize: initialPageSize = 10 }: { items: UserRow[]; total: number; q?: string; status?: 'all' | 'active' | 'blocked'; role?: 'all' | 'user' | 'admin' | 'superadmin'; page?: number; pageSize?: number }) {
   const router = useRouter()
   const { push } = useToast()
   const [q, setQ] = useState(initialQ)
   const [status, setStatus] = useState<'all' | 'active' | 'blocked'>(initialStatus)
-  const [role, setRole] = useState<'all' | 'user' | 'admin'>(initialRole)
+  const [role, setRole] = useState<'all' | 'user' | 'admin' | 'superadmin'>(initialRole)
   const [page, setPage] = useState(initialPage)
   const [pageSize, setPageSize] = useState(initialPageSize)
   const [confirm, setConfirm] = useState<{ open: boolean; id?: number; action?: 'block' | 'unblock' }>(() => ({ open: false }))
@@ -67,10 +67,11 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             </div>
             <div className="relative">
-              <select className="min-w-[120px] appearance-none rounded-full border pl-3 pr-12 py-2 text-sm bg-white dark:bg-gray-800" value={role} onChange={(e) => { setPage(1); setRole(e.target.value as 'all' | 'user' | 'admin') }}>
+              <select className="min-w-[120px] appearance-none rounded-full border pl-3 pr-12 py-2 text-sm bg-white dark:bg-gray-800" value={role} onChange={(e) => { setPage(1); setRole(e.target.value as 'all' | 'user' | 'admin' | 'superadmin') }}>
                 <option value="all">권한: 전체</option>
                 <option value="user">일반</option>
                 <option value="admin">관리자</option>
+                <option value="superadmin">총관리자</option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             </div>
@@ -143,7 +144,7 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
               className="mx-auto block rounded border px-2 py-1 text-xs"
               defaultValue={String(v)}
               onChange={async (e) => {
-                const role = e.target.value as 'user' | 'admin'
+                const role = e.target.value as 'user' | 'admin' | 'superadmin'
                 await fetch(`/api/admin/users/${r.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role }) })
                 push('권한을 변경했습니다.', 'success')
                 router.refresh()
@@ -151,6 +152,7 @@ export default function UsersAdminClient({ items, total, q: initialQ = '', statu
             >
               <option value="user">user</option>
               <option value="admin">admin</option>
+              <option value="superadmin">superadmin</option>
             </select>
           ) },
           { key: 'status', header: '상태', className: 'text-center', headerClassName: 'text-center', span: 1, render: (v) => (

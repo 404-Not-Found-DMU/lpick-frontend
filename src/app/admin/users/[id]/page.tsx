@@ -56,10 +56,10 @@ function Field({ label, value }: { label: string; value: string }) {
   )
 }
 
-function Actions({ id, role, status }: { id: number; role: 'user' | 'admin'; status: 'active' | 'blocked' }) {
+function Actions({ id, role, status }: { id: number; role: 'user' | 'admin' | 'superadmin'; status: 'active' | 'blocked' }) {
   async function save(formData: FormData) {
     'use server'
-    const nextRole = formData.get('role') as 'user' | 'admin'
+    const nextRole = formData.get('role') as 'user' | 'admin' | 'superadmin'
     const nextStatus = formData.get('status') as 'active' | 'blocked'
     updateUser(id, { role: nextRole, status: nextStatus })
     redirect(`/admin/users/${id}?saved=1`)
@@ -72,6 +72,7 @@ function Actions({ id, role, status }: { id: number; role: 'user' | 'admin'; sta
           <select name="role" defaultValue={role} className="w-full rounded-md border px-3 py-2 text-sm">
             <option value="user">user</option>
             <option value="admin">admin</option>
+            <option value="superadmin">superadmin</option>
           </select>
         </div>
         <div>
