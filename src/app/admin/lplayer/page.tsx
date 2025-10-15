@@ -14,6 +14,9 @@ export default function AdminLPlayerPage() {
   const [playing, setPlaying] = useState(false)
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [dragging, setDragging] = useState<number | null>(null)
+  const [errors, setErrors] = useState<{ title?: string; artist?: string; mp3?: string; cover?: string }>({})
+  const [uploadMp3Progress, setUploadMp3Progress] = useState<number>(0)
+  const [uploadCoverProgress, setUploadCoverProgress] = useState<number>(0)
 
   async function fetchList() {
     const res = await fetch(`/api/admin/lplayer`)
@@ -39,23 +42,36 @@ export default function AdminLPlayerPage() {
     return tracks.filter((t) => [t.title, t.artist].some((v) => v.toLowerCase().includes(s)))
   }, [q, tracks])
 
-  async function fileToDataUrl(file: File) {
+  async function fileToDataUrl(file: File, onProgress?: (p: number) => void) {
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = () => resolve(String(reader.result))
       reader.onerror = reject
+      reader.onprogress = (e) => { if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total) }
       reader.readAsDataURL(file)
     })
   }
 
+  function validate(): boolean {
+    const next: typeof errors = {}
+    if (!form.title.trim()) next.title = '제목은 필수입니다.'
+    if (!form.artist.trim()) next.artist = '아티스트는 필수입니다.'
+    if (!form.mp3.trim()) next.mp3 = 'MP3 파일을 업로드하거나 URL을 입력하세요.'
+    if (!form.cover.trim()) next.cover = '커버 이미지를 업로드하거나 URL을 입력하세요.'
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!validate()) return
     if (form.id) {
       await fetch(`/api/admin/lplayer/${form.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
     } else {
       await fetch('/api/admin/lplayer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
     }
     setForm({ id: undefined, title: '', artist: '', mp3: '', cover: '' })
+    setErrors({})
     fetchList()
   }
 
@@ -108,8 +124,10 @@ export default function AdminLPlayerPage() {
           </div>
         </div>
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={handleSubmit}>
-          <input placeholder="제목" className="rounded-md border px-3 py-2 text-sm" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          <input placeholder="아티스트" className="rounded-md border px-3 py-2 text-sm" value={form.artist} onChange={(e) => setForm({ ...form, artist: e.target.value })} />
+          <input placeholder="제목" className={`rounded-md border px-3 py-2 text-sm ${errors.title ? 'border-red-500' : ''}`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <input placeholder="아티스트" className={`rounded-md border px-3 py-2 text-sm ${errors.artist ? 'border-red-500' : ''}`} value={form.artist} onChange={(e) => setForm({ ...form, artist: e.target.value })} />
+          {errors.title ? <p className="text-xs text-red-600">{errors.title}</p> : null}
+          {errors.artist ? <p className="text-xs text-red-600 md:col-start-2">{errors.artist}</p> : null}
           {/* MP3 업로드/드롭 */}
           <div className="sm:col-span-2 grid grid-cols-1 gap-3 md:grid-cols-2">
             <div
@@ -128,8 +146,25 @@ export default function AdminLPlayerPage() {
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded bg-gray-100 dark:bg-gray-700">🎵</div>
                 <div className="flex-1">
-                  <input accept="audio/*" type="file" onChange={async (e) => { const file = e.target.files?.[0]; if (file) { const dataUrl = await fileToDataUrl(file); setForm((f) => ({ ...f, mp3: dataUrl })) } }} />
-                  <input placeholder="또는 URL 입력" className="mt-2 w-full rounded-md border px-3 py-2 text-sm" value={form.mp3} onChange={(e) => setForm({ ...form, mp3: e.target.value })} />
+                  <input accept="audio/*" type="file" onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      if (!file.type.startsWith('audio/')) { setErrors((er) => ({ ...er, mp3: '오디오 파일만 업로드할 수 있습니다.' })); return }
+                      if (file.size > 20 * 1024 * 1024) { setErrors((er) => ({ ...er, mp3: '파일 용량은 20MB를 초과할 수 없습니다.' })); return }
+                      setErrors((er) => ({ ...er, mp3: undefined }))
+                      setUploadMp3Progress(0)
+                      const dataUrl = await fileToDataUrl(file, (p) => setUploadMp3Progress(p))
+                      setForm((f) => ({ ...f, mp3: dataUrl }))
+                      setUploadMp3Progress(1)
+                    }
+                  }} />
+                  <input placeholder="또는 URL 입력" className={`mt-2 w-full rounded-md border px-3 py-2 text-sm ${errors.mp3 ? 'border-red-500' : ''}`} value={form.mp3} onChange={(e) => { setForm({ ...form, mp3: e.target.value }); setErrors((er) => ({ ...er, mp3: undefined })) }} />
+                  {uploadMp3Progress > 0 && uploadMp3Progress < 1 ? (
+                    <div className="mt-2 h-1 w-full overflow-hidden rounded bg-gray-100">
+                      <div className="h-1 bg-violet-600" style={{ width: `${Math.round(uploadMp3Progress * 100)}%` }} />
+                    </div>
+                  ) : null}
+                  {errors.mp3 ? <p className="mt-1 text-xs text-red-600">{errors.mp3}</p> : null}
                 </div>
               </div>
               <p className="mt-1 text-xs text-gray-500">드래그&드롭 또는 파일 선택. data:URL 저장.</p>
@@ -152,8 +187,25 @@ export default function AdminLPlayerPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {form.cover ? <img src={form.cover} alt="cover" className="h-12 w-12 rounded object-cover" /> : <div className="h-12 w-12 rounded bg-gray-100" />}
                 <div className="flex-1">
-                  <input accept="image/*" type="file" onChange={async (e) => { const file = e.target.files?.[0]; if (file) { const dataUrl = await fileToDataUrl(file); setForm((f) => ({ ...f, cover: dataUrl })) } }} />
-                  <input placeholder="또는 URL 입력" className="mt-2 w-full rounded-md border px-3 py-2 text-sm" value={form.cover} onChange={(e) => setForm({ ...form, cover: e.target.value })} />
+                  <input accept="image/*" type="file" onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      if (!file.type.startsWith('image/')) { setErrors((er) => ({ ...er, cover: '이미지 파일만 업로드할 수 있습니다.' })); return }
+                      if (file.size > 5 * 1024 * 1024) { setErrors((er) => ({ ...er, cover: '이미지 용량은 5MB를 초과할 수 없습니다.' })); return }
+                      setErrors((er) => ({ ...er, cover: undefined }))
+                      setUploadCoverProgress(0)
+                      const dataUrl = await fileToDataUrl(file, (p) => setUploadCoverProgress(p))
+                      setForm((f) => ({ ...f, cover: dataUrl }))
+                      setUploadCoverProgress(1)
+                    }
+                  }} />
+                  <input placeholder="또는 URL 입력" className={`mt-2 w-full rounded-md border px-3 py-2 text-sm ${errors.cover ? 'border-red-500' : ''}`} value={form.cover} onChange={(e) => { setForm({ ...form, cover: e.target.value }); setErrors((er) => ({ ...er, cover: undefined })) }} />
+                  {uploadCoverProgress > 0 && uploadCoverProgress < 1 ? (
+                    <div className="mt-2 h-1 w-full overflow-hidden rounded bg-gray-100">
+                      <div className="h-1 bg-violet-600" style={{ width: `${Math.round(uploadCoverProgress * 100)}%` }} />
+                    </div>
+                  ) : null}
+                  {errors.cover ? <p className="mt-1 text-xs text-red-600">{errors.cover}</p> : null}
                 </div>
               </div>
               <p className="mt-1 text-xs text-gray-500">드래그&드롭 또는 파일 선택. data:URL 저장.</p>
