@@ -50,52 +50,6 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* 금일 이용자 수 대형 그래프 */}
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">금일 이용자 수 (시간대별)</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">00시 ~ 23시</p>
-          </div>
-          <div className="text-right">
-            <div className="text-xs text-gray-500 dark:text-gray-400">오늘 합계</div>
-            <div className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{todayTotal.toLocaleString()}</div>
-          </div>
-        </div>
-        <div className="relative w-full overflow-hidden">
-          <svg viewBox="0 0 800 260" className="h-64 w-full">
-            <defs>
-              <linearGradient id="u-chart" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.35" />
-                <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            {/* 영역 채우기 */}
-            <path
-              d={`${sparklinePath(hourly, 800, 240)} L 788 240 L 12 240 Z`}
-              fill="url(#u-chart)"
-              transform="translate(0,10)"
-            />
-            {/* 선 */}
-            <path d={sparklinePath(hourly, 800, 240)} stroke="#8b5cf6" strokeWidth="3" fill="none" transform="translate(0,10)" />
-            {/* 축/눈금 */}
-            <g stroke="#e5e7eb" className="dark:stroke-gray-700" transform="translate(0,10)">
-              <line x1="12" y1="240" x2="788" y2="240" />
-              {[0, 6, 12, 18, 23].map((h) => {
-                const x = 12 + (h / 23) * (788 - 12)
-                return <line key={h} x1={x} y1={240} x2={x} y2={246} />
-              })}
-            </g>
-            <g fontSize="10" fill="#6b7280" className="dark:fill-gray-400">
-              {[0, 6, 12, 18, 23].map((h) => {
-                const x = 12 + (h / 23) * (788 - 12)
-                return <text key={h} x={x} y={258} textAnchor="middle">{h}</text>
-              })}
-            </g>
-          </svg>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
@@ -146,6 +100,45 @@ export default function AdminDashboardPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* 금일 이용자 수 대형 그래프 (페이지 하단) */}
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">금일 이용자 수 (시간대별)</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">00시 ~ 23시</p>
+          </div>
+          <div className="text-right">
+            <div className="text-xs text-gray-500 dark:text-gray-400">오늘 합계</div>
+            <div className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{todayTotal.toLocaleString()}</div>
+          </div>
+        </div>
+        <div className="relative w-full overflow-hidden">
+          <svg viewBox="0 0 800 260" className="h-64 w-full">
+            <defs>
+              <linearGradient id="u-chart" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path d={`${sparklinePath(hourly, 800, 240)} L 788 240 L 12 240 Z`} fill="url(#u-chart)" transform="translate(0,10)" />
+            <path d={sparklinePath(hourly, 800, 240)} stroke="#8b5cf6" strokeWidth="3" fill="none" transform="translate(0,10)" />
+            <g stroke="#e5e7eb" className="dark:stroke-gray-700" transform="translate(0,10)">
+              <line x1="12" y1="240" x2="788" y2="240" />
+              {[0, 6, 12, 18, 23].map((h) => {
+                const x = 12 + (h / 23) * (788 - 12)
+                return <line key={h} x1={x} y1={240} x2={x} y2={246} />
+              })}
+            </g>
+            <g fontSize="10" fill="#6b7280" className="dark:fill-gray-400">
+              {[0, 6, 12, 18, 23].map((h) => {
+                const x = 12 + (h / 23) * (788 - 12)
+                return <text key={h} x={x} y={258} textAnchor="middle">{h}</text>
+              })}
+            </g>
+          </svg>
         </div>
       </div>
     </div>
