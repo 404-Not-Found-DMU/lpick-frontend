@@ -1,24 +1,30 @@
 # ---------- deps ----------
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml* package-lock.json* yarn.lock* ./
-RUN if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm i --frozen-lockfile; \
-    elif [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-    else npm ci; fi
+
+# yarn만 사용할 것이므로 필요한 파일만 COPY (캐시 효율 ↑)
+COPY package.json yarn.lock ./
+
+# Yarn v1 (node:20-alpine 기본 포함) - 재현성을 위해 frozen-lockfile 사용
+RUN yarn install --frozen-lockfile --non-interactive
 
 # ---------- builder ----------
 FROM node:20-alpine AS builder
 WORKDIR /app
+
+# 의존성 복사
 COPY --from=deps /app/node_modules ./node_modules
+
+# 앱 소스 복사
 COPY . .
 
-# ✅ 빌드타임 인자 → Next 빌드에서 읽히도록 환경변수로 승격
+# Next 환경변수 승격 (필요한 공개 변수만!)
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# next.config.mjs: export default { output: 'standalone' }
-RUN npm run build
+# next.config.* 에서 output: 'standalone' 설정되어 있다고 가정
+RUN yarn build
 
 # ---------- runner ----------
 FROM node:20-alpine AS runner
@@ -26,7 +32,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# healthcheck용 도구
+# healthcheck용(선택)
 RUN apk add --no-cache curl
 
 # standalone 산출물만 복사
@@ -35,4 +41,4 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
-CMD ["node","server.js"]
+CMD ["node", "server.js"]
