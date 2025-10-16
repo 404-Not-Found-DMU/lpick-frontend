@@ -2,20 +2,34 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-# yarn만 사용할 것이므로 필요한 파일만 COPY (캐시 효율 ↑)
-COPY package.json yarn.lock ./
+# Corepack로 Yarn Berry 활성화 (필요 시 특정 버전 고정)
+RUN corepack enable && corepack prepare yarn@4.10.3 --activate
 
-# Yarn v1 (node:20-alpine 기본 포함) - 재현성을 위해 frozen-lockfile 사용
-RUN yarn install --frozen-lockfile --non-interactive
+# 설치 캐시 최적화를 위해 필요한 파일만 먼저 복사
+COPY package.json yarn.lock* .yarnrc.yml* ./
+# .yarn 디렉터리가 있으면 함께 복사 (Berry 캐시/플러그인)
+# (옵션) .yarn 디렉터리가 없더라도 빌드 가능하도록 스킵
+
+# 패키지 매니저별 무결성 설치
+RUN if [ -f yarn.lock ]; then \
+    yarn install --immutable --check-cache --inline-builds; \
+    elif [ -f pnpm-lock.yaml ]; then \
+    corepack prepare pnpm@latest --activate && pnpm i --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then \
+    npm ci; \
+    else \
+    echo "No lockfile found" && exit 1; \
+    fi
 
 # ---------- builder ----------
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# 의존성 복사
-COPY --from=deps /app/node_modules ./node_modules
+# Yarn Berry 활성화
+RUN corepack enable && corepack prepare yarn@4.10.3 --activate
 
-# 앱 소스 복사
+# deps 단계의 설치 결과와 프로젝트 파일 복사
+COPY --from=deps /app/ ./
 COPY . .
 
 # Next 환경변수 승격 (필요한 공개 변수만!)
@@ -23,7 +37,7 @@ ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# next.config.* 에서 output: 'standalone' 설정되어 있다고 가정
+# next.config: output: 'standalone' 기준
 RUN yarn build
 
 # ---------- runner ----------
