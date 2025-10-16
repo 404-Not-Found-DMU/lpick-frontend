@@ -3,6 +3,7 @@
 import React from 'react';
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 import clsx from 'clsx';
+import { useCoverPalette } from '../hooks/useCoverPalette';
 import { Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward } from 'lucide-react';
 import VolumeBar from './VolumeBar';
 
@@ -21,6 +22,10 @@ const PlayerControls = ({ audioRef }: PlayerControlsProps) => {
     goToPrevTrack,
     goToNextTrack,
   } = useAudioPlayerStore();
+
+  const { playlist, currentTrackId } = useAudioPlayerStore();
+  const currentTrack = playlist.find((t) => t.id === currentTrackId) || playlist[0];
+  const palette = useCoverPalette(currentTrack?.cover);
 
   return (
     <div className="mt-4 flex items-center justify-center gap-8">
@@ -45,7 +50,8 @@ const PlayerControls = ({ audioRef }: PlayerControlsProps) => {
       <SkipBack onClick={goToPrevTrack} size={24} className="cursor-pointer text-gray-700" />
 
       <button
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-500 text-lg text-white"
+        className="flex h-12 w-12 items-center justify-center rounded-full text-lg text-white"
+        style={{ backgroundColor: palette.accent }}
         onClick={togglePlay}
       >
         {isPlaying ? (
