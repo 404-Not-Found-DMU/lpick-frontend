@@ -23,12 +23,14 @@ const LPlayerPage = () => {
   }, []); // setIsPlaying, setPlaylist은 zustand store에서 stable하므로 제외
 
   return (
-    <div className="w-full bg-gradient-to-br from-violet-50 via-white to-indigo-50 px-2 py-4 dark:from-gray-900 dark:via-gray-800 dark:to-violet-900/20 md:px-4 md:py-6">
-      <div className="mx-auto flex flex-col items-center justify-center gap-6 md:gap-8 lg:flex-row lg:items-start lg:gap-10 lg:px-6">
+    <div className="w-full min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 px-2 py-4 pb-24 dark:from-gray-900 dark:via-gray-800 dark:to-violet-900/20 md:px-4 md:py-6 md:pb-28">
+      <div className="mx-auto flex flex-col items-center justify-center gap-6 md:gap-8 lg:flex-row lg:items-stretch lg:gap-10 lg:px-6">
         <Player />
-        <div className="flex w-full max-w-[400px] flex-col gap-6 md:max-w-[400px] lg:min-w-[400px]">
+        <div className="flex w-full max-w-[400px] flex-col justify-between gap-4 md:max-w-[400px] lg:min-w-[400px]">
           <Playlist />
-          <LyricsPanel />
+          <div className="flex grow">
+            <LyricsPanel />
+          </div>
         </div>
       </div>
       <MiniPlayer />
