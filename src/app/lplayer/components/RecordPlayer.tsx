@@ -50,6 +50,7 @@ const RecordPlayer = ({ cover }: RecordPlayerProps) => {
   return (
     <LPContainer>
       <LPDisc
+        $isPlaying={isPlaying}
         style={{
           transform: `rotateX(10deg) rotateZ(${rotation}deg)`,
           transition: isPlaying ? 'none' : 'transform 0.7s ease-out',
@@ -106,7 +107,7 @@ const LPContainer = styled.div`
   }
 `;
 
-const LPDisc = styled.div`
+const LPDisc = styled.div<{ $isPlaying: boolean }>`
   overflow: hidden;
   border-radius: 9999px;
   box-shadow:
@@ -129,6 +130,34 @@ const LPDisc = styled.div`
   width: 180px;
   height: 180px;
   transition: transform 0.7s ease-out;
+
+  /* 상단 라이트 하이라이트 스윕 (아주 느리게) */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    border-radius: 50%;
+    pointer-events: none;
+    background: linear-gradient(
+      -25deg,
+      rgba(255,255,255,0) 35%,
+      rgba(255,255,255,0.10) 48%,
+      rgba(255,255,255,0.18) 50%,
+      rgba(255,255,255,0.10) 52%,
+      rgba(255,255,255,0) 65%
+    );
+    background-size: 200% 200%;
+    animation: highlightSweep 18s linear infinite;
+    z-index: 5;
+    mix-blend-mode: screen;
+    filter: blur(0.5px);
+  }
+
+  /* 재생 중 섀도우 강도 미세 펄스 (회전 주기와 유사한 속도) */
+  ${({ $isPlaying }) => $isPlaying ? `
+    animation: shadowPulse 15s ease-in-out infinite;
+  ` : ''}
+
   @media (min-width: 640px) {
     width: 240px;
     height: 240px;
@@ -140,6 +169,36 @@ const LPDisc = styled.div`
   @media (min-width: 1280px) {
     width: 400px;
     height: 400px;
+  }
+
+  @keyframes highlightSweep {
+    0% {
+      background-position: -150% -150%;
+      opacity: 0.55;
+    }
+    50% {
+      background-position: 0% 0%;
+      opacity: 0.75;
+    }
+    100% {
+      background-position: 150% 150%;
+      opacity: 0.55;
+    }
+  }
+
+  @keyframes shadowPulse {
+    0%, 100% {
+      box-shadow:
+        inset 0 0 60px rgba(0, 0, 0, 0.75),
+        0 8px 15px rgba(0, 0, 0, 0.45),
+        0 0 24px rgba(0, 0, 0, 0.65);
+    }
+    50% {
+      box-shadow:
+        inset 0 0 60px rgba(0, 0, 0, 0.75),
+        0 11px 19px rgba(0, 0, 0, 0.55),
+        0 0 28px rgba(0, 0, 0, 0.72);
+    }
   }
 `;
 
