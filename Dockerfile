@@ -32,7 +32,7 @@ RUN corepack enable && corepack prepare yarn@4.10.3 --activate
 COPY --from=deps /app/ ./
 COPY . .
 
-# ✅ 빌드타임 인자 → Next 빌드에서 읽히도록 환경변수로 승격
+# Next 환경변수 승격 (필요한 공개 변수만!)
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -46,7 +46,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# healthcheck용 도구
+# healthcheck용(선택)
 RUN apk add --no-cache curl
 
 # standalone 산출물만 복사
@@ -55,4 +55,4 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
-CMD ["node","server.js"]
+CMD ["node", "server.js"]
