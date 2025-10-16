@@ -32,7 +32,7 @@ const Playlist = () => {
               <li
                 key={item.id}
                 onClick={() => setCurrentTrackId(item.id)}
-                className={`group relative flex min-h-[56px] cursor-pointer items-center justify-between gap-2 rounded-lg p-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                className={`group relative flex h-14 cursor-pointer items-center justify-between gap-2 rounded-lg p-2 text-sm hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-700 ${
                   isActive ? 'bg-violet-100 font-semibold text-violet-700' : ''
                 }`}
                 tabIndex={0}
@@ -52,9 +52,9 @@ const Playlist = () => {
                   >
                     {i + 1}
                   </div>
-                  <div>
-                    <p>{item.title}</p>
-                    <p className="text-xs text-gray-500">{item.artist}</p>
+                  <div className="leading-tight">
+                    <p className="truncate">{item.title}</p>
+                    <p className="truncate text-xs text-gray-500">{item.artist}</p>
                   </div>
                 </div>
 
