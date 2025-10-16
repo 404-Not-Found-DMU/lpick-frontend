@@ -1,0 +1,46 @@
+name: Deploy Next.js (Docker Hub)
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/lpick-front
+  EC2_DIR: opt/next-web
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production   # ← Environments의 Variables 사용
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push with build-args
+        run: |
+          TAG=${{ github.sha }}
+          docker build \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.lpick.in \
+            -t $IMAGE_NAME:$TAG -t $IMAGE_NAME:latest .
+          docker push $IMAGE_NAME:$TAG
+          docker push $IMAGE_NAME:latest
+
+      - name: Deploy to EC2 (pull & restart compose)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host:     ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}     # ex) ubuntu
+          key:      ${{ secrets.EC2_SSH_KEY }}  # PEM 개인키 내용
+          script: |
+            set -e
+            cd ${{ env.EC2_DIR }}
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
