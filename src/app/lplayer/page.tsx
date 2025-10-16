@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 
 import Player from './components/Player';
 import Playlist from './components/Playlist';
+import MiniPlayer from './components/MiniPlayer';
 import { fetchPlaylist } from './api/playlist.api';
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 
@@ -26,6 +27,7 @@ const LPlayerPage = () => {
         <Player />
         <Playlist />
       </div>
+      <MiniPlayer />
     </div>
   );
 };

@@ -6,11 +6,15 @@ import PlayerProgressBar from './PlayerProgressBar';
 import PlayerControls from './Controls';
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 import { useAudio } from '../hooks/useAudioPlayer';
+import { useCoverPalette } from '../hooks/useCoverPalette';
+import { useHotkeys } from '../hooks/useHotkeys';
 
 const Player = () => {
   const { playlist, currentTrackId, isPlaying, setIsPlaying } = useAudioPlayerStore();
   const currentTrack = playlist.find((item) => item.id === currentTrackId) || playlist[0];
   const { audioRef } = useAudio();
+  const palette = useCoverPalette(currentTrack?.cover);
+  useHotkeys(audioRef);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -64,7 +68,12 @@ const Player = () => {
   }, [isPlaying, audioRef]);
 
   return (
-    <div className="animate-slide-up mx-auto flex w-full min-w-0 max-w-[95vw] flex-col items-center justify-center rounded-2xl bg-white px-6 py-8 shadow-lg dark:bg-gray-900 sm:max-w-[700px] md:max-w-[900px] md:px-12 md:py-10 xl:max-w-[1200px] xl:px-32 xl:py-20 2xl:max-w-[1400px]">
+    <div
+      className="animate-slide-up mx-auto flex w-full min-w-0 max-w-[95vw] flex-col items-center justify-center rounded-2xl px-6 py-8 shadow-lg sm:max-w-[700px] md:max-w-[900px] md:px-12 md:py-10 xl:max-w-[1200px] xl:px-32 xl:py-20 2xl:max-w-[1400px]"
+      style={{
+        background: `linear-gradient(180deg, ${palette.secondary} 0%, #ffffff 60%)`,
+      }}
+    >
       <audio ref={audioRef} controls className="hidden">
         {currentTrack && (
           <>
@@ -83,7 +92,9 @@ const Player = () => {
           </p>
         </div>
         <PlayerProgressBar audioRef={audioRef} />
-        <PlayerControls audioRef={audioRef} />
+        <div style={{ outlineColor: palette.accent }}>
+          <PlayerControls audioRef={audioRef} />
+        </div>
       </div>
     </div>
   );
