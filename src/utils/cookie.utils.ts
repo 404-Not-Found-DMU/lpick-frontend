@@ -9,6 +9,7 @@ export const hasCookie = (name: string): boolean => {
   if (typeof window === 'undefined') return false;
   
   const cookies = document.cookie.split(';');
+  console.log('Current cookies:', document.cookie);
   return cookies.some(cookie => cookie.trim().startsWith(`${name}=`));
 };
 
@@ -16,6 +17,7 @@ export const hasCookie = (name: string): boolean => {
  * 액세스 토큰 쿠키 존재 확인
  */
 export const hasAccessToken = (): boolean => {
+  console.log('Checking for access_token cookie', hasCookie('access_token')); 
   return hasCookie('access_token');
 };
 
@@ -23,23 +25,8 @@ export const hasAccessToken = (): boolean => {
  * 리프레시 토큰 쿠키 존재 확인
  */
 export const hasRefreshToken = (): boolean => {
+  console.log('Checking for refresh_token cookie', hasCookie('refresh_token'));
   return hasCookie('refresh_token');
-};
-
-/**
- * 쿠키 값 가져오기
- */
-export const getCookie = (name: string): string | null => {
-  if (typeof window === 'undefined') return null;
-  
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  
-  if (parts.length === 2) {
-    return parts.pop()?.split(';').shift() || null;
-  }
-  
-  return null;
 };
 
 /**
