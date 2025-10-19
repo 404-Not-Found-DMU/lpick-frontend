@@ -53,6 +53,7 @@ export const UserAvatarWithAuth = () => {
     return <div className="w-16 h-8 animate-pulse bg-gray-200 rounded dark:bg-gray-700"></div>;
   }
 
+  
   return isAuthenticated ? <UserAvatar /> : <AuthButton />;
 };
 export default UserAvatarWithAuth;
