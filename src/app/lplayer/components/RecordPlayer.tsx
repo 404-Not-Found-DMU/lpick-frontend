@@ -50,20 +50,22 @@ const RecordPlayer = ({ cover }: RecordPlayerProps) => {
   return (
     <LPContainer>
       <LPDisc
+        $isPlaying={isPlaying}
         style={{
           transform: `rotateX(10deg) rotateZ(${rotation}deg)`,
           transition: isPlaying ? 'none' : 'transform 0.7s ease-out',
         }}
       >
-        <Image
-          src={cover || '/lplayer/temp/images/album1.png'}
-          alt="Album Cover"
-          width={400}
-          height={400}
-          className="h-[180px] w-[180px] rounded-full object-cover sm:h-[240px] sm:w-[240px] md:h-[280px] md:w-[280px] xl:h-[400px] xl:w-[400px]"
-          sizes="(max-width: 640px) 180px, (max-width: 768px) 240px, (max-width: 1280px) 280px, 400px"
-          unoptimized
-        />
+        <CenterLabel>
+          <Image
+            src={cover || '/lplayer/temp/images/album1.png'}
+            alt="Album Cover"
+            fill
+            sizes="(max-width: 640px) 68px, (max-width: 768px) 100px, (max-width: 1280px) 140px, 160px"
+            className="object-contain"
+            unoptimized
+          />
+        </CenterLabel>
         <CenterPin />
         <InnerRing1 />
         <InnerRing2 />
@@ -82,8 +84,10 @@ const LPContainer = styled.div`
   width: 180px;
   height: 180px;
   border-radius: 9999px;
-  background: linear-gradient(to bottom right, #2b2b2b, #1a1a1a);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+  background: radial-gradient(120% 120% at 50% 35%, #2b2b2b 0%, #1a1a1a 60%, #0f0f0f 100%);
+  box-shadow:
+    0 12px 20px rgba(0, 0, 0, 0.55),
+    0 4px 12px rgba(0, 0, 0, 0.35) inset;
   position: relative;
   display: flex;
   align-items: center;
@@ -103,14 +107,22 @@ const LPContainer = styled.div`
   }
 `;
 
-const LPDisc = styled.div`
+const LPDisc = styled.div<{ $isPlaying: boolean }>`
   overflow: hidden;
   border-radius: 9999px;
   box-shadow:
-    inset 0 0 40px rgba(0, 0, 0, 0.6),
-    0 8px 15px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(0, 0, 0, 0.7);
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1), transparent 70%);
+    inset 0 0 60px rgba(0, 0, 0, 0.75),
+    0 8px 15px rgba(0, 0, 0, 0.45),
+    0 0 24px rgba(0, 0, 0, 0.65);
+  /* LP 그루브 표현: 얇은 홈이 반복되는 반지름 그라디언트 */
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 40%, transparent 60%),
+    repeating-radial-gradient(circle at center,
+      rgba(0,0,0,0.9) 0px,
+      rgba(0,0,0,0.9) 2px,
+      rgba(30,30,30,0.95) 3px,
+      rgba(30,30,30,0.95) 4px
+    );
   transform-style: preserve-3d;
   transform-origin: 50% 50%;
   position: relative;
@@ -118,6 +130,34 @@ const LPDisc = styled.div`
   width: 180px;
   height: 180px;
   transition: transform 0.7s ease-out;
+
+  /* 상단 라이트 하이라이트 스윕 (아주 느리게) */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    border-radius: 50%;
+    pointer-events: none;
+    background: linear-gradient(
+      -25deg,
+      rgba(255,255,255,0) 35%,
+      rgba(255,255,255,0.10) 48%,
+      rgba(255,255,255,0.18) 50%,
+      rgba(255,255,255,0.10) 52%,
+      rgba(255,255,255,0) 65%
+    );
+    background-size: 200% 200%;
+    animation: highlightSweep 18s linear infinite;
+    z-index: 5;
+    mix-blend-mode: screen;
+    filter: blur(0.5px);
+  }
+
+  /* 재생 중 섀도우 강도 미세 펄스 (회전 주기와 유사한 속도) */
+  ${({ $isPlaying }) => $isPlaying ? `
+    animation: shadowPulse 15s ease-in-out infinite;
+  ` : ''}
+
   @media (min-width: 640px) {
     width: 240px;
     height: 240px;
@@ -130,6 +170,36 @@ const LPDisc = styled.div`
     width: 400px;
     height: 400px;
   }
+
+  @keyframes highlightSweep {
+    0% {
+      background-position: -150% -150%;
+      opacity: 0.55;
+    }
+    50% {
+      background-position: 0% 0%;
+      opacity: 0.75;
+    }
+    100% {
+      background-position: 150% 150%;
+      opacity: 0.55;
+    }
+  }
+
+  @keyframes shadowPulse {
+    0%, 100% {
+      box-shadow:
+        inset 0 0 60px rgba(0, 0, 0, 0.75),
+        0 8px 15px rgba(0, 0, 0, 0.45),
+        0 0 24px rgba(0, 0, 0, 0.65);
+    }
+    50% {
+      box-shadow:
+        inset 0 0 60px rgba(0, 0, 0, 0.75),
+        0 11px 19px rgba(0, 0, 0, 0.55),
+        0 0 28px rgba(0, 0, 0, 0.72);
+    }
+  }
 `;
 
 const CenterPin = styled.div`
@@ -137,10 +207,10 @@ const CenterPin = styled.div`
   left: 50%;
   top: 50%;
   z-index: 20;
-  width: 40px;
-  height: 40px;
-  margin-left: -20px;
-  margin-top: -20px;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  margin-top: -14px;
   border-radius: 9999px;
   background: radial-gradient(circle at center, #9c6b4c 0%, #66332f 60%, #3b1d1a 100%);
   box-shadow:
@@ -149,17 +219,17 @@ const CenterPin = styled.div`
   border: 2px solid #4b2a21;
   transform: rotate(-15deg);
   @media (min-width: 640px) {
+    width: 40px;
+    height: 40px;
+    margin-left: -20px;
+    margin-top: -20px;
+    border-width: 3px;
+  }
+  @media (min-width: 1280px) {
     width: 56px;
     height: 56px;
     margin-left: -28px;
     margin-top: -28px;
-    border-width: 3px;
-  }
-  @media (min-width: 1280px) {
-    width: 80px;
-    height: 80px;
-    margin-left: -40px;
-    margin-top: -40px;
   }
 `;
 
@@ -195,6 +265,23 @@ const InnerRing2 = styled.div`
     inset: 40px;
     border-width: 2px;
   }
+`;
+
+const CenterLabel = styled.div`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 47%;
+  height: 47%;
+  border-radius: 50%;
+  overflow: hidden;
+  z-index: 15;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), rgba(0,0,0,0.1));
+  border: 2px solid rgba(0,0,0,0.5);
+  box-shadow:
+    inset 0 2px 6px rgba(255,255,255,0.15),
+    0 3px 8px rgba(0,0,0,0.35);
 `;
 
 const ToneArm = styled.div<{ $isPlaying: boolean }>`

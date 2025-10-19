@@ -2,6 +2,7 @@
 
 import { useAudioPlayerStore } from '@/store/audioPlayerStore';
 import React, { useEffect } from 'react';
+import { useCoverPalette } from '../hooks/useCoverPalette';
 import { useProgressBar } from '../hooks/useProgressBar';
 
 interface ProgressBarProps {
@@ -9,7 +10,9 @@ interface ProgressBarProps {
 }
 
 const PlayerProgressBar = ({ audioRef }: ProgressBarProps) => {
-  const { setIsPlaying, setCurrentTime } = useAudioPlayerStore();
+  const { setIsPlaying, setCurrentTime, playlist, currentTrackId } = useAudioPlayerStore();
+  const currentTrack = playlist.find((t) => t.id === currentTrackId) || playlist[0];
+  const palette = useCoverPalette(currentTrack?.cover);
 
   const { ref, percent, setPercent, handleMouseDown } = useProgressBar({
     onChange: (p) => {
@@ -66,12 +69,12 @@ const PlayerProgressBar = ({ audioRef }: ProgressBarProps) => {
         className="relative h-2 w-full cursor-pointer rounded-full bg-gray-200"
       >
         <div
-          className="absolute left-0 top-0 h-2 rounded-full bg-violet-400"
-          style={{ width: `${percent}%` }}
+          className="absolute left-0 top-0 h-2 rounded-full"
+          style={{ width: `${percent}%`, backgroundColor: palette.accent }}
         />
         <div
-          className="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-violet-500 shadow-md transition-transform"
-          style={{ left: `calc(${percent}% - 0.5rem)` }}
+          className="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full shadow-md transition-transform"
+          style={{ left: `calc(${percent}% - 0.5rem)`, backgroundColor: palette.accent }}
         />
       </div>
     </div>

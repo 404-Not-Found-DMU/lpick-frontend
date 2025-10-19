@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, Heart, MessageCircle, Eye, TrendingUp } from "lucide-react"
+import Image from "next/image"
 import { Button } from "@/components/Button"
 import { Card, CardContent } from "@/components/Card"
 import { Badge } from "@/components/Badge"
@@ -272,13 +273,15 @@ export default function HomePage() {
                       <div
                         className={`w-[220px] h-[220px] bg-gradient-to-br ${album.gradient} shadow-lg dark:shadow-xl rounded-lg overflow-hidden border border-gray-100 dark:border-gray-700 relative`}
                       >
-                        <img
+                        <Image
                           src={album.imageUrl}
                           alt={`${album.title} 앨범 커버`}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="220px"
+                          className="object-cover"
                           onError={(e) => {
-                            // 이미지 로드 실패 시 그라데이션 배경으로 fallback
-                            e.currentTarget.style.display = 'none'
+                            const target = e.currentTarget as HTMLImageElement
+                            target.style.display = 'none'
                           }}
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-300 flex flex-col items-center justify-center text-white opacity-0 hover:opacity-100">
