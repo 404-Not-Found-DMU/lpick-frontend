@@ -59,12 +59,6 @@ export const UserAvatarWithAuth = () => {
     return <div className="w-16 h-8 animate-pulse bg-gray-200 rounded dark:bg-gray-700"></div>;
   }
 
-  if (isAuthenticated) {
-    console.log('✅ 인증됨 - UserAvatar 표시');
-    return <UserAvatar />;
-  } else {
-    console.log('❌ 미인증 - AuthButton 표시');
-    return <AuthButton />;
-  }
+  return isAuthenticated ? <UserAvatar /> : <AuthButton />;
 };
 export default UserAvatarWithAuth;
