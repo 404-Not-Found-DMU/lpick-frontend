@@ -11,13 +11,6 @@ export async function fetcher<T>(
     
     // 단순하게 baseUrl + path 조합 (baseUrl에는 슬래시 없음, path에는 슬래시 있음)
     const fullUrl = `${baseUrl}${path}`;
-    
-    // 환경 변수 디버깅
-    if (typeof window !== 'undefined') {
-        console.log('API Base URL:', baseUrl);
-        console.log('Path:', path);
-        console.log('Full URL:', fullUrl);
-    }
 
     const res = await fetch(fullUrl, {
         ...options,

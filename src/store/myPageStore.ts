@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { User, ActivityStats } from '@/app/mypage/types/mypage.types';
+import { useUserStore } from './userStore';
 
 interface MyPageState {
   activeTab: string;
@@ -8,6 +9,7 @@ interface MyPageState {
   setActiveTab: (tab: string) => void;
   updateUserProfile: (profile: Partial<User>) => void;
   updateActivityStats: (stats: Partial<ActivityStats>) => void;
+  syncUserInfo: () => void; // 실제 사용자 정보와 동기화
 }
 
 export const useMyPageStore = create<MyPageState>((set) => ({
@@ -41,4 +43,17 @@ export const useMyPageStore = create<MyPageState>((set) => ({
     set((state) => ({
       activityStats: { ...state.activityStats, ...stats },
     })),
+  syncUserInfo: () => {
+    const { userInfo } = useUserStore.getState();
+    if (userInfo) {
+      set((state) => ({
+        userProfile: {
+          ...state.userProfile,
+          name: userInfo.nickname,
+          username: `@${userInfo.oauthId}`,
+          id: userInfo.oauthId,
+        }
+      }));
+    }
+  },
 }));
