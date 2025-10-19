@@ -41,6 +41,8 @@ export const useUserStore = create<UserStore>()(
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : '사용자 정보를 불러올 수 없습니다.';
           set({ error: errorMessage, isLoading: false, userInfo: null });
+          // 에러를 다시 throw하여 useAuth에서 catch할 수 있도록 함
+          throw error;
         }
       },
 
