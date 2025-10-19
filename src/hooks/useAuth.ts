@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { hasAnyAuthToken } from '@/utils';
 import { useUserStore } from '@/store/userStore';
 
 interface UseAuthReturn {
@@ -23,21 +22,16 @@ export const useAuth = (): UseAuthReturn => {
         return;
       }
 
-      // 쿠키에 토큰이 있는지 확인
-      const hasToken = hasAnyAuthToken();
+      // HttpOnly 쿠키 환경에서는 바로 API 호출로 인증 상태 확인
+      // /api/v1/user-info 호출이 성공하면 로그인됨 + 사용자 정보도 함께 로드
+      await getUserInfo(); 
       
-      if (!hasToken) {
-        setIsAuthenticated(false);
-        clearUserInfo(); // 토큰이 없으면 사용자 정보도 클리어
-        return;
-      }
-
-      // 토큰이 있으면 로그인 상태로 간주하고 사용자 정보 로드
+      // API 호출이 성공하면 로그인된 상태
       setIsAuthenticated(true);
-      await getUserInfo(); // 사용자 정보 자동 로드
       
     } catch (error) {
       console.error('인증 확인 중 오류:', error);
+      // API 호출 실패 = 로그인 안됨 (401 등)
       setIsAuthenticated(false);
       clearUserInfo();
     } finally {
