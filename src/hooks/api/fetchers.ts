@@ -9,13 +9,17 @@ export async function fetcher<T>(
         throw new Error('API Base URL이 설정되지 않았습니다.');
     }
     
+    // 단순하게 baseUrl + path 조합 (baseUrl에는 슬래시 없음, path에는 슬래시 있음)
+    const fullUrl = `${baseUrl}${path}`;
+    
     // 환경 변수 디버깅
     if (typeof window !== 'undefined') {
         console.log('API Base URL:', baseUrl);
-        console.log('Full URL:', `${baseUrl}${path}`);
+        console.log('Path:', path);
+        console.log('Full URL:', fullUrl);
     }
 
-    const res = await fetch(`${baseUrl}${path}`, {
+    const res = await fetch(fullUrl, {
         ...options,
         headers: {
             'Content-Type': 'application/json', // json 방식 사용
@@ -29,14 +33,15 @@ export async function fetcher<T>(
     if (res.status === 401) {
         try {
             // 토큰 갱신 시도
-            const refreshResponse = await fetch(`${baseUrl}/api/v1/auth/refresh`, {
+            const refreshUrl = `${baseUrl}/api/v1/auth/refresh`;
+            const refreshResponse = await fetch(refreshUrl, {
                 method: 'POST',
                 credentials: 'include',
             });
 
             if (refreshResponse.ok) {
                 // 토큰 갱신 성공 시 원래 요청 재시도
-                const retryRes = await fetch(`${baseUrl}${path}`, {
+                const retryRes = await fetch(fullUrl, {
                     ...options,
                     headers: {
                         'Content-Type': 'application/json',
