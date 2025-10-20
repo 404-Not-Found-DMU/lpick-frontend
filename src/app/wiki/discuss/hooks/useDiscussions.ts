@@ -8,10 +8,12 @@ import type {
   DiscussionThread,
   DiscussionStatus,
   DiscussionCategory,
+  DiscussionVote,
 } from "../types";
 
 const THREADS_KEY = "lpick_wiki_discussions_threads";
 const OPINIONS_KEY = "lpick_wiki_discussions_opinions";
+const VOTES_KEY = "lpick_wiki_discussions_votes";
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -108,6 +110,7 @@ export interface ThreadFilter {
 export function useDiscussions() {
   const [threads, setThreads] = useState<DiscussionThread[]>([]);
   const [opinions, setOpinions] = useState<DiscussionOpinion[]>([]);
+  const [votes, setVotes] = useState<DiscussionVote[]>([]);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -115,6 +118,7 @@ export function useDiscussions() {
     const loadedOpinions = loadFromStorage<DiscussionOpinion[]>(OPINIONS_KEY, seedOpinions());
     setThreads(loadedThreads);
     setOpinions(loadedOpinions);
+    setVotes(loadFromStorage<DiscussionVote[]>(VOTES_KEY, []));
     setIsReady(true);
   }, []);
 
@@ -127,6 +131,11 @@ export function useDiscussions() {
     if (!isReady) return;
     saveToStorage(OPINIONS_KEY, opinions);
   }, [isReady, opinions]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    saveToStorage(VOTES_KEY, votes);
+  }, [isReady, votes]);
 
   const listThreads = useCallback(
     (filter?: ThreadFilter): DiscussionThread[] => {
@@ -168,6 +177,7 @@ export function useDiscussions() {
         lastUpdatedAt: now,
         opinionsCount: 1,
         docId: input.docId,
+        voteStatus: "none",
       };
       const opinion: DiscussionOpinion = {
         id: `${newId}-o1`,
@@ -237,11 +247,72 @@ export function useDiscussions() {
     [],
   );
 
+  // ===== 투표 로직 =====
+  const getVote = useCallback(
+    (threadId: string): DiscussionVote | undefined => votes.find((v) => v.threadId === threadId),
+    [votes],
+  );
+
+  const openVote = useCallback(
+    (threadId: string, options: string[], allowMultiple = false) => {
+      const vote: DiscussionVote = {
+        threadId,
+        status: "open",
+        allowMultiple,
+        options: options.map((text, idx) => ({ id: `opt-${idx + 1}`, text, count: 0 })),
+        startedAt: nowIso(),
+        userChoices: {},
+      };
+      setVotes((prev) => [vote, ...prev.filter((v) => v.threadId !== threadId)]);
+      setThreads((prev) => prev.map((t) => (t.id === threadId ? { ...t, voteStatus: "open" } : t)));
+    },
+    [],
+  );
+
+  const closeVote = useCallback((threadId: string) => {
+    const endedAt = nowIso();
+    setVotes((prev) =>
+      prev.map((v) => (v.threadId === threadId ? { ...v, status: "closed", endedAt } : v)),
+    );
+    setThreads((prev) => prev.map((t) => (t.id === threadId ? { ...t, voteStatus: "closed" } : t)));
+  }, []);
+
+  const castVote = useCallback(
+    (threadId: string, userId: string, choiceIds: string | string[]) => {
+      setVotes((prev) =>
+        prev.map((v) => {
+          if (v.threadId !== threadId || v.status !== "open") return v;
+          const next = { ...v } as DiscussionVote;
+          // 기존 선택 취소를 위해 count 롤백
+          const prevChoice = next.userChoices[userId];
+          const prevChoiceIds = Array.isArray(prevChoice) ? prevChoice : prevChoice ? [prevChoice] : [];
+          for (const cid of prevChoiceIds) {
+            const opt = next.options.find((o) => o.id === cid);
+            if (opt && opt.count > 0) opt.count -= 1;
+          }
+          // 신규 선택 반영
+          const newChoiceIds = Array.isArray(choiceIds) ? choiceIds : [choiceIds];
+          if (!next.allowMultiple && newChoiceIds.length > 1) {
+            newChoiceIds.splice(1); // 단일 선택 강제
+          }
+          for (const cid of newChoiceIds) {
+            const opt = next.options.find((o) => o.id === cid);
+            if (opt) opt.count += 1;
+          }
+          next.userChoices[userId] = next.allowMultiple ? newChoiceIds : newChoiceIds[0];
+          return next;
+        }),
+      );
+    },
+    [],
+  );
+
   return useMemo(
     () => ({
       isReady,
       threads,
       opinions,
+      votes,
       listThreads,
       getThread,
       listOpinions,
@@ -249,11 +320,16 @@ export function useDiscussions() {
       addOpinion,
       likeOpinion,
       closeThread,
+      getVote,
+      openVote,
+      closeVote,
+      castVote,
     }),
     [
       isReady,
       threads,
       opinions,
+      votes,
       listThreads,
       getThread,
       listOpinions,
@@ -261,6 +337,10 @@ export function useDiscussions() {
       addOpinion,
       likeOpinion,
       closeThread,
+      getVote,
+      openVote,
+      closeVote,
+      castVote,
     ],
   );
 }
