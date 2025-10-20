@@ -50,6 +50,7 @@ function seedThreads(): DiscussionThread[] {
       createdBy: "위키유저A",
       lastUpdatedAt: nowIso(),
       opinionsCount: 2,
+      voteStatus: "none",
     },
     {
       id: "2",
@@ -62,6 +63,7 @@ function seedThreads(): DiscussionThread[] {
       opinionsCount: 3,
       closedAt: nowIso(),
       closedSummary: "가나다 순 정렬로 합의",
+      voteStatus: "closed",
     },
   ];
   return base;
