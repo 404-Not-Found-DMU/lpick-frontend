@@ -11,7 +11,7 @@ export default function DiscussionDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const { id } = params;
-  const { isReady, getThread, listOpinions, addOpinion, likeOpinion, closeThread, getVote, openVote, castVote, closeVote } = useDiscussions();
+  const { isReady, getThread, listOpinions, addOpinion, likeOpinion, closeThread, getVote, openVote, castVote, closeVote, cancelVoteStart } = useDiscussions();
 
   const thread = useMemo(() => (isReady ? getThread(id) : undefined), [isReady, getThread, id]);
   const opinions = useMemo(() => (isReady ? listOpinions(id) : []), [isReady, listOpinions, id]);
@@ -72,9 +72,20 @@ export default function DiscussionDetailPage() {
   };
 
   const startVoteNow = () => {
-    // 정책: 즉시 종료 후 기본 옵션으로 투표 개시
+    if (!confirm('토론을 종료하고 바로 투표를 시작할까요?')) return;
     closeThread(id, "수동 종료 및 투표 개시");
     openVote(id, ["찬성", "반대", "중립"], false);
+  };
+
+  const cancelVote = () => {
+    if (!vote || vote.status !== 'open') return;
+    const total = vote.options.reduce((s, o) => s + o.count, 0);
+    if (total > 0) {
+      alert('이미 투표가 진행되어 취소할 수 없습니다.');
+      return;
+    }
+    if (!confirm('투표 시작을 취소하고 토론을 다시 진행 상태로 되돌릴까요?')) return;
+    cancelVoteStart(id);
   };
 
   return (
@@ -136,7 +147,8 @@ export default function DiscussionDetailPage() {
               <div className="space-y-4">
                 {vote.status === "open" && (
                   <>
-                    <div className="flex items-center justify-end">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button size="sm" variant="outline" onClick={cancelVote}>투표 취소</Button>
                       <Button size="sm" variant="outline" onClick={() => closeVote(id)}>투표 마감</Button>
                     </div>
                     {!hasVoted && (

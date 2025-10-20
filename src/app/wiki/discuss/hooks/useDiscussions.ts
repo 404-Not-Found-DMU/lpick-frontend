@@ -107,6 +107,7 @@ export interface ThreadFilter {
   category?: DiscussionCategory | "all";
   docId?: string;
   q?: string; // 검색어(제목)
+  sortBy?: "updated" | "opinions"; // 정렬: 최근 업데이트(default) / 의견 많은 순
 }
 
 export function useDiscussions() {
@@ -141,13 +142,16 @@ export function useDiscussions() {
 
   const listThreads = useCallback(
     (filter?: ThreadFilter): DiscussionThread[] => {
-      const { status = "all", category = "all", docId, q } = filter ?? {};
-      return threads
+      const { status = "all", category = "all", docId, q, sortBy = "updated" } = filter ?? {};
+      const filtered = threads
         .filter((t) => (status === "all" ? true : t.status === status))
         .filter((t) => (category === "all" ? true : t.category === category))
         .filter((t) => (docId ? t.docId === docId : true))
-        .filter((t) => (q ? t.title.toLowerCase().includes(q.toLowerCase()) : true))
-        .sort((a, b) => b.lastUpdatedAt.localeCompare(a.lastUpdatedAt));
+        .filter((t) => (q ? t.title.toLowerCase().includes(q.toLowerCase()) : true));
+      if (sortBy === "opinions") {
+        return [...filtered].sort((a, b) => b.opinionsCount - a.opinionsCount);
+      }
+      return [...filtered].sort((a, b) => b.lastUpdatedAt.localeCompare(a.lastUpdatedAt));
     },
     [threads],
   );
@@ -309,6 +313,31 @@ export function useDiscussions() {
     [],
   );
 
+  // 투표 시작 취소: 아직 표가 하나도 없고 상태가 open일 때만 허용
+  const cancelVoteStart = useCallback((threadId: string) => {
+    setVotes((prev) => {
+      const v = prev.find((x) => x.threadId === threadId);
+      if (!v || v.status !== "open") return prev;
+      const total = v.options.reduce((s, o) => s + o.count, 0);
+      if (total > 0) return prev; // 이미 투표 발생 시 취소 불가
+      // 삭제
+      return prev.filter((x) => x.threadId !== threadId);
+    });
+    setThreads((prev) =>
+      prev.map((t) =>
+        t.id === threadId
+          ? {
+              ...t,
+              status: "open",
+              voteStatus: "none",
+              closedAt: undefined,
+              closedSummary: undefined,
+            }
+          : t,
+      ),
+    );
+  }, []);
+
   return useMemo(
     () => ({
       isReady,
@@ -326,6 +355,7 @@ export function useDiscussions() {
       openVote,
       closeVote,
       castVote,
+      cancelVoteStart,
     }),
     [
       isReady,
@@ -343,6 +373,7 @@ export function useDiscussions() {
       openVote,
       closeVote,
       castVote,
+      cancelVoteStart,
     ],
   );
 }
