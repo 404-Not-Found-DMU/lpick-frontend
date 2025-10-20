@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input, Badge, Card, CardHeader, CardTitle, CardContent } from "@/components";
 import { useDiscussions } from "./hooks/useDiscussions";
@@ -37,10 +38,27 @@ function WikiDiscussListInner() {
     [isReady, listThreads, q, category, status, docIdFromQuery],
   );
 
+  const docTitle = useMemo(() => {
+    if (!docIdFromQuery) return null;
+    try {
+      const decoded = decodeURIComponent(docIdFromQuery);
+      return decoded.replace(/-/g, ' ');
+    } catch {
+      return docIdFromQuery;
+    }
+  }, [docIdFromQuery]);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">위키 토론</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold">위키 토론</h1>
+          {docIdFromQuery && docTitle && (
+            <div className="text-base font-medium">
+              문서: <Link href={`/wiki/${docIdFromQuery}`} className="text-violet-600 hover:underline">{docTitle}</Link>
+            </div>
+          )}
+        </div>
         <Button onClick={() => router.push(docIdFromQuery ? `/wiki/discuss/new?docId=${docIdFromQuery}` : "/wiki/discuss/new")}>새 토론 개설</Button>
       </div>
 
@@ -81,9 +99,9 @@ function WikiDiscussListInner() {
 
       <div className="mt-6 space-y-3">
         {threads.map((t) => (
-          <div key={t.id} onClick={() => router.push(`/wiki/discuss/${t.id}`)} className="block cursor-pointer rounded-lg border p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+          <div key={t.id} className="block rounded-lg border p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
             <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
+              <div className="min-w-0 cursor-pointer" onClick={() => router.push(`/wiki/discuss/${t.id}`)}>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="truncate text-lg font-semibold">{t.title}</span>
                   <Badge>{t.category}</Badge>
@@ -95,6 +113,16 @@ function WikiDiscussListInner() {
                   개설자 {t.createdBy} · 의견 {t.opinionsCount} · 최근 업데이트 {new Date(t.lastUpdatedAt).toLocaleString()}
                 </div>
               </div>
+              {t.docId && (
+                <Link
+                  href={`/wiki/${t.docId}`}
+                  className="shrink-0 rounded-full p-2 text-violet-600 hover:bg-violet-50"
+                  aria-label="문서로 이동"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  ↗
+                </Link>
+              )}
             </div>
           </div>
         ))}
