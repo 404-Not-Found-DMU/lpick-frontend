@@ -1,9 +1,7 @@
-import { useRouter } from 'next/navigation';
 import { logout } from '@/app/login/hooks/auth.api';
 import { useUserStore } from '@/store/userStore';
 
 export const useLogout = () => {
-  const router = useRouter();
   const { clearUserInfo } = useUserStore();
 
   const handleLogout = async () => {
@@ -14,13 +12,13 @@ export const useLogout = () => {
       // 프론트엔드 상태 초기화
       clearUserInfo();
       
-      // 로그인 페이지로 리다이렉트
-      router.push('/login');
+      // 브라우저 캐시 무력화를 위해 전체 페이지 리로드
+      window.location.href = '/login';
     } catch (error) {
       console.error('로그아웃 실패:', error);
       // API 호출이 실패해도 프론트엔드 상태는 초기화
       clearUserInfo();
-      router.push('/login');
+      window.location.href = '/login';
     }
   };
 
