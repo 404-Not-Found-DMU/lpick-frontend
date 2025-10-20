@@ -3,7 +3,7 @@
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Input, Badge, Card, CardHeader, CardTitle, CardContent } from "@/components";
+import { Button, Input, Badge } from "@/components";
 import { useDiscussions } from "./hooks/useDiscussions";
 import type { DiscussionCategory, DiscussionStatus } from "./types";
 
@@ -63,54 +63,78 @@ function WikiDiscussListInner() {
         <Button onClick={() => router.push(docIdFromQuery ? `/wiki/discuss/new?docId=${docIdFromQuery}` : "/wiki/discuss/new")}>새 토론 개설</Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>필터</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="md:w-1/2">
-              <Input placeholder="제목 검색" value={q} onChange={(e) => setQ(e.target.value)} />
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1 rounded-full bg-gray-100 p-1">
-                <button
-                  className={`rounded-full px-3 py-1 text-sm ${sortBy === 'updated' ? 'bg-white shadow' : 'text-gray-600'}`}
-                  onClick={() => setSortBy('updated')}
-                  type="button"
-                >
-                  최신순
-                </button>
-                <button
-                  className={`rounded-full px-3 py-1 text-sm ${sortBy === 'opinions' ? 'bg-white shadow' : 'text-gray-600'}`}
-                  onClick={() => setSortBy('opinions')}
-                  type="button"
-                >
-                  의견 많은 순
-                </button>
-              </div>
-              <select
-                className="rounded-md border px-3 py-2"
-                value={category}
-                onChange={(e) => setCategory(e.target.value as DiscussionCategory | 'all')}
-              >
-                {categoryOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <select
-                className="rounded-md border px-3 py-2"
-                value={status}
-                onChange={(e) => setStatus(e.target.value as DiscussionStatus | 'all')}
-              >
-                {statusOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
+      {/* Toolbar filters */}
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="md:w-1/2">
+          <Input placeholder="제목 검색" value={q} onChange={(e) => setQ(e.target.value)} />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1 rounded-full bg-gray-100 p-1">
+            <button
+              className={`rounded-full px-3 py-1 text-sm ${sortBy === 'updated' ? 'bg-white shadow' : 'text-gray-600'}`}
+              onClick={() => setSortBy('updated')}
+              type="button"
+            >
+              최신순
+            </button>
+            <button
+              className={`rounded-full px-3 py-1 text-sm ${sortBy === 'opinions' ? 'bg-white shadow' : 'text-gray-600'}`}
+              onClick={() => setSortBy('opinions')}
+              type="button"
+            >
+              의견 많은 순
+            </button>
           </div>
-        </CardContent>
-      </Card>
+          <select
+            className="rounded-md border px-3 py-2"
+            value={category}
+            onChange={(e) => setCategory(e.target.value as DiscussionCategory | 'all')}
+          >
+            {categoryOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <select
+            className="rounded-md border px-3 py-2"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as DiscussionStatus | 'all')}
+          >
+            {statusOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <Button
+            variant="outline"
+            onClick={() => { setQ(''); setCategory('all'); setStatus('all'); setSortBy('updated'); }}
+          >
+            초기화
+          </Button>
+        </div>
+      </div>
+
+      {/* Active filter chips */}
+      {(q || category !== 'all' || status !== 'all') && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {q && (
+            <span className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1 text-sm text-violet-700">
+              검색: {q}
+              <button className="text-violet-600" onClick={() => setQ('')} aria-label="remove search">×</button>
+            </span>
+          )}
+          {category !== 'all' && (
+            <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
+              분류: {category}
+              <button className="text-gray-600" onClick={() => setCategory('all')} aria-label="remove category">×</button>
+            </span>
+          )}
+          {status !== 'all' && (
+            <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
+              상태: {status === 'open' ? '진행중' : '종료됨'}
+              <button className="text-gray-600" onClick={() => setStatus('all')} aria-label="remove status">×</button>
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="mt-6 space-y-3">
         {threads.map((t) => (
