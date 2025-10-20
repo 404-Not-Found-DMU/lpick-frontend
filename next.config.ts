@@ -14,8 +14,8 @@ const nextConfig: NextConfig = {
         // domains: ['example.com'],
     },
 
-    // App Router를 사용하는 경우 edge runtime 페이지가 많은지 확인 필요
-    // (대부분 standalone 생성엔 문제 없음)
+    // 루트 추정 경고 방지: 현재 워크스페이스 루트를 명시
+    outputFileTracingRoot: __dirname,
 };
 
 export default nextConfig;
