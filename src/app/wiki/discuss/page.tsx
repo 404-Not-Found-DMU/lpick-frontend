@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input, Badge, Card, CardHeader, CardTitle, CardContent } from "@/components";
 import { useDiscussions } from "./hooks/useDiscussions";
@@ -22,7 +21,7 @@ const statusOptions: { label: string; value: DiscussionStatus | "all" }[] = [
   { label: "종료됨", value: "closed" },
 ];
 
-export default function WikiDiscussListPage() {
+function WikiDiscussListInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const docIdFromQuery = searchParams.get("docId") ?? undefined;
@@ -105,6 +104,14 @@ export default function WikiDiscussListPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function WikiDiscussListPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">로딩 중...</div>}>
+      <WikiDiscussListInner />
+    </Suspense>
   );
 }
 
