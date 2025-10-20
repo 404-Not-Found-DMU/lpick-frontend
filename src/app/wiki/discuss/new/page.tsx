@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from "@/components";
 import { Textarea } from "@/components/textarea";
 import { useDiscussions } from "../hooks/useDiscussions";
@@ -14,7 +14,7 @@ const stances: { label: string; value: DiscussionStance }[] = [
   { label: "중립", value: "neutral" },
 ];
 
-export default function NewDiscussionPage() {
+function NewDiscussionInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const docId = searchParams.get("docId") ?? undefined;
@@ -24,7 +24,7 @@ export default function NewDiscussionPage() {
   const [category, setCategory] = useState<DiscussionCategory>("내용");
   const [stance, setStance] = useState<DiscussionStance>("neutral");
   const [content, setContent] = useState("");
-  const [author, setAuthor] = useState("현재사용자");
+  const [author] = useState("현재사용자");
   const [submitting, setSubmitting] = useState(false);
 
   const canSubmit = title.trim().length > 0 && content.trim().length > 0 && isReady && !submitting;
@@ -104,4 +104,11 @@ export default function NewDiscussionPage() {
   );
 }
 
+export default function NewDiscussionPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">로딩 중...</div>}>
+      <NewDiscussionInner />
+    </Suspense>
+  );
+}
 
