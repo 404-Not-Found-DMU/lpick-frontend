@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button, Badge, Card, CardHeader, CardTitle, CardContent } from "@/components";
 import { Textarea } from "@/components/textarea";
 import { useDiscussions } from "../hooks/useDiscussions";
-import type { DiscussionStance } from "../types";
+// import type { DiscussionStance } from "../types";
 
 export default function DiscussionDetailPage() {
   const router = useRouter();
@@ -17,7 +17,6 @@ export default function DiscussionDetailPage() {
   const opinions = useMemo(() => (isReady ? listOpinions(id) : []), [isReady, listOpinions, id]);
   const vote = useMemo(() => (isReady ? getVote(id) : undefined), [isReady, getVote, id]);
 
-  const [stance, setStance] = useState<DiscussionStance>("neutral");
   const [content, setContent] = useState("");
   const [closing, setClosing] = useState(false);
   const [closeSummary, setCloseSummary] = useState("");
@@ -56,7 +55,7 @@ export default function DiscussionDetailPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canAdd) return;
-    addOpinion({ threadId: id, author: "현재사용자", stance, content });
+    addOpinion({ threadId: id, author: "현재사용자", stance: "neutral", content });
     setContent("");
   };
 
@@ -208,53 +207,46 @@ export default function DiscussionDetailPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {opinions.map((op) => (
-              <div key={op.id} className="rounded-lg border p-4">
-                <div className="mb-2 flex items-center justify-between text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <Badge className={
-                      op.stance === "agree"
-                        ? "bg-green-100 text-green-700"
-                        : op.stance === "disagree"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-gray-100 text-gray-700"
-                    }>
-                      {op.stance === "agree" ? "찬성" : op.stance === "disagree" ? "반대" : "중립"}
-                    </Badge>
-                    <span>{op.author}</span>
-                    <span>{new Date(op.createdAt).toLocaleString()}</span>
+            {opinions.map((op) => {
+              const isMine = op.author === "현재사용자"; // TODO: 실제 로그인 사용자 닉네임/PK로 비교
+              return (
+                <div key={op.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                  <div className="max-w-[80%]">
+                    <div
+                      className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
+                        isMine
+                          ? "bg-violet-500 text-white rounded-br-md"
+                          : "bg-gray-100 text-gray-900 rounded-bl-md dark:bg-gray-800 dark:text-gray-100"
+                      }`}
+                    >
+                      {op.content}
+                    </div>
+                    <div className={`mt-1 flex items-center gap-2 text-xs ${isMine ? "justify-end text-violet-600/80" : "justify-start text-gray-500"}`}>
+                      <span>{op.author}</span>
+                      <span>{new Date(op.createdAt).toLocaleTimeString()}</span>
+                      <button
+                        className="hover:opacity-80"
+                        onClick={() => likeOpinion(op.id)}
+                        aria-label="like opinion"
+                      >
+                        👍 {op.likes}
+                      </button>
+                    </div>
                   </div>
-                  <Button size="sm" variant="ghost" onClick={() => likeOpinion(op.id)}>
-                    👍 {op.likes}
-                  </Button>
                 </div>
-                <div className="whitespace-pre-wrap text-sm leading-6">{op.content}</div>
-              </div>
-            ))}
+              );
+            })}
 
             {thread.status === "open" ? (
               <form onSubmit={handleSubmit} className="rounded-lg border p-4">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
-                  <select
-                    className="rounded-md border px-3 py-2"
-                    value={stance}
-                    onChange={(e) => setStance(e.target.value as DiscussionStance)}
-                  >
-                    <option value="agree">찬성</option>
-                    <option value="disagree">반대</option>
-                    <option value="neutral">중립</option>
-                  </select>
-                </div>
-                <div className="mt-3">
-                  <Textarea
-                    placeholder="의견을 입력하세요"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                  />
-                </div>
+                <Textarea
+                  placeholder="메시지를 입력하세요"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                />
                 <div className="mt-3 flex justify-end">
                   <Button type="submit" disabled={!canAdd}>
-                    의견 작성
+                    보내기
                   </Button>
                 </div>
               </form>
