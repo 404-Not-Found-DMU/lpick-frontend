@@ -22,6 +22,13 @@ export const useAuth = (): UseAuthReturn => {
         return;
       }
 
+      // API Base URL 미설정 시 인증 체크를 건너뜀 (로컬/스태틱 환경 보호)
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      if (!baseUrl) {
+        setIsAuthenticated(false);
+        return;
+      }
+
       // HttpOnly 쿠키 환경에서는 바로 API 호출로 인증 상태 확인
       // /api/v1/user-info 호출이 성공하면 로그인됨 + 사용자 정보도 함께 로드
       await getUserInfo(); 
