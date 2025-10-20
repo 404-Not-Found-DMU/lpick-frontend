@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Badge, Card, CardHeader, CardTitle, CardContent } from "@/components";
 import { Textarea } from "@/components/textarea";
 import { useDiscussions } from "../hooks/useDiscussions";
@@ -11,15 +11,42 @@ export default function DiscussionDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const { id } = params;
-  const { isReady, getThread, listOpinions, addOpinion, likeOpinion, closeThread } = useDiscussions();
+  const { isReady, getThread, listOpinions, addOpinion, likeOpinion, closeThread, getVote, openVote, castVote, closeVote } = useDiscussions();
 
   const thread = useMemo(() => (isReady ? getThread(id) : undefined), [isReady, getThread, id]);
   const opinions = useMemo(() => (isReady ? listOpinions(id) : []), [isReady, listOpinions, id]);
+  const vote = useMemo(() => (isReady ? getVote(id) : undefined), [isReady, getVote, id]);
 
   const [stance, setStance] = useState<DiscussionStance>("neutral");
   const [content, setContent] = useState("");
   const [closing, setClosing] = useState(false);
   const [closeSummary, setCloseSummary] = useState("");
+  const [selectedOption, setSelectedOption] = useState<string>("");
+
+  const totalVotes = vote ? vote.options.reduce((sum, o) => sum + o.count, 0) : 0;
+  const hasVoted = (() => {
+    if (!vote) return false;
+    const userId = "현재사용자"; // TODO: 인증 연동 시 실제 사용자 ID 사용
+    return Boolean(vote.userChoices[userId]);
+  })();
+
+  // 자동 투표 개시: 개설 7일 경과 또는 마지막 의견 24시간 경과 시
+  useEffect(() => {
+    if (!isReady || !thread) return;
+    if (thread.status !== "open" || thread.voteStatus !== "none") return;
+    const now = new Date();
+    const createdAt = new Date(thread.createdAt);
+    const sevenDaysPassed = now.getTime() - createdAt.getTime() >= 7 * 24 * 60 * 60 * 1000;
+    const lastOpinionAt = opinions.length > 0 ? new Date(opinions[opinions.length - 1].createdAt) : undefined;
+    const twentyFourHoursSinceLast = lastOpinionAt
+      ? now.getTime() - lastOpinionAt.getTime() >= 24 * 60 * 60 * 1000
+      : false;
+    if (sevenDaysPassed || twentyFourHoursSinceLast) {
+      // 토론 종료 후 투표 개시(기본 옵션: 찬성/반대/중립)
+      closeThread(id, "자동 종료 및 투표 개시 기준 충족");
+      openVote(id, ["찬성", "반대", "중립"], false);
+    }
+  }, [isReady, thread, opinions, id, closeThread, openVote]);
 
   if (!isReady) return null;
   if (!thread) return <div className="container mx-auto px-4 py-8">존재하지 않는 토론입니다.</div>;
@@ -37,6 +64,12 @@ export default function DiscussionDetailPage() {
     if (!closeSummary.trim()) return;
     closeThread(id, closeSummary);
     setClosing(false);
+  };
+
+  const submitVote = () => {
+    if (!vote || !selectedOption) return;
+    const userId = "현재사용자"; // TODO: 인증 연동 시 실제 사용자 ID 사용
+    castVote(id, userId, selectedOption);
   };
 
   return (
@@ -80,6 +113,91 @@ export default function DiscussionDetailPage() {
                 <Button onClick={handleClose}>종료하기</Button>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 투표 카드 */}
+      {thread.voteStatus && thread.voteStatus !== "none" && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>투표</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {vote && (
+              <div className="space-y-4">
+                {vote.status === "open" && (
+                  <>
+                    {!hasVoted && (
+                      <div className="space-y-3">
+                        {vote.options.map((opt) => (
+                          <label key={opt.id} className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <input
+                              type="radio"
+                              name="discussion-vote"
+                              className="h-4 w-4"
+                              checked={selectedOption === opt.id}
+                              onChange={() => setSelectedOption(opt.id)}
+                            />
+                            <span className="text-sm">{opt.text}</span>
+                          </label>
+                        ))}
+                        <div className="flex justify-end">
+                          <Button size="sm" onClick={submitVote} disabled={!selectedOption}>
+                            투표하기
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {hasVoted && (
+                      <div className="space-y-3">
+                        {vote.options.map((opt) => {
+                          const percent = totalVotes === 0 ? 0 : Math.round((opt.count / totalVotes) * 100);
+                          return (
+                            <div key={opt.id} className="space-y-1">
+                              <div className="flex items-center justify-between text-sm">
+                                <span>{opt.text}</span>
+                                <span className="text-gray-500">{percent}% ({opt.count})</span>
+                              </div>
+                              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                                <div className="h-2 bg-violet-500" style={{ width: `${percent}%` }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div className="text-right text-xs text-gray-500">총 {totalVotes}표</div>
+                        <div className="flex justify-end">
+                          <Button size="sm" variant="outline" onClick={() => closeVote(id)}>
+                            투표 마감
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {vote.status === "closed" && (
+                  <div className="space-y-3">
+                    {vote.options.map((opt) => {
+                      const percent = totalVotes === 0 ? 0 : Math.round((opt.count / totalVotes) * 100);
+                      return (
+                        <div key={opt.id} className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>{opt.text}</span>
+                            <span className="text-gray-500">{percent}% ({opt.count})</span>
+                          </div>
+                          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                            <div className="h-2 bg-violet-500" style={{ width: `${percent}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div className="text-right text-xs text-gray-500">총 {totalVotes}표 · 마감됨</div>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
