@@ -1,0 +1,45 @@
+name: PR CI - Build and Lint
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - feat/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Setup Corepack (Yarn)
+        run: corepack enable
+
+      - name: Display Yarn/NPM versions
+        run: |
+          node -v
+          corepack yarn -v
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build (includes ESLint)
+        run: yarn build
+
+      # 선택: 타입체크만 별도로 보고 싶다면 주석 해제
+      # - name: Typecheck
+      #   run: yarn tsc -p tsconfig.json --noEmit
+
+      # 선택: 스토리북이 깨지는지까지 확인하려면 주석 해제 (시간 증가)
+      # - name: Build Storybook
+      #   run: yarn build-storybook
+
+
