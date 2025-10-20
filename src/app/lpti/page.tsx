@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button, Card } from "@/components"
 import { RadioGroup, RadioGroupItem } from "@/components/radio-group"
 import { Label } from "@/components/label"
-import { ArrowLeft, RotateCcw } from "lucide-react"
+import { ArrowLeft, RotateCcw, Loader2 } from "lucide-react"
 import Link from "next/link"
 
 interface Question {
@@ -156,7 +156,7 @@ const lptiResults: Record<string, LPTIResult> = {
 }
 
 export default function LPTIPage() {
-  const [currentStep, setCurrentStep] = useState<"intro" | "test" | "result">("intro")
+  const [currentStep, setCurrentStep] = useState<"intro" | "test" | "loading" | "result">("intro")
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<number, number>>({})
   const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([])
@@ -193,23 +193,27 @@ export default function LPTIPage() {
   }
 
   const calculateResult = () => {
-    const scores = { EC: 0, AM: 0, IV: 0, ES: 0 }
+    setCurrentStep("loading")
 
-    shuffledQuestions.forEach((question, index) => {
-      const answer = answers[index] ?? 0 // Default to 0 (neutral)
-      const score = (answer - 3) * question.weight // Convert 1-5 to -2 to +2
-      scores[question.axis as keyof typeof scores] += score
-    })
+    setTimeout(() => {
+      const scores = { EC: 0, AM: 0, IV: 0, ES: 0 }
 
-    // Determine the code based on scores
-    const code =
-      (scores.EC > 0 ? "E" : "C") +
-      (scores.AM > 0 ? "A" : "M") +
-      (scores.IV > 0 ? "I" : "V") +
-      (scores.ES > 0 ? "E" : "S")
+      shuffledQuestions.forEach((question, index) => {
+        const answer = answers[index] ?? 0 // Default to 0 (neutral)
+        const score = (answer - 3) * question.weight // Convert 1-5 to -2 to +2
+        scores[question.axis as keyof typeof scores] += score
+      })
 
-    setResult(lptiResults[code])
-    setCurrentStep("result")
+      // Determine the code based on scores
+      const code =
+        (scores.EC > 0 ? "E" : "C") +
+        (scores.AM > 0 ? "A" : "M") +
+        (scores.IV > 0 ? "I" : "V") +
+        (scores.ES > 0 ? "E" : "S")
+
+      setResult(lptiResults[code])
+      setCurrentStep("result")
+    }, 2000)
   }
 
   const handleRetry = () => {
@@ -303,7 +307,9 @@ export default function LPTIPage() {
           </div>
 
           <Card className="p-8">
-            <h2 className="text-2xl font-bold mb-8 text-center">{currentQuestion.text}</h2>
+            <div className="mb-8 flex items-center justify-center min-h-[72px] md:min-h-[96px] lg:min-h-[120px]">
+              <h2 className="text-2xl font-bold text-center">{currentQuestion.text}</h2>
+            </div>
 
             <RadioGroup name="lpti-answer">
               <div className="space-y-3">
@@ -347,6 +353,24 @@ export default function LPTIPage() {
               <Button onClick={handleNext} disabled={!currentAnswer} variant="violet" className="flex-1">
                 {currentQuestionIndex === shuffledQuestions.length - 1 ? "결과 보기" : "다음"}
               </Button>
+            </div>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  if (currentStep === "loading") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <Card className="p-12">
+            <div className="flex flex-col items-center justify-center gap-4 text-center">
+              <Loader2 className="w-10 h-10 animate-spin text-violet-600" />
+              <div>
+                <p className="text-xl font-semibold">분석 중...</p>
+                <p className="text-muted-foreground mt-1">결과를 계산하고 있어요</p>
+              </div>
             </div>
           </Card>
         </div>
