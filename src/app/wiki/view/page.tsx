@@ -72,10 +72,12 @@ export default function WikiViewPage() {
                   <History className="w-4 h-4 mr-2" />
                   역사
                 </Button>
-                <Button variant="outline" size="sm" className="h-8">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  토론
-                </Button>
+                <Link href="/wiki/discuss" className="inline-flex">
+                  <Button variant="outline" size="sm" className="h-8">
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    토론
+                  </Button>
+                </Link>
                 <Button variant="outline" size="sm" className="h-8">
                   <Star className="w-4 h-4 mr-2" />
                   평가
