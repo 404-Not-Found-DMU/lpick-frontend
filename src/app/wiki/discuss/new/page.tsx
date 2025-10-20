@@ -26,14 +26,35 @@ function NewDiscussionInner() {
   const [content, setContent] = useState("");
   const [author] = useState("현재사용자");
   const [submitting, setSubmitting] = useState(false);
+  const [docInput, setDocInput] = useState(docId ?? "");
 
   const canSubmit = title.trim().length > 0 && content.trim().length > 0 && isReady && !submitting;
+
+  const normalizeDocId = (raw: string): string | undefined => {
+    const value = raw.trim();
+    if (!value) return undefined;
+    try {
+      if (value.startsWith("http")) {
+        const u = new URL(value);
+        const idx = u.pathname.indexOf("/wiki/");
+        if (idx >= 0) {
+          const after = u.pathname.substring(idx + "/wiki/".length);
+          return after.replace(/^\//, "");
+        }
+        return u.pathname.replace(/^\//, "");
+      }
+    } catch {
+      // fallthrough to plain text handling
+    }
+    return value.replace(/\s+/g, "-");
+  };
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
     setSubmitting(true);
-    const thread = createThread({ title, category, content, author, docId, stance });
+    const normalized = normalizeDocId(docInput) ?? docId;
+    const thread = createThread({ title, category, content, author, docId: normalized, stance });
     router.push(`/wiki/discuss/${thread.id}`);
   };
 
@@ -47,6 +68,17 @@ function NewDiscussionInner() {
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={onSubmit}>
+            <div>
+              <label className="mb-1 block text-sm font-medium">문서 링크 또는 슬러그</label>
+              <Input
+                value={docInput}
+                onChange={(e) => setDocInput(e.target.value)}
+                placeholder="예) /wiki/michael-jackson 또는 https://.../wiki/michael-jackson"
+              />
+              {docInput && (
+                <div className="mt-1 text-xs text-gray-500">미입력 시 토론은 문서와 연결되지 않습니다.</div>
+              )}
+            </div>
             <div>
               <label className="mb-1 block text-sm font-medium">제목</label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="토론 제목을 입력하세요" />
