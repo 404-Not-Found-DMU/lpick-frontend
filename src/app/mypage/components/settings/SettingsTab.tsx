@@ -13,6 +13,7 @@ import {
   User,
   Lock,
 } from 'lucide-react';
+import { useAccountDelete } from '../../hooks/useAccountDelete';
 
 interface ToggleSwitchProps {
   checked: boolean;
@@ -114,6 +115,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({
 );
 
 const SettingsTab: React.FC = () => {
+  const { handleDeleteAccount, isLoading } = useAccountDelete();
   const [notifications, setNotifications] = useState<NotificationSettings>({
     followers: true,
     comments: true,
@@ -218,7 +220,8 @@ const SettingsTab: React.FC = () => {
             <MenuButton
               icon={Trash2}
               title="계정 삭제"
-              subtitle="계정을 영구적으로 삭제합니다"
+              subtitle={isLoading ? "삭제 중..." : "계정을 영구적으로 삭제합니다"}
+              onClick={handleDeleteAccount}
               danger
             />
           </div>

@@ -16,11 +16,22 @@ export async function fetcher<T>(
         ...options,
         headers: {
             'Content-Type': 'application/json', // json 방식 사용
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
             ...(options.headers || {}),
         },
         credentials: 'include', // 쿠키 전달 필요
-        cache: 'no-store',      // Server Component에서 fresh fetch
+        cache: 'no-store',      // 브라우저 캐시 사용 안 함
     });
+
+    // 302 리다이렉트는 바로 인증 실패로 처리 (로그아웃 후 카카오 로그인으로 리다이렉트)
+    if (res.status === 302) {
+        if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+        }
+        throw new Error('인증이 필요합니다.');
+    }
 
     // 401 에러 시 토큰 갱신 시도
     if (res.status === 401) {
