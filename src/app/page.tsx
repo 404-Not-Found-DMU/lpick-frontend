@@ -6,10 +6,14 @@ import Image from "next/image"
 import { Button } from "@/components/Button"
 import { Card, CardContent } from "@/components/Card"
 import { Badge } from "@/components/Badge"
+import { WelcomeModal, useWelcomeModal } from "@/modules/welcomeModal"
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(2) // 중앙 앨범이 활성화된 상태
   const [isAnimating, setIsAnimating] = useState(false)
+  
+  // 환영 모달 훅
+  const { isModalOpen, closeModal, handleTakeLPTI, userInfo } = useWelcomeModal()
 
   const featuredAlbums = [
     {
@@ -26,7 +30,7 @@ export default function HomePage() {
       artist: "The Beatles",
       year: "1969",
       imageUrl: "https://upload.wikimedia.org/wikipedia/en/4/42/Beatles_-_Abbey_Road.jpg",
-      gradient: "from-blue-100 via-indigo-100 to-purple-100 dark:from-blue-900 dark:via-indigo-900 dark:to-purple-900",
+      gradient: "from-violet-100 via-lavender-100 to-violet-200 dark:from-violet-900 dark:via-lavender-900 dark:to-violet-800",
     },
     {
       id: 3,
@@ -500,6 +504,16 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 환영 모달 */}
+      {userInfo && (
+        <WelcomeModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          userInfo={userInfo}
+          onTakeLPTI={handleTakeLPTI}
+        />
+      )}
     </div>
   )
 }
