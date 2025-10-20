@@ -32,10 +32,11 @@ function WikiDiscussListInner() {
   const [q, setQ] = useState("");
   const [category, setCategory] = useState<DiscussionCategory | "all">("all");
   const [status, setStatus] = useState<DiscussionStatus | "all">("all");
+  const [sortBy, setSortBy] = useState<"updated" | "opinions">("updated");
 
   const threads = useMemo(
-    () => (isReady ? listThreads({ q, category, status, docId: docIdFromQuery }) : []),
-    [isReady, listThreads, q, category, status, docIdFromQuery],
+    () => (isReady ? listThreads({ q, category, status, docId: docIdFromQuery, sortBy }) : []),
+    [isReady, listThreads, q, category, status, docIdFromQuery, sortBy],
   );
 
   const docTitle = useMemo(() => {
@@ -67,32 +68,46 @@ function WikiDiscussListInner() {
           <CardTitle>필터</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
-            <div className="sm:col-span-2">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="md:w-1/2">
               <Input placeholder="제목 검색" value={q} onChange={(e) => setQ(e.target.value)} />
             </div>
-            <select
-              className="rounded-md border px-3 py-2"
-              value={category}
-              onChange={(e) => setCategory(e.target.value as DiscussionCategory | "all")}
-            >
-              {categoryOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <select
-              className="rounded-md border px-3 py-2"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as DiscussionStatus | "all")}
-            >
-              {statusOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 rounded-full bg-gray-100 p-1">
+                <button
+                  className={`rounded-full px-3 py-1 text-sm ${sortBy === 'updated' ? 'bg-white shadow' : 'text-gray-600'}`}
+                  onClick={() => setSortBy('updated')}
+                  type="button"
+                >
+                  최신순
+                </button>
+                <button
+                  className={`rounded-full px-3 py-1 text-sm ${sortBy === 'opinions' ? 'bg-white shadow' : 'text-gray-600'}`}
+                  onClick={() => setSortBy('opinions')}
+                  type="button"
+                >
+                  의견 많은 순
+                </button>
+              </div>
+              <select
+                className="rounded-md border px-3 py-2"
+                value={category}
+                onChange={(e) => setCategory(e.target.value as DiscussionCategory | 'all')}
+              >
+                {categoryOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <select
+                className="rounded-md border px-3 py-2"
+                value={status}
+                onChange={(e) => setStatus(e.target.value as DiscussionStatus | 'all')}
+              >
+                {statusOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </CardContent>
       </Card>
