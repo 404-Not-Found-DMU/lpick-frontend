@@ -32,7 +32,7 @@ export default function DiscussionDetailPage() {
   // 자동 투표 개시: 개설 7일 경과 또는 마지막 의견 24시간 경과 시
   useEffect(() => {
     if (!isReady || !thread) return;
-    if (thread.status !== "open" || thread.voteStatus !== "none") return;
+    if (thread.status !== "open" || (thread.voteStatus && thread.voteStatus !== "none")) return;
     const now = new Date();
     const createdAt = new Date(thread.createdAt);
     const sevenDaysPassed = now.getTime() - createdAt.getTime() >= 7 * 24 * 60 * 60 * 1000;
@@ -71,6 +71,12 @@ export default function DiscussionDetailPage() {
     castVote(id, userId, selectedOption);
   };
 
+  const startVoteNow = () => {
+    // 정책: 즉시 종료 후 기본 옵션으로 투표 개시
+    closeThread(id, "수동 종료 및 투표 개시");
+    openVote(id, ["찬성", "반대", "중립"], false);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
@@ -92,6 +98,9 @@ export default function DiscussionDetailPage() {
             <Button variant="danger" onClick={() => setClosing((s) => !s)}>
               {closing ? "종료 취소" : "토론 종료"}
             </Button>
+          )}
+          {thread.status === "open" && (!thread.voteStatus || thread.voteStatus === "none") && (
+            <Button variant="violet" onClick={startVoteNow}>지금 투표 시작</Button>
           )}
         </div>
       </div>
@@ -117,7 +126,7 @@ export default function DiscussionDetailPage() {
       )}
 
       {/* 투표 카드 */}
-      {thread.voteStatus && thread.voteStatus !== "none" && (
+      {(thread.voteStatus && thread.voteStatus !== "none") && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>투표</CardTitle>
@@ -127,6 +136,9 @@ export default function DiscussionDetailPage() {
               <div className="space-y-4">
                 {vote.status === "open" && (
                   <>
+                    <div className="flex items-center justify-end">
+                      <Button size="sm" variant="outline" onClick={() => closeVote(id)}>투표 마감</Button>
+                    </div>
                     {!hasVoted && (
                       <div className="space-y-3">
                         {vote.options.map((opt) => (
