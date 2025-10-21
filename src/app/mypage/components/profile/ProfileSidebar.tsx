@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Share2, Music, Settings, LogOut, Star, Zap, User } from 'lucide-react';
+import { Share2, Music, Settings, LogOut, Star, Zap, User, Target } from 'lucide-react';
 import Image from 'next/image';
 import { useMyPageStore } from '@/store/myPageStore';
 import { useUserStore } from '@/store/userStore';
 import { useLogout } from '../../hooks/useLogout';
+import { useRouter } from 'next/navigation';
 
 interface StatCardProps {
   label: string;
@@ -24,6 +25,7 @@ const ProfileSidebar = () => {
   const { userProfile, activityStats, setActiveTab, syncUserInfo } = useMyPageStore();
   const { userInfo } = useUserStore();
   const { handleLogout } = useLogout();
+  const router = useRouter();
 
   // 컴포넌트 마운트 시 실제 사용자 정보로 동기화
   useEffect(() => {
@@ -64,6 +66,49 @@ const ProfileSidebar = () => {
           <Music className="h-2.5 w-2.5" />
           LP 덕후
         </span>
+      </div>
+
+      {/* LPTI Section */}
+      <div className="mb-4 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-purple-50 p-3 dark:border-violet-900/30 dark:from-gray-800/30 dark:to-gray-800/10">
+        {userInfo?.lpti ? (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Music className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                <span className="text-sm font-bold text-gray-900 dark:text-white">내 LPTI</span>
+              </div>
+              <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">{userInfo.lpti.code}</span>
+            </div>
+            {userInfo.lpti.nickname && (
+              <p className="text-xs text-gray-700 dark:text-gray-300">{userInfo.lpti.nickname}</p>
+            )}
+            {userInfo.lpti.summary && (
+              <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{userInfo.lpti.summary}</p>
+            )}
+            <button 
+              onClick={() => router.push('/lpti')}
+              className="mt-3 w-full rounded-xl bg-violet-600 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-violet-700"
+            >
+              결과 보기 / 다시 검사하기
+            </button>
+          </div>
+        ) : (
+          <div>
+            <div className="mb-2 flex items-center gap-2">
+              <Target className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <span className="text-sm font-bold text-gray-900 dark:text-white">LPTI 검사</span>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              아직 LPTI 결과가 없습니다. 나의 음악 성향을 알아보세요!
+            </p>
+            <button 
+              onClick={() => router.push('/lpti')}
+              className="mt-3 w-full rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 py-1.5 text-xs font-medium text-white shadow-sm transition-all hover:from-violet-700 hover:to-purple-700"
+            >
+              LPTI 검사하러 가기
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Level & Experience Bar */}

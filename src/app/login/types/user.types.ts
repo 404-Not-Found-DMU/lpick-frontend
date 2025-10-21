@@ -6,6 +6,7 @@ export interface UserInfo {
   nickname: string;
   about: string;
   profile: string;
+  lpti?: UserLPTIInfo;
 }
 
 /**
@@ -20,4 +21,10 @@ export interface UserState {
   userInfo: UserInfo | null;
   isLoading: boolean;
   error: string | null;
+}
+
+export interface UserLPTIInfo {
+  code: string;
+  nickname?: string;
+  summary?: string;
 }
