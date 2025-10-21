@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, ExternalLink, Heart, Filter, TrendingUp, Music } from 'lucide-react';
+import { Play, ExternalLink, Heart, Filter, Music } from 'lucide-react';
 import { tempAlbums } from '../../temp/mypage.temp';
 
 const AlbumCollection = () => {
@@ -33,10 +33,6 @@ const AlbumCollection = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sm">
-            <TrendingUp className="h-4 w-4 text-green-500" />
-            <span className="font-medium text-green-600">+3개 이번 달</span>
-          </div>
           <button className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-500 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl">
             <ExternalLink className="h-4 w-4" />
             전체보기
