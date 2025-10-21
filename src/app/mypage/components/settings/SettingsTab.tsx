@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import {
-  Bell,
   Shield,
   Key,
   Mail,
@@ -34,14 +33,6 @@ interface MenuButtonProps {
   subtitle?: string;
   onClick?: () => void;
   danger?: boolean;
-}
-
-interface NotificationSettings {
-  followers: boolean;
-  comments: boolean;
-  likes: boolean;
-  mentions: boolean;
-  email: boolean;
 }
 
 interface PrivacySettings {
@@ -116,35 +107,15 @@ const MenuButton: React.FC<MenuButtonProps> = ({
 
 const SettingsTab: React.FC = () => {
   const { handleDeleteAccount, isLoading } = useAccountDelete();
-  const [notifications, setNotifications] = useState<NotificationSettings>({
-    followers: true,
-    comments: true,
-    likes: false,
-    mentions: true,
-    email: false,
-  });
   const [privacy, setPrivacy] = useState<PrivacySettings>({
     profilePublic: true,
     postsPublic: true,
     activityPublic: false,
   });
 
-  const updateNotification = (key: keyof NotificationSettings, value: boolean) => {
-    setNotifications((prev) => ({ ...prev, [key]: value }));
-  };
-
   const updatePrivacy = (key: keyof PrivacySettings, value: boolean) => {
     setPrivacy((prev) => ({ ...prev, [key]: value }));
   };
-
-  // 설정 데이터 구조화
-  const notificationItems = [
-    { key: 'followers', label: '새로운 팔로워' },
-    { key: 'comments', label: '댓글 알림' },
-    { key: 'likes', label: '좋아요 알림' },
-    { key: 'mentions', label: '멘션 알림' },
-    { key: 'email', label: '이메일 알림' },
-  ] as const;
 
   const privacyItems = [
     { key: 'profilePublic', label: '프로필 공개' },
@@ -173,20 +144,6 @@ const SettingsTab: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Notifications */}
-      <SettingCard icon={Bell} title="알림 설정" description="받고 싶은 알림을 선택하세요">
-        <div className="space-y-1">
-          {notificationItems.map(({ key, label }) => (
-            <ToggleSwitch
-              key={key}
-              checked={notifications[key]}
-              onChange={(checked) => updateNotification(key, checked)}
-              label={label}
-            />
-          ))}
-        </div>
-      </SettingCard>
 
       {/* Privacy */}
       <SettingCard
