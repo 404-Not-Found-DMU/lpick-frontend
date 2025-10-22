@@ -34,13 +34,13 @@ function SortableTrackRow({
         value={track.title}
         onChange={(e) => onTrackChange(track.id, "title", e.target.value)}
         placeholder="곡 제목"
-        className="flex-3 bg-white dark:bg-gray-700"
+        className="flex-[3] basis-0 bg-white dark:bg-gray-700"
       />
       <Input
         value={track.length}
         onChange={(e) => onTrackChange(track.id, "length", e.target.value)}
         placeholder="길이"
-        className="flex-2 bg-white dark:bg-gray-700"
+        className="flex-[2] basis-0 bg-white dark:bg-gray-700"
       />
       <Button variant="ghost" size="icon" onClick={() => onDeleteTrack(track.id)} className="h-9 w-9 flex-shrink-0">
         <Trash2 className="w-3 h-3 text-lavender-400" />

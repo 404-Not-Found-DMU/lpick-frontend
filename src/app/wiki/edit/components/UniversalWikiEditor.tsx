@@ -90,7 +90,7 @@ export function UniversalWikiEditor({
       
       <div className="flex flex-1 flex-row gap-px overflow-hidden bg-gray-200 dark:bg-gray-700">
         {/* Editor Panel */}
-        <main className="flex-2 flex flex-col overflow-y-auto bg-gray-50 p-4 dark:bg-gray-900 md:p-8">
+        <main className="flex-[2] basis-0 flex flex-col overflow-y-auto bg-gray-50 p-4 dark:bg-gray-900 md:p-8">
           <ClientOnly fallback={<div className="space-y-4">폼 로딩 중...</div>}>
             <CategoryFormSelector
               category={category}
@@ -106,7 +106,7 @@ export function UniversalWikiEditor({
         </main>
 
         {/* Preview Panel */}
-        <aside className="flex-2 hidden overflow-y-auto bg-white p-4 dark:bg-gray-800 md:block md:p-8">
+        <aside className="flex-[2] basis-0 hidden overflow-y-auto bg-white p-4 dark:bg-gray-800 md:block md:p-8">
           <LivePreview
             category={category}
             categoryData={categoryData}
