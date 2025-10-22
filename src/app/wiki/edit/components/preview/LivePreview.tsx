@@ -47,6 +47,27 @@ const generateNumbering = (blocks: TextBlock[]): { [id: string]: string } => {
   return numbering
 }
 
+// 라벨 매핑 및 불린 포매터
+const roleLabelMap: Record<string, string> = {
+  composer: '작곡가',
+  singer: '가수',
+  group: '그룹',
+  producer: '프로듀서',
+  arranger: '편곡가',
+  instrumentalist: '연주자',
+  other: '기타',
+}
+
+const equipmentTypeLabelMap: Record<string, string> = {
+  turntable: '턴테이블',
+  speaker: '스피커',
+  amp: '앰프',
+  headphone: '헤드폰',
+  other: '기타',
+}
+
+const formatBooleanKo = (v: unknown) => (v ? '예' : '아니오')
+
 interface LPAccordionProps {
   lp: LPInfo
   index: number
@@ -197,10 +218,11 @@ function EquipmentAccordion({ title, data, fields }: EquipmentAccordionProps) {
             <tbody>
               {fields.map((field) => {
                 const value = data[field.key];
-                return value ? (
+                const displayValue = typeof value === 'boolean' ? formatBooleanKo(value) : String(value);
+                return value !== undefined && value !== '' ? (
                   <tr key={field.key} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <th className="p-3 text-left font-semibold w-1/3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50">{field.label}</th>
-                    <td className="p-3 text-gray-900 dark:text-gray-100">{String(value)}</td>
+                    <td className="p-3 text-gray-900 dark:text-gray-100">{displayValue}</td>
                   </tr>
                 ) : null;
               })}
@@ -477,7 +499,7 @@ export function LivePreview(props: LivePreviewProps | LivePreviewLPProps): React
                   </tr>
                   <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors last:border-b-0">
                     <th className="p-4 text-left font-semibold w-1/3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50">분류</th>
-                    <td className="p-4 text-gray-900 dark:text-gray-100">{equipmentData.equipmentType}</td>
+                    <td className="p-4 text-gray-900 dark:text-gray-100">{equipmentTypeLabelMap[equipmentData.equipmentType] || equipmentData.equipmentType}</td>
                   </tr>
                 </tbody>
               </table>
@@ -590,7 +612,7 @@ export function LivePreview(props: LivePreviewProps | LivePreviewLPProps): React
                               key={index}
                               className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-md text-sm"
                             >
-                              {role}
+                              {roleLabelMap[role] || role}
                             </span>
                           ))}
                         </div>
