@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useMyPageStore } from '@/store/myPageStore';
-import { TrendingUp, FileText, MessageCircle, Edit, Users } from 'lucide-react';
+import { FileText, MessageCircle, Edit, Users } from 'lucide-react';
 
 const StatsGrid = () => {
   const { activityStats } = useMyPageStore();
@@ -13,28 +13,24 @@ const StatsGrid = () => {
       value: activityStats.posts,
       label: '작성글',
       color: 'bg-blue-500',
-      trend: '+12%',
     },
     {
       icon: MessageCircle,
       value: activityStats.comments,
       label: '댓글',
       color: 'bg-green-500',
-      trend: '+8%',
     },
     {
       icon: Edit,
       value: activityStats.wikiEdits,
       label: '위키편집',
       color: 'bg-purple-500',
-      trend: '+15%',
     },
     {
       icon: Users,
       value: activityStats.discussions,
       label: '토론참여',
       color: 'bg-orange-500',
-      trend: '+5%',
     },
   ];
 
@@ -60,14 +56,8 @@ const StatsGrid = () => {
               </div>
 
               <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stat.value}
-                  </span>
-                  <div className="flex items-center text-green-500">
-                    <TrendingUp className="h-3 w-3" />
-                    <span className="text-xs font-medium">{stat.trend}</span>
-                  </div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {stat.value}
                 </div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   {stat.label}

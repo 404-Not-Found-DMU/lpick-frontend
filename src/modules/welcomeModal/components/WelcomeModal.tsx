@@ -23,12 +23,12 @@ const WelcomeModal = ({
       {/* 배경 오버레이 */}
       <div 
         className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
-        onClick={onClose}
+        //onClick={onClose}
         aria-hidden="true"
       />
       
       {/* 모달 컨텐츠 */}
-      <div className="relative w-full max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 opacity-100 max-h-[90vh] overflow-y-auto sm:rounded-3xl rounded-2xl">
+      <div className="relative w-full max-w-2xl mx-auto bg-white dark:bg-gray-900 shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 opacity-100 max-h-[90vh] overflow-y-auto sm:rounded-3xl rounded-2xl">
         {/* 닫기 버튼 */}
         <button
           onClick={onClose}
