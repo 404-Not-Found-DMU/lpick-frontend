@@ -83,6 +83,7 @@ function SortableDiscographyItem({ item, onEdit, onDelete }: SortableDiscography
           {...attributes}
           {...listeners}
           className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          aria-label={`디스코그래피 항목 순서 변경: ${item.title} (스페이스로 잡기, 화살표로 이동)`}
         >
           <GripVertical className="h-4 w-4" />
         </button>
@@ -148,6 +149,7 @@ function SortableActivityItem({ item, onEdit, onDelete }: SortableActivityItemPr
           {...attributes}
           {...listeners}
           className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          aria-label={`활동 이력 항목 순서 변경: ${item.title} (스페이스로 잡기, 화살표로 이동)`}
         >
           <GripVertical className="h-4 w-4" />
         </button>

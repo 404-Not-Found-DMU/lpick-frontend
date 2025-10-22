@@ -7,8 +7,8 @@ import { Button } from "@/components/Button"
 import { Plus, Trash2, ChevronDown, ChevronRight, GripVertical } from "lucide-react"
 import { useState } from "react"
 import { nanoid } from "nanoid"
-import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core"
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { DndContext, closestCenter, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { DeleteConfirmModal } from "../common/DeleteConfirmModal"
 import type { InfoboxData, LPInfo } from "@/types/hierarchical.editor.types"
@@ -45,7 +45,7 @@ function SortableLPItem({ lp, index, isExpanded, onToggleExpansion, onLPChange, 
               {...attributes}
               {...listeners}
               className="cursor-grab p-1 text-gray-400 hover:text-gray-600"
-              aria-label="Drag to reorder"
+              aria-label={`LP #${index + 1} 순서 변경 (스페이스로 잡기, 화살표로 이동)`}
             >
               <GripVertical className="w-4 h-4" />
             </div>
@@ -226,6 +226,10 @@ function SortableLPItem({ lp, index, isExpanded, onToggleExpansion, onLPChange, 
 
 export function InfoboxForm({ data, onUpdate }: InfoboxFormProps) {
   const [expandedLPs, setExpandedLPs] = useState<Set<string>>(new Set())
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
 
   const handleChange = (field: keyof InfoboxData, value: string) => {
     onUpdate({ ...data, [field]: value })
@@ -328,7 +332,7 @@ export function InfoboxForm({ data, onUpdate }: InfoboxFormProps) {
           </Button>
         </div>
         
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
           <SortableContext items={data.lpInfos?.map(lp => lp.id) || []} strategy={verticalListSortingStrategy}>
             {data.lpInfos?.map((lp, index) => (
               <SortableLPItem

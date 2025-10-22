@@ -4,8 +4,8 @@ import * as React from "react"
 import { Input } from "@/components/Input/Input"
 import { Button } from "@/components/Button"
 import { Plus, Trash2, GripVertical } from "lucide-react"
-import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core"
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { DndContext, closestCenter, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { nanoid } from "nanoid"
 import type { Track, TracklistData } from "@/types/hierarchical.editor.types"
@@ -24,7 +24,7 @@ function SortableTrackRow({
 
   return (
     <div ref={setNodeRef} style={style} className="flex items-center gap-2">
-      <Button variant="ghost" size="sm" {...attributes} {...listeners} className="cursor-grab h-9 w-9 flex-shrink-0">
+      <Button variant="ghost" size="sm" {...attributes} {...listeners} className="cursor-grab h-9 w-9 flex-shrink-0" aria-label="트랙 순서 변경 (스페이스로 잡기, 화살표로 이동)">
         <GripVertical className="w-4 h-4 text-gray-500" />
       </Button>
       <div className="flex-1 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm border border-input rounded-md flex items-center justify-center">
@@ -51,6 +51,10 @@ function SortableTrackRow({
 
 export function TracklistForm({ data, onUpdate }: { data: TracklistData; onUpdate: (data: TracklistData) => void }) {
   const tracks = React.useMemo(() => data.tracks || [], [data.tracks])
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
 
   // 초기 로드 시 번호가 없으면 자동으로 번호 매기기
   React.useEffect(() => {
@@ -93,7 +97,7 @@ export function TracklistForm({ data, onUpdate }: { data: TracklistData; onUpdat
 
   return (
     <div className="space-y-3">
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
         <SortableContext items={tracks} strategy={verticalListSortingStrategy}>
           {tracks.map((track) => (
             <SortableTrackRow
