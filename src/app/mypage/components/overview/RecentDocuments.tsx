@@ -8,7 +8,6 @@ import {
   MessageCircle,
   Clock,
   ExternalLink,
-  TrendingUp,
   Eye,
 } from 'lucide-react';
 import { tempRecentDocuments } from '../../temp/mypage.temp';
@@ -115,10 +114,6 @@ const RecentDocuments = () => {
               <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                 <Clock className="h-3 w-3" />
                 <span>{doc.lastModified}</span>
-              </div>
-              <div className="flex items-center gap-1 text-green-600">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+5%</span>
               </div>
             </div>
           </div>
