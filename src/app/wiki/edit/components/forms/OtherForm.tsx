@@ -1,6 +1,7 @@
 import type { OtherInfo, CategoryFormProps } from "@/types/hierarchical.editor.types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card/Card"
 import { Input } from "@/components/Input"
+import { Textarea } from "@/components/textarea"
 
 type OtherFormProps = CategoryFormProps<OtherInfo>;
 
@@ -32,11 +33,11 @@ export function OtherForm({ data, onUpdate }: OtherFormProps) {
           <CardTitle className="text-base font-semibold">내용</CardTitle>
         </CardHeader>
         <CardContent>
-          <textarea
+          <Textarea
             value={data.content}
             onChange={(e) => handleFieldChange("content", e.target.value)}
             placeholder="자유롭게 내용을 작성하세요. 마크다운을 지원합니다..."
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 min-h-[400px] resize-y"
+            className="min-h-[400px] resize-y"
           />
         </CardContent>
       </Card>

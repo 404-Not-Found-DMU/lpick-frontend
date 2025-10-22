@@ -27,7 +27,7 @@ function SortableTrackRow({
       <Button variant="ghost" size="sm" {...attributes} {...listeners} className="cursor-grab h-9 w-9 flex-shrink-0" aria-label="트랙 순서 변경 (스페이스로 잡기, 화살표로 이동)">
         <GripVertical className="w-4 h-4 text-gray-500" />
       </Button>
-      <div className="flex-1 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm border border-input rounded-md flex items-center justify-center">
+      <div className="flex-1 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm border border-input rounded-md flex items-center justify-center" aria-label="트랙 번호">
         {track.number || "#"}
       </div>
       <Input

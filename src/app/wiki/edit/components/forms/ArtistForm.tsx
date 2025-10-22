@@ -7,6 +7,7 @@ import type {
 } from "@/types/hierarchical.editor.types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card/Card"
 import { Input } from "@/components/Input"
+import { Select } from "@/components"
 import { Button } from "@/components/Button"
 import { Plus, Edit, Trash2, GripVertical } from "lucide-react"
 import { useState } from "react"
@@ -293,32 +294,36 @@ export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">이름</label>
+              <label className="block text-sm font-medium mb-2" htmlFor="artist-name">이름</label>
               <Input
+                id="artist-name"
                 value={data.name}
                 onChange={(e) => handleFieldChange("name", e.target.value)}
                 placeholder="아티스트명을 입력하세요"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">국가</label>
+              <label className="block text-sm font-medium mb-2" htmlFor="artist-country">국가</label>
               <Input
+                id="artist-country"
                 value={data.country}
                 onChange={(e) => handleFieldChange("country", e.target.value)}
                 placeholder="국가를 입력하세요"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">활동 기간</label>
+              <label className="block text-sm font-medium mb-2" htmlFor="artist-activePeriod">활동 기간</label>
               <Input
+                id="artist-activePeriod"
                 value={data.activePeriod}
                 onChange={(e) => handleFieldChange("activePeriod", e.target.value)}
                 placeholder="예: 1990-현재, 2005-2015"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">이미지 URL</label>
+              <label className="block text-sm font-medium mb-2" htmlFor="artist-imageUrl">이미지 URL</label>
               <Input
+                id="artist-imageUrl"
                 value={data.imageUrl}
                 onChange={(e) => handleFieldChange("imageUrl", e.target.value)}
                 placeholder="이미지 URL을 입력하세요"
@@ -495,16 +500,16 @@ export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">유형</label>
-                  <select
-                    value={editingDiscography.type}
-                    onChange={(e) => setEditingDiscography({...editingDiscography, type: e.target.value})}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
-                  >
-                    <option value="">유형 선택</option>
-                    {RELEASE_TYPES.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
+                <Select
+                  value={editingDiscography.type}
+                  onChange={(e) => setEditingDiscography({...editingDiscography, type: e.target.value})}
+                  aria-label="디스코그래피 유형"
+                >
+                  <option value="">유형 선택</option>
+                  {RELEASE_TYPES.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">역할</label>
@@ -562,16 +567,16 @@ export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">유형</label>
-                  <select
-                    value={editingActivity.type}
-                    onChange={(e) => setEditingActivity({...editingActivity, type: e.target.value})}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
-                  >
-                    <option value="">유형 선택</option>
-                    {ACTIVITY_TYPES.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
+                <Select
+                  value={editingActivity.type}
+                  onChange={(e) => setEditingActivity({...editingActivity, type: e.target.value})}
+                  aria-label="활동 이력 유형"
+                >
+                  <option value="">유형 선택</option>
+                  {ACTIVITY_TYPES.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">설명</label>

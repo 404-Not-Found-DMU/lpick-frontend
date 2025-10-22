@@ -290,36 +290,36 @@ export function InfoboxForm({ data, onUpdate }: InfoboxFormProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="title">앨범명</Label>
-          <Input id="title" value={data.title} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("title", e.target.value)} />
+          <Label htmlFor="infobox-title">앨범명</Label>
+          <Input id="infobox-title" value={data.title} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("title", e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="artist">아티스트</Label>
-          <Input id="artist" value={data.artist} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("artist", e.target.value)} />
+          <Label htmlFor="infobox-artist">아티스트</Label>
+          <Input id="infobox-artist" value={data.artist} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("artist", e.target.value)} />
         </div>
       </div>
       <div>
-        <Label htmlFor="coverUrl">커버 이미지 URL</Label>
-        <Input id="coverUrl" value={data.coverUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("coverUrl", e.target.value)} />
+        <Label htmlFor="infobox-coverUrl">커버 이미지 URL</Label>
+        <Input id="infobox-coverUrl" value={data.coverUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("coverUrl", e.target.value)} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <Label htmlFor="releaseDate">발매일</Label>
+          <Label htmlFor="infobox-releaseDate">발매일</Label>
           <Input
-            id="releaseDate"
+            id="infobox-releaseDate"
             type="date"
             value={data.releaseDate}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("releaseDate", e.target.value)}
           />
         </div>
         <div className="col-span-2">
-          <Label htmlFor="genre">장르</Label>
-          <Input id="genre" value={data.genre} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("genre", e.target.value)} />
+          <Label htmlFor="infobox-genre">장르</Label>
+          <Input id="infobox-genre" value={data.genre} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("genre", e.target.value)} />
         </div>
       </div>
       <div>
-        <Label htmlFor="label">레이블</Label>
-        <Input id="label" value={data.label} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("label", e.target.value)} />
+        <Label htmlFor="infobox-label">레이블</Label>
+        <Input id="infobox-label" value={data.label} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("label", e.target.value)} />
       </div>
       
       {/* LP 정보 섹션 */}
