@@ -31,6 +31,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { createPortal } from 'react-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/Dialog';
 
 type ArtistFormProps = CategoryFormProps<ArtistInfo>;
 
@@ -465,133 +466,141 @@ export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
         </CardContent>
       </Card>
 
-      {/* 디스코그래피 편집 모달 */}
-      {editingDiscography && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">디스코그래피 편집</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">제목</label>
-                <Input
-                  value={editingDiscography.title}
-                  onChange={(e) => setEditingDiscography({...editingDiscography, title: e.target.value})}
-                  placeholder="앨범/싱글 제목"
-                />
+      {/* 디스코그래피 편집 모달 - Dialog */}
+      <Dialog open={!!editingDiscography} onOpenChange={(open) => !open && setEditingDiscography(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>디스코그래피 편집</DialogTitle>
+          </DialogHeader>
+          {editingDiscography && (
+            <>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">제목</label>
+                  <Input
+                    value={editingDiscography.title}
+                    onChange={(e) => setEditingDiscography({...editingDiscography, title: e.target.value})}
+                    placeholder="앨범/싱글 제목"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">발매일</label>
+                  <Input
+                    type="date"
+                    value={editingDiscography.releaseDate}
+                    onChange={(e) => setEditingDiscography({...editingDiscography, releaseDate: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">유형</label>
+                  <select
+                    value={editingDiscography.type}
+                    onChange={(e) => setEditingDiscography({...editingDiscography, type: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
+                  >
+                    <option value="">유형 선택</option>
+                    {RELEASE_TYPES.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">역할</label>
+                  <Input
+                    value={editingDiscography.role}
+                    onChange={(e) => setEditingDiscography({...editingDiscography, role: e.target.value})}
+                    placeholder="작곡, 작사, 프로듀싱 등"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">발매일</label>
-                <Input
-                  type="date"
-                  value={editingDiscography.releaseDate}
-                  onChange={(e) => setEditingDiscography({...editingDiscography, releaseDate: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">유형</label>
-                <select
-                  value={editingDiscography.type}
-                  onChange={(e) => setEditingDiscography({...editingDiscography, type: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
+              <div className="flex gap-2 mt-6">
+                <Button
+                  onClick={() => handleSaveDiscography(editingDiscography)}
+                  className="flex-1"
                 >
-                  <option value="">유형 선택</option>
-                  {RELEASE_TYPES.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
+                  저장
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditingDiscography(null)}
+                  className="flex-1"
+                >
+                  취소
+                </Button>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">역할</label>
-                <Input
-                  value={editingDiscography.role}
-                  onChange={(e) => setEditingDiscography({...editingDiscography, role: e.target.value})}
-                  placeholder="작곡, 작사, 프로듀싱 등"
-                />
-              </div>
-            </div>
-            <div className="flex gap-2 mt-6">
-              <Button
-                onClick={() => handleSaveDiscography(editingDiscography)}
-                className="flex-1"
-              >
-                저장
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setEditingDiscography(null)}
-                className="flex-1"
-              >
-                취소
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
-      {/* 활동 이력 편집 모달 */}
-      {editingActivity && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">활동 이력 편집</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">연도</label>
-                <Input
-                  value={editingActivity.year}
-                  onChange={(e) => setEditingActivity({...editingActivity, year: e.target.value})}
-                  placeholder="예: 2020"
-                />
+      {/* 활동 이력 편집 모달 - Dialog */}
+      <Dialog open={!!editingActivity} onOpenChange={(open) => !open && setEditingActivity(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>활동 이력 편집</DialogTitle>
+          </DialogHeader>
+          {editingActivity && (
+            <>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">연도</label>
+                  <Input
+                    value={editingActivity.year}
+                    onChange={(e) => setEditingActivity({...editingActivity, year: e.target.value})}
+                    placeholder="예: 2020"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">제목</label>
+                  <Input
+                    value={editingActivity.title}
+                    onChange={(e) => setEditingActivity({...editingActivity, title: e.target.value})}
+                    placeholder="활동 제목"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">유형</label>
+                  <select
+                    value={editingActivity.type}
+                    onChange={(e) => setEditingActivity({...editingActivity, type: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
+                  >
+                    <option value="">유형 선택</option>
+                    {ACTIVITY_TYPES.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">설명</label>
+                  <textarea
+                    value={editingActivity.description}
+                    onChange={(e) => setEditingActivity({...editingActivity, description: e.target.value})}
+                    placeholder="활동에 대한 설명"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
+                    rows={3}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">제목</label>
-                <Input
-                  value={editingActivity.title}
-                  onChange={(e) => setEditingActivity({...editingActivity, title: e.target.value})}
-                  placeholder="활동 제목"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">유형</label>
-                <select
-                  value={editingActivity.type}
-                  onChange={(e) => setEditingActivity({...editingActivity, type: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
+              <div className="flex gap-2 mt-6">
+                <Button
+                  onClick={() => handleSaveActivity(editingActivity)}
+                  className="flex-1"
                 >
-                  <option value="">유형 선택</option>
-                  {ACTIVITY_TYPES.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
+                  저장
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditingActivity(null)}
+                  className="flex-1"
+                >
+                  취소
+                </Button>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">설명</label>
-                <textarea
-                  value={editingActivity.description}
-                  onChange={(e) => setEditingActivity({...editingActivity, description: e.target.value})}
-                  placeholder="활동에 대한 설명"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
-                  rows={3}
-                />
-              </div>
-            </div>
-            <div className="flex gap-2 mt-6">
-              <Button
-                onClick={() => handleSaveActivity(editingActivity)}
-                className="flex-1"
-              >
-                저장
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setEditingActivity(null)}
-                className="flex-1"
-              >
-                취소
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

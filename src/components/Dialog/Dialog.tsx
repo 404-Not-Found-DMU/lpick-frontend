@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 
 interface DialogContextType {
@@ -68,19 +68,57 @@ export const DialogContent: React.FC<DialogContentProps> = ({
   className 
 }) => {
   const { open, onOpenChange } = useDialogContext();
+  const contentRef = useRef<HTMLDivElement>(null);
 
   if (!open) return null;
 
+  // ESC close
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onOpenChange(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [onOpenChange]);
+
+  // Focus trap: keep focus inside dialog
+  useEffect(() => {
+    const root = contentRef.current;
+    if (!root) return;
+    const focusable = root.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+    );
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    first?.focus();
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || focusable.length === 0) return;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        (last || first).focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        (first || last).focus();
+      }
+    };
+    root.addEventListener('keydown', handleTab as any);
+    return () => root.removeEventListener('keydown', handleTab as any);
+  }, [open]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
       <div 
         className="fixed inset-0 bg-black/50" 
         onClick={() => onOpenChange(false)}
+        aria-hidden="true"
       />
-      <div className={clsx(
-        'relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6 border border-gray-200 dark:border-gray-700',
-        className
-      )}>
+      <div
+        ref={contentRef}
+        className={clsx(
+          'relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6 border border-gray-200 dark:border-gray-700',
+          className
+        )}
+      >
         {children}
       </div>
     </div>
