@@ -5,7 +5,7 @@ import { fetcher } from '@/hooks/api/fetchers';
  * 백엔드에서 OAuth 처리 후 access_token, refresh_token을 쿠키로 설정해줌
  */
 export const redirectToKakaoLogin = (): void => {
-  window.location.href = 'https://api.lpick.in/oauth2/authorization/kakao';
+  window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
 };
 
 /**
