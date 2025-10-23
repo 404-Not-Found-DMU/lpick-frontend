@@ -327,7 +327,7 @@ export function LivePreview(props: LivePreviewProps | LivePreviewLPProps): React
         </section>
 
         {textBlocks.map((block) => (
-          <section key={block.id} className="mt-6">
+          <section id={block.id} key={block.id} className="mt-6 scroll-mt-24">
             {renderHeading(block, generateNumbering(textBlocks)[block.id])}
             <div className="prose-p:my-2 prose-blockquote:my-2">
               <MarkdownRenderer>{block.content}</MarkdownRenderer>
@@ -693,7 +693,7 @@ export function LivePreview(props: LivePreviewProps | LivePreviewLPProps): React
       
       {/* 텍스트 블록들 */}
       {textBlocks.map((block) => (
-        <section key={block.id} className="mt-6">
+        <section id={block.id} key={block.id} className="mt-6 scroll-mt-24">
           {renderHeading(block, numberingMap[block.id])}
           <div className="prose-p:my-2 prose-blockquote:my-2">
             <MarkdownRenderer>{block.content}</MarkdownRenderer>
