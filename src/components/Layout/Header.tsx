@@ -1,41 +1,48 @@
-// Header.tsx (파일 확장자를 .tsx로 변경)
+// Header.tsx
 'use client';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation'; 
+import { usePathname, useRouter } from 'next/navigation';
 import { Search, Bell } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { LPickLogo } from '@/assets/images/LPickLogo';
 import { ThemeSelector } from '@/modules';
 import { UserAvatarWithAuth } from '@/components/Layout/UserAvatar';
 import clsx from 'clsx';
-import React, { useState, useEffect, useRef, MouseEvent, FormEvent, ChangeEvent } from 'react'; 
+import React, { useState, useEffect, useRef, MouseEvent, FormEvent, ChangeEvent } from 'react';
 
-// 환경 변수 설정 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ''; 
-const API_PREFIX = '/api/v1/public/album'; 
+// 환경 변수 설정
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+const API_PREFIX = '/api/v1/public/data';
+
+// 반환 타입
+interface SearchResult {
+  id: string;
+  name: string;
+  documentType: string;
+}
 
 // 자동 완성 API 호출 함수
-const fetchAutocompleteSuggestions = async (query: string): Promise<string[]> => {
+const fetchAutocompleteSuggestions = async (query: string): Promise<SearchResult[]> => {
   if (!query || query.trim() === '') return [];
 
   // 환경 변수를 사용하여 전체 URL 구성
-  const fullUrl = `${API_BASE_URL}${API_PREFIX}/autocomplete?q=${encodeURIComponent(query)}&size=8`;
+  const fullUrl = `${API_BASE_URL}${API_PREFIX}/autocomplete?keyword=${encodeURIComponent(query)}&size=8`;
 
   try {
-    const res = await fetch(fullUrl); 
+    const res = await fetch(fullUrl);
     if (!res.ok) {
       // 4xx 또는 5xx 오류 발생 시
       console.error(`API 호출 실패: ${res.status} - URL: ${fullUrl}`);
       return [];
     }
-    return await res.json() as string[]; 
+  
+    return (await res.json()) as SearchResult[];
   } catch (error) {
     // 네트워크 오류 발생 시
-    console.error("자동 완성 데이터를 불러오는 데 실패했습니다:", error);
+    console.error('자동 완성 데이터를 불러오는 데 실패했습니다:', error);
     return [];
   }
 };
-
 
 const Header = () => {
   const NAV_ITEMS = [
@@ -45,19 +52,19 @@ const Header = () => {
   ];
 
   const pathname = usePathname();
-  const router = useRouter(); 
+  const router = useRouter();
 
   // 상태 관리
   const [searchTerm, setSearchTerm] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
   const [isFocused, setIsFocused] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null); 
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  // 자동 완성 API 호출 로직 (간단 테스트를 위해 디바운싱 없이 바로 호출)
+  // 자동 완성 API 호출 로직
   useEffect(() => {
     if (isFocused && searchTerm.length > 0) {
       fetchAutocompleteSuggestions(searchTerm)
-        .then(data => setSuggestions(data))
+        .then((data) => setSuggestions(data))
         .catch(() => setSuggestions([]));
     } else {
       setSuggestions([]);
@@ -92,30 +99,24 @@ const Header = () => {
   };
 
   // 자동 완성 항목 클릭 핸들러
-  const handleSuggestionClick = (e: MouseEvent, suggestion: string) => {
+  const handleSuggestionClick = (e: MouseEvent, suggestion: SearchResult) => {
     e.preventDefault();
-    setSearchTerm(suggestion);
-    handleSearchSubmit(e as unknown as FormEvent, suggestion); // 클릭 이벤트 객체를 FormEvent로 캐스팅하여 사용
+    setSearchTerm(suggestion.name);
+    handleSearchSubmit(e as unknown as FormEvent, suggestion.name);
   };
-    
+
   const showSuggestions = isFocused && suggestions.length > 0 && searchTerm.length > 0;
 
-  console.log({
-    isFocused,
-    suggestionsLength: suggestions.length,
-    searchTermLength: searchTerm.length,
-    showSuggestions
-  });
+  // ... (console.log는 동일)
 
   return (
     <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
       <div className="flex h-16 w-full items-center justify-between gap-5 px-4">
+        {/* ... (로고, 네비게이션 등 상단부는 동일) ... */}
         <div className="flex-shrink-0 px-2">
           <Link href="/" className="flex items-center">
             <LPickLogo className="mr-2 h-8 w-8 flex-shrink-0 text-lavender-500 dark:text-lavender-400" />
-            <span className="text-xl font-bold text-lavender-500 dark:text-lavender-400">
-              LPick
-            </span>
+            <span className="text-xl font-bold text-lavender-500 dark:text-lavender-400">LPick</span>
           </Link>
         </div>
 
@@ -147,25 +148,32 @@ const Header = () => {
               onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
               onFocus={() => setIsFocused(true)}
             />
-            
-            {/* 자동 완성 드롭다운 UI 렌더링 */}
+
             {showSuggestions && (
               <div className="absolute top-full left-0 mt-2 w-full rounded-lg bg-white shadow-xl dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto z-10">
                 <ul className="py-1">
-                  {suggestions.map((suggestion, index) => (
-                    <li 
-                      key={index}
-                      className="px-4 py-2 text-gray-700 cursor-pointer hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  {suggestions.map((suggestion) => (
+                    <li
+                      key={suggestion.id} // key
+                      className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       onClick={(e: MouseEvent) => handleSuggestionClick(e, suggestion)}
                     >
-                      <Search className="inline-block h-3 w-3 mr-2 text-gray-500 dark:text-gray-400" />
-                      {suggestion}
+                      {/* 이름 표시 부분 */}
+                      <div className="flex items-center text-gray-700 dark:text-gray-200">
+                        <Search className="inline-block h-3 w-3 mr-2 text-gray-500 dark:text-gray-400" />
+                        <span>{suggestion.name}</span>
+                      </div>
+
+                      {/* 타입 배지 표시 부분 (신규) */}
+                      <span className="text-xs font-medium text-gray-500 bg-gray-100 dark:text-gray-400 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                        {suggestion.documentType}
+                      </span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
-            
+
             <button type="submit" hidden aria-hidden="true" />
           </form>
         </div>
