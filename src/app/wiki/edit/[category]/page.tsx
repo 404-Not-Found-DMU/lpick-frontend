@@ -2,7 +2,6 @@
 
 import { useParams } from 'next/navigation';
 import { UniversalWikiEditor } from '../components/UniversalWikiEditor';
-import { getDummyData } from '../data/dummyData';
 import type { WikiCategory } from '@/types/hierarchical.editor.types';
 
 export default function CategoryEditorPage() {
@@ -21,18 +20,11 @@ export default function CategoryEditorPage() {
     );
   }
 
-  // 카테고리별 더미 데이터 가져오기
-  const dummyData = getDummyData(category);
-  const initialData = {
-    categoryData: dummyData.categoryData,
-    textBlocks: dummyData.textBlocks
-  };
-
   return (
     <div className="flex-1">
       <UniversalWikiEditor 
         category={category}
-        initialData={initialData}
+        // 초기값은 빈 데이터로 시작 (예시 불러오기 버튼으로 주입)
         onSave={(data) => {
           console.log(`${category} 위키 저장:`, data);
           // 여기에 실제 저장 로직을 구현할 수 있습니다

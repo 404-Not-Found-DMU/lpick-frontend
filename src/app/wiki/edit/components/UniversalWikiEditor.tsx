@@ -40,19 +40,13 @@ export function UniversalWikiEditor({
     handleSave,
     handleExportJson,
     handleImportJson,
+    loadExampleData,
     getDocumentTitle
   } = useWikiEditor({ category, initialData, onSave });
 
-  // JSON 가져오기 핸들러
-  const handleImportJsonWithValidation = (data: {
-    categoryData: CategoryData;
-    textBlocks: TextBlock[];
-  }) => {
-    if (data?.categoryData && data?.textBlocks) {
-      handleImportJson(data);
-    } else {
-      alert('올바른 형식의 JSON이 아닙니다.');
-    }
+  // 예시 데이터 로드
+  const handleLoadExample = () => {
+    loadExampleData();
   };
 
   return (
@@ -60,7 +54,7 @@ export function UniversalWikiEditor({
       <HierarchicalHeader
         documentTitle={getDocumentTitle()}
         onShowJson={() => setShowJson(true)}
-        onImportJson={handleImportJsonWithValidation}
+        onLoadExample={handleLoadExample}
         onSave={handleSave}
       />
       

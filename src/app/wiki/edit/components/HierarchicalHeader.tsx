@@ -7,43 +7,18 @@ import type { CategoryData, TextBlock } from "@/types/hierarchical.editor.types"
 interface HierarchicalHeaderProps {
   documentTitle: string
   onShowJson?: () => void
-  onImportJson?: (data: {
-    categoryData: CategoryData;
-    textBlocks: TextBlock[];
-  }) => void
+  onLoadExample?: () => void
   onSave?: () => void
 }
 
 export function HierarchicalHeader({ 
   documentTitle, 
   onShowJson, 
-  onImportJson, 
+  onLoadExample, 
   onSave 
 }: HierarchicalHeaderProps) {
-  // 파일 input 참조
-  const fileInputRef = useRef<HTMLInputElement>(null)
   // 모달 상태 관리
   const [showExitModal, setShowExitModal] = useState(false)
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      try {
-        const json = JSON.parse(event.target?.result as string)
-        onImportJson?.(json)
-      } catch {
-        alert('올바른 JSON 파일이 아닙니다.')
-      }
-    }
-    reader.readAsText(file)
-    e.target.value = '' // 같은 파일 연속 업로드 가능하게
-  }
 
   const handleExitClick = () => {
     setShowExitModal(true)
@@ -75,16 +50,9 @@ export function HierarchicalHeader({
               <Button variant="outline" className="text-gray-700 dark:text-gray-200" onClick={onShowJson}>
                 JSON으로 보기
               </Button>
-              <Button variant="outline" className="text-gray-700 dark:text-gray-200" onClick={handleImportClick}>
-                JSON 불러오기
-              </Button>
-              <input
-                type="file"
-                accept="application/json"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-              />
+            <Button variant="outline" className="text-gray-700 dark:text-gray-200" onClick={onLoadExample}>
+              예시 폼 불러오기
+            </Button>
               <Button 
                 className="bg-lavender-500 hover:bg-lavender-600"
                 onClick={handleSaveClick}
