@@ -54,9 +54,10 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <a href="#wiki-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 rounded bg-violet-600 px-3 py-2 text-white">본문으로 건너뛰기</a>
       <main className="container px-4 py-8 mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-3/4">
+          <div id="wiki-content" className="w-full lg:w-3/4">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
               <div className="flex items-center mb-2">
                 <Badge className="bg-violet-500/10 text-violet-500 font-normal mr-2">{wikiMeta.category}</Badge>
@@ -83,10 +84,10 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
             <ContentWithToc content={data.content} />
           </div>
 
-          <div className="w-full lg:w-1/4">
+          <aside aria-label="문서 보조 정보" className="w-full lg:w-1/4">
             <div className="sticky top-24">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+            <section aria-labelledby="doc-info-heading" className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+              <h3 id="doc-info-heading" className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                 <Info className="w-5 h-5 mr-2 text-violet-500" />
                 문서 정보
               </h3>
@@ -108,13 +109,13 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
                   <span className="font-medium text-gray-900 dark:text-gray-100">{wikiMeta.bookmarks.toLocaleString()}</span>
                 </div>
               </div>
-            </div>
+            </section>
 
             <RelatedPagesCard slug={slug} />
 
             <RecentUpdatedCard slug={slug} />
             </div>
-          </div>
+          </aside>
         </div>
       </main>
     </div>
