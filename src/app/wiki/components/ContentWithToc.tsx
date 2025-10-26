@@ -40,8 +40,9 @@ export default function ContentWithToc({ content }: { content: string }) {
 
   const components = useMemo(() => {
     function makeHeading(level: 2 | 3) {
-      return function Heading({ children }: { children: any }) {
-        const text = Array.isArray(children) ? children.join(' ') : String(children ?? '')
+      return function Heading({ children }: { children: React.ReactNode }) {
+        const plain = Array.isArray(children) ? children.join(' ') : (typeof children === 'string' ? children : '')
+        const text = String(plain ?? '')
         const id = slugify(text)
         if (!collectedRef.current.has(id)) {
           collectedRef.current.set(id, { id, text, level })
@@ -58,7 +59,9 @@ export default function ContentWithToc({ content }: { content: string }) {
                 const url = `${window.location.origin}${window.location.pathname}#${id}`
                 try {
                   await navigator.clipboard.writeText(url)
-                } catch {}
+                } catch {
+                  // ignore
+                }
               }}
               className="ml-2 inline-flex opacity-0 transition-opacity group-hover:opacity-100 align-middle text-gray-400 hover:text-violet-600"
             >
@@ -77,7 +80,8 @@ export default function ContentWithToc({ content }: { content: string }) {
   // After first render, commit collected headings
   useEffect(() => {
     setHeadings(Array.from(collectedRef.current.values()))
-  })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Scroll spy
   useEffect(() => {
@@ -97,7 +101,7 @@ export default function ContentWithToc({ content }: { content: string }) {
     return () => observer.disconnect()
   }, [content])
 
-  const onClickToc = (id: string) => (e: React.MouseEvent) => {
+  const onClickToc = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     const el = document.getElementById(id)
     if (el) {

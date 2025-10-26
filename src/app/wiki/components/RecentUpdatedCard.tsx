@@ -36,7 +36,7 @@ export default function RecentUpdatedCard({ slug, initial }: { slug: string; ini
       if (!res.ok) throw new Error("failed")
       const json = await res.json()
       setItems((json.recent ?? []) as Recent[])
-    } catch (e) {
+    } catch {
       setError("최근 수정 문서를 불러오지 못했습니다.")
     } finally {
       setLoading(false)
@@ -46,7 +46,8 @@ export default function RecentUpdatedCard({ slug, initial }: { slug: string; ini
   useEffect(() => {
     if (!initial || initial.length === 0) fetchData()
     else setLoading(false)
-  }, [fetchData])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchData, initial])
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">

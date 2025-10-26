@@ -18,7 +18,7 @@ export default function RelatedPagesCard({ slug, initial }: { slug: string; init
       if (!res.ok) throw new Error("failed")
       const json = await res.json()
       setItems((json.relatedPages ?? []) as Related[])
-    } catch (e) {
+    } catch {
       setError("관련 문서를 불러오지 못했습니다.")
     } finally {
       setLoading(false)
@@ -28,7 +28,8 @@ export default function RelatedPagesCard({ slug, initial }: { slug: string; init
   useEffect(() => {
     if (!initial || initial.length === 0) fetchData()
     else setLoading(false)
-  }, [fetchData])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchData, initial])
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
