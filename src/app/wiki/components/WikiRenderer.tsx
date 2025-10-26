@@ -53,7 +53,9 @@ export default function WikiRenderer({ content, components }: { content: string;
     ),
     ul: ({ children }) => <ul className="list-disc pl-6">{children}</ul>,
     ol: ({ children }) => <ol className="list-decimal pl-6">{children}</ol>,
-    p: ({ children }) => <p className="leading-7">{children}</p>,
+    p: ({ children }) => <p className="leading-7 text-gray-800 dark:text-gray-200">{children}</p>,
+    h2: ({ children }) => <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{children}</h2>,
+    h3: ({ children }) => <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{children}</h3>,
     ...components,
   }
 

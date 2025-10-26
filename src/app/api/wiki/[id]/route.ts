@@ -5,7 +5,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   const { id } = params
   const now = new Date()
   // 테스트용 더미 데이터: /wiki/test-lp 에서 풍부한 콘텐츠 확인
-  if (id === 'test-lp') {
+  if (id === 'test-lp' || id === 'lp-pink-floyd-dark-side-of-the-moon') {
     const demo = {
       id,
       category: 'lp',

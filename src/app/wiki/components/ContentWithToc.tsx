@@ -132,17 +132,15 @@ export default function ContentWithToc({ content }: { content: string }) {
 
         {open && (
           <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-            <ol className="space-y-2">
-              {headings.map((h) => (
-                <li key={h.id} className="flex items-center justify-between">
+            <ol className="list-decimal pl-5 space-y-2">
+              {headings.map((h, idx) => (
+                <li key={h.id} className={`flex items-center justify-between ${h.level === 3 ? 'ml-4' : ''}`}>
                   <a
                     href={`#${h.id}`}
                     onClick={onClickToc(h.id)}
-                    className={`text-violet-600 hover:underline ${
-                      h.level === 3 ? 'ml-4' : ''
-                    } ${activeId === h.id ? 'font-semibold' : ''}`}
+                    className={`text-violet-600 hover:underline ${activeId === h.id ? 'font-semibold' : ''}`}
                   >
-                    {h.text}
+                    <span className="mr-1 text-gray-500">{idx + 1}.</span> {h.text}
                   </a>
                   <button
                     className="ml-2 inline-flex rounded p-1 text-gray-400 hover:text-violet-600"
@@ -158,7 +156,7 @@ export default function ContentWithToc({ content }: { content: string }) {
         )}
       </nav>
 
-      <div ref={containerRef} className="prose dark:prose-invert max-w-none bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+      <div ref={containerRef} className="prose dark:prose-invert max-w-none bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6 [&>h2]:mt-10 [&>h2]:mb-4 [&>h3]:mt-6 [&>h3]:mb-3 [&>p]:my-3 [&>ul]:my-3 [&>ol]:my-3 [&>blockquote]:my-4 [&>table]:my-4">
         <WikiRenderer content={content} components={components} />
       </div>
     </>
