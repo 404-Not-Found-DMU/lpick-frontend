@@ -23,10 +23,10 @@ function timeAgo(iso: string) {
   return `${yr}년 전`
 }
 
-export default function RecentUpdatedCard({ slug }: { slug: string }) {
+export default function RecentUpdatedCard({ slug, initial }: { slug: string; initial?: Recent[] }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [items, setItems] = useState<Recent[]>([])
+  const [items, setItems] = useState<Recent[]>(initial ?? [])
 
   const fetchData = useCallback(async () => {
     try {
@@ -44,7 +44,8 @@ export default function RecentUpdatedCard({ slug }: { slug: string }) {
   }, [slug])
 
   useEffect(() => {
-    fetchData()
+    if (!initial || initial.length === 0) fetchData()
+    else setLoading(false)
   }, [fetchData])
 
   return (

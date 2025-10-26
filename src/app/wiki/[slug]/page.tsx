@@ -6,14 +6,14 @@ import ActionButtons from "@/app/wiki/components/ActionButtons"
 import InfoboxLP from "@/app/wiki/components/InfoboxLP"
 import dynamic from "next/dynamic"
 const ContentWithToc = dynamic(() => import("@/app/wiki/components/ContentWithToc"), { ssr: false })
+const RelatedPagesCard = dynamic(() => import("@/app/wiki/components/RelatedPagesCard"), { ssr: false })
+const RecentUpdatedCard = dynamic(() => import("@/app/wiki/components/RecentUpdatedCard"), { ssr: false })
 import { ChevronRight, Info, FileText, Clock } from "lucide-react"
-import RelatedPagesCard from "@/app/wiki/components/RelatedPagesCard"
-import RecentUpdatedCard from "@/app/wiki/components/RecentUpdatedCard"
 export default async function WikiViewPage({ params }: { params: { slug: string } }) {
   const slug = params.slug
 
   // 서버에서 문서 데이터 fetch
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/wiki/${encodeURIComponent(slug)}`, { cache: 'no-store' })
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/wiki/${encodeURIComponent(slug)}`, { next: { revalidate: 60 } })
   if (!res.ok) {
     // 404 처리
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -111,9 +111,9 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
               </div>
             </section>
 
-            <RelatedPagesCard slug={slug} />
+            <RelatedPagesCard slug={slug} initial={wikiMeta.relatedPages} />
 
-            <RecentUpdatedCard slug={slug} />
+            <RecentUpdatedCard slug={slug} initial={wikiMeta.recent} />
             </div>
           </aside>
         </div>

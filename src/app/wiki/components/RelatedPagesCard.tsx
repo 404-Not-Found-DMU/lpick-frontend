@@ -5,10 +5,10 @@ import { FileText, ChevronRight } from "lucide-react"
 
 type Related = { title: string; slug: string }
 
-export default function RelatedPagesCard({ slug }: { slug: string }) {
+export default function RelatedPagesCard({ slug, initial }: { slug: string; initial?: Related[] }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [items, setItems] = useState<Related[]>([])
+  const [items, setItems] = useState<Related[]>(initial ?? [])
 
   const fetchData = useCallback(async () => {
     try {
@@ -26,7 +26,8 @@ export default function RelatedPagesCard({ slug }: { slug: string }) {
   }, [slug])
 
   useEffect(() => {
-    fetchData()
+    if (!initial || initial.length === 0) fetchData()
+    else setLoading(false)
   }, [fetchData])
 
   return (
