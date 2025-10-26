@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Edit, History, MessageSquare, Star, Share2, Bookmark } from "lucide-react"
 import { useToast } from "@/components/Toast/ToastProvider"
+import { useState } from "react"
 
 type Props = {
   slug: string
@@ -10,6 +11,8 @@ type Props = {
 
 export default function ActionButtons({ slug }: Props) {
   const { push } = useToast()
+  const [bookmarking, setBookmarking] = useState(false)
+  const [bookmarked, setBookmarked] = useState<boolean | null>(null)
 
   const onRate = () => {
     push("평가 기능은 준비 중입니다.", "info")
@@ -30,8 +33,21 @@ export default function ActionButtons({ slug }: Props) {
     }
   }
 
-  const onBookmark = () => {
-    push("북마크 기능은 준비 중입니다.", "info")
+  const onBookmark = async () => {
+    if (bookmarking) return
+    setBookmarking(true)
+    const prev = bookmarked
+    setBookmarked(true)
+    try {
+      const res = await fetch(`/api/wiki/${encodeURIComponent(slug)}/bookmark`, { method: 'POST' })
+      if (!res.ok) throw new Error('failed')
+      push('북마크에 추가되었습니다.', 'success')
+    } catch {
+      setBookmarked(prev)
+      push('북마크 처리 중 오류가 발생했습니다.', 'error')
+    } finally {
+      setBookmarking(false)
+    }
   }
 
   const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
@@ -64,9 +80,9 @@ export default function ActionButtons({ slug }: Props) {
         <Share2 className="w-4 h-4 mr-2" />
         공유
       </Button>
-      <Button variant="outline" size="sm" className={`h-8 ${focusRing}`} onClick={onBookmark} aria-label="문서 북마크">
-        <Bookmark className="w-4 h-4 mr-2" />
-        북마크
+      <Button variant="outline" size="sm" disabled={bookmarking} className={`h-8 ${focusRing}`} onClick={onBookmark} aria-label="문서 북마크">
+        <Bookmark className={`w-4 h-4 mr-2 ${bookmarked ? 'fill-violet-600 text-violet-600' : ''}`} />
+        {bookmarking ? '처리 중...' : (bookmarked ? '북마크됨' : '북마크')}
       </Button>
     </div>
   )

@@ -8,6 +8,7 @@ import dynamic from "next/dynamic"
 const ContentWithToc = dynamic(() => import("@/app/wiki/components/ContentWithToc"), { ssr: false })
 const RelatedPagesCard = dynamic(() => import("@/app/wiki/components/RelatedPagesCard"), { ssr: false })
 const RecentUpdatedCard = dynamic(() => import("@/app/wiki/components/RecentUpdatedCard"), { ssr: false })
+const ScrollTopButton = dynamic(() => import("@/app/wiki/components/ScrollTopButton"), { ssr: false })
 import { ChevronRight, Info, FileText, Clock } from "lucide-react"
 export default async function WikiViewPage({ params }: { params: { slug: string } }) {
   const slug = params.slug
@@ -136,6 +137,7 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
           </aside>
         </div>
       </main>
+      <ScrollTopButton />
     </div>
   )
 }
