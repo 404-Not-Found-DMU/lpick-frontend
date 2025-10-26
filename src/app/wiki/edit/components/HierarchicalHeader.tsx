@@ -1,8 +1,8 @@
-import React, { useState, useRef } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/Button"
 import { DeleteConfirmModal } from "./common/DeleteConfirmModal"
 import { ArrowLeft, Save } from "lucide-react"
-import type { CategoryData, TextBlock } from "@/types/hierarchical.editor.types"
+import type {} from "@/types/hierarchical.editor.types"
 
 interface HierarchicalHeaderProps {
   documentTitle: string

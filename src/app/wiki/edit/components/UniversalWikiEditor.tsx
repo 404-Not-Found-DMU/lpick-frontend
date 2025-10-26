@@ -39,7 +39,6 @@ export function UniversalWikiEditor({
     updateTextBlocks,
     handleSave,
     handleExportJson,
-    handleImportJson,
     loadExampleData,
     getDocumentTitle
   } = useWikiEditor({ category, initialData, onSave });

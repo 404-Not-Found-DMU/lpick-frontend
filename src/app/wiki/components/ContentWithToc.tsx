@@ -47,7 +47,7 @@ export default function ContentWithToc({ content }: { content: string }) {
         if (!collectedRef.current.has(id)) {
           collectedRef.current.set(id, { id, text, level })
         }
-        const Tag = (`h${level}` as unknown) as any
+        const Tag = (level === 2 ? 'h2' : 'h3') as 'h2' | 'h3'
         return (
           <Tag id={id} className="group scroll-mt-24">
             <span>{children}</span>
@@ -80,7 +80,6 @@ export default function ContentWithToc({ content }: { content: string }) {
   // After first render, commit collected headings
   useEffect(() => {
     setHeadings(Array.from(collectedRef.current.values()))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Scroll spy
@@ -160,7 +159,7 @@ export default function ContentWithToc({ content }: { content: string }) {
       </nav>
 
       <div ref={containerRef} className="prose dark:prose-invert max-w-none bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-        <WikiRenderer content={content} components={components as any} />
+        <WikiRenderer content={content} components={components} />
       </div>
     </>
   )
