@@ -1,7 +1,6 @@
 import type { OtherInfo, CategoryFormProps } from "@/types/hierarchical.editor.types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card/Card"
 import { Input } from "@/components/Input"
-import { Textarea } from "@/components/textarea"
 import RichTextEditor from "@/components/RichTextEditor/RichTextEditor"
 import { MarkdownRenderer } from "../common/MarkdownRenderer"
 import { useState } from "react"

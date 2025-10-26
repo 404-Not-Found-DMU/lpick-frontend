@@ -70,19 +70,21 @@ export const DialogContent: React.FC<DialogContentProps> = ({
   const { open, onOpenChange } = useDialogContext();
   const contentRef = useRef<HTMLDivElement>(null);
 
-  if (!open) return null;
+  // 훅은 항상 동일한 순서로 호출되어야 하므로 조기 반환을 아래로 이동
 
   // ESC close
   useEffect(() => {
+    if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onOpenChange(false);
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onOpenChange]);
+  }, [open, onOpenChange]);
 
   // Focus trap: keep focus inside dialog
   useEffect(() => {
+    if (!open) return;
     const root = contentRef.current;
     if (!root) return;
     const focusable = root.querySelectorAll<HTMLElement>(
@@ -101,9 +103,12 @@ export const DialogContent: React.FC<DialogContentProps> = ({
         (first || last).focus();
       }
     };
-    root.addEventListener('keydown', handleTab as any);
-    return () => root.removeEventListener('keydown', handleTab as any);
+    const listener: EventListener = (e) => handleTab(e as KeyboardEvent);
+    root.addEventListener('keydown', listener);
+    return () => root.removeEventListener('keydown', listener);
   }, [open]);
+
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
