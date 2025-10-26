@@ -12,8 +12,26 @@ import { ChevronRight, Info, FileText, Clock } from "lucide-react"
 export default async function WikiViewPage({ params }: { params: { slug: string } }) {
   const slug = params.slug
 
-  // 서버에서 문서 데이터 fetch
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/wiki/${encodeURIComponent(slug)}`, { next: { revalidate: 60 } })
+  // 서버에서 문서 데이터 fetch (timeout + retry)
+  async function fetchWithTimeout(url: string, opts: RequestInit & { timeoutMs?: number; retries?: number } = {}) {
+    const { timeoutMs = 5000, retries = 1, ...rest } = opts
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const ac = new AbortController()
+      const id = setTimeout(() => ac.abort(), timeoutMs)
+      try {
+        const r = await fetch(url, { ...rest, signal: ac.signal, next: { revalidate: 60 } })
+        clearTimeout(id)
+        if (!r.ok) throw new Error('bad status')
+        return r
+      } catch (e) {
+        clearTimeout(id)
+        if (attempt === retries) throw e
+      }
+    }
+    throw new Error('unreachable')
+  }
+
+  const res = await fetchWithTimeout(`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/wiki/${encodeURIComponent(slug)}`, { timeoutMs: 5000, retries: 1 })
   if (!res.ok) {
     // 404 처리
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

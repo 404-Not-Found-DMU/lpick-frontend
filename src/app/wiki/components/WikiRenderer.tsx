@@ -2,6 +2,7 @@
 import Link from "next/link"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import rehypeSanitize from "rehype-sanitize"
 
 type Components = Parameters<typeof ReactMarkdown>[0]['components']
 
@@ -57,7 +58,7 @@ export default function WikiRenderer({ content, components }: { content: string;
   }
 
   return (
-    <ReactMarkdown remarkPlugins={[remarkGfm]} components={merged}>
+    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]} components={merged}>
       {content}
     </ReactMarkdown>
   )
