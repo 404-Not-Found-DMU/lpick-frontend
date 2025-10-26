@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
+import ActionButtons from "@/app/wiki/components/ActionButtons"
 import {
   Edit,
   History,
@@ -53,38 +54,7 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
               </div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{wikiMeta.title}</h1>
 
-              <div className="flex flex-wrap gap-3">
-                <Link href={`/wiki/${encodeURIComponent(slug)}/edit`} className="inline-flex">
-                  <Button variant="outline" size="sm" className="h-8">
-                    <Edit className="w-4 h-4 mr-2" />
-                    편집하기
-                  </Button>
-                </Link>
-                <Link href={`/wiki/${encodeURIComponent(slug)}/history`} className="inline-flex">
-                  <Button variant="outline" size="sm" className="h-8">
-                    <History className="w-4 h-4 mr-2" />
-                    역사
-                  </Button>
-                </Link>
-                <Link href={`/wiki/discuss?docId=${encodeURIComponent(slug)}`} className="inline-flex">
-                  <Button variant="outline" size="sm" className="h-8">
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    토론
-                  </Button>
-                </Link>
-                <Button variant="outline" size="sm" className="h-8">
-                  <Star className="w-4 h-4 mr-2" />
-                  평가
-                </Button>
-                <Button variant="outline" size="sm" className="h-8">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  공유
-                </Button>
-                <Button variant="outline" size="sm" className="h-8">
-                  <Bookmark className="w-4 h-4 mr-2" />
-                  북마크
-                </Button>
-              </div>
+              <ActionButtons slug={slug} />
             </div>
 
             <div className="prose dark:prose-invert max-w-none bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">

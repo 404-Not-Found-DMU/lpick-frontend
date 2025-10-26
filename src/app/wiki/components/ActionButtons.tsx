@@ -1,0 +1,75 @@
+"use client"
+import Link from "next/link"
+import { Button } from "@/components/Button"
+import { Edit, History, MessageSquare, Star, Share2, Bookmark } from "lucide-react"
+import { useToast } from "@/components/Toast/ToastProvider"
+
+type Props = {
+  slug: string
+}
+
+export default function ActionButtons({ slug }: Props) {
+  const { push } = useToast()
+
+  const onRate = () => {
+    push("평가 기능은 준비 중입니다.", "info")
+  }
+
+  const onShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : `${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/wiki/${encodeURIComponent(slug)}`
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `LPick - ${slug}`, url })
+        push("공유되었습니다.", "success")
+        return
+      }
+      await navigator.clipboard.writeText(url)
+      push("링크가 클립보드에 복사되었습니다.", "success")
+    } catch {
+      push("공유 중 오류가 발생했습니다.", "error")
+    }
+  }
+
+  const onBookmark = () => {
+    push("북마크 기능은 준비 중입니다.", "info")
+  }
+
+  const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      <Link href={`/wiki/${encodeURIComponent(slug)}/edit`} className="inline-flex" aria-label="문서 편집 페이지로 이동">
+        <Button variant="outline" size="sm" className={`h-8 ${focusRing}`}>
+          <Edit className="w-4 h-4 mr-2" />
+          편집하기
+        </Button>
+      </Link>
+      <Link href={`/wiki/${encodeURIComponent(slug)}/history`} className="inline-flex" aria-label="문서 역사 페이지로 이동">
+        <Button variant="outline" size="sm" className={`h-8 ${focusRing}`}>
+          <History className="w-4 h-4 mr-2" />
+          역사
+        </Button>
+      </Link>
+      <Link href={`/wiki/${encodeURIComponent(slug)}/discuss`} className="inline-flex" aria-label="문서 토론 페이지로 이동">
+        <Button variant="outline" size="sm" className={`h-8 ${focusRing}`}>
+          <MessageSquare className="w-4 h-4 mr-2" />
+          토론
+        </Button>
+      </Link>
+      <Button variant="outline" size="sm" className={`h-8 ${focusRing}`} onClick={onRate} aria-label="문서 평가">
+        <Star className="w-4 h-4 mr-2" />
+        평가
+      </Button>
+      <Button variant="outline" size="sm" className={`h-8 ${focusRing}`} onClick={onShare} aria-label="문서 공유">
+        <Share2 className="w-4 h-4 mr-2" />
+        공유
+      </Button>
+      <Button variant="outline" size="sm" className={`h-8 ${focusRing}`} onClick={onBookmark} aria-label="문서 북마크">
+        <Bookmark className="w-4 h-4 mr-2" />
+        북마크
+      </Button>
+    </div>
+  )
+}
+
+
