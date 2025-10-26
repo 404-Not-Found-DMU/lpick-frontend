@@ -2,6 +2,8 @@ import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import ActionButtons from "@/app/wiki/components/ActionButtons"
+import dynamic from "next/dynamic"
+const ContentWithToc = dynamic(() => import("@/app/wiki/components/ContentWithToc"), { ssr: false })
 import {
   Edit,
   History,
@@ -57,9 +59,8 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
               <ActionButtons slug={slug} />
             </div>
 
-            <div className="prose dark:prose-invert max-w-none bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-              <div>{data.content}</div>
-            </div>
+            { /* 동적 로딩: 클라이언트에서 목차/스크롤스파이 */ }
+            <ContentWithToc content={data.content} />
           </div>
 
           <div className="w-full lg:w-1/4">
