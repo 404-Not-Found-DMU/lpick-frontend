@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { headers } from "next/headers"
 import { Badge } from "@/components/Badge"
 import ActionButtons from "@/app/wiki/components/ActionButtons"
 import InfoboxLP from "@/app/wiki/components/InfoboxLP"
@@ -7,8 +8,8 @@ import RelatedPagesCard from "@/app/wiki/components/RelatedPagesCard"
 import RecentUpdatedCard from "@/app/wiki/components/RecentUpdatedCard"
 import ScrollTopButton from "@/app/wiki/components/ScrollTopButton"
 import { Info } from "lucide-react"
-export default async function WikiViewPage({ params }: { params: { slug: string } }) {
-  const slug = params.slug
+export default async function WikiViewPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
 
   // 서버에서 문서 데이터 fetch (timeout + retry)
   async function fetchWithTimeout(url: string, opts: RequestInit & { timeoutMs?: number; retries?: number } = {}) {
@@ -29,7 +30,11 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
     throw new Error('unreachable')
   }
 
-  const res = await fetchWithTimeout(`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/wiki/${encodeURIComponent(slug)}`, { timeoutMs: 5000, retries: 1 })
+  const hdrs = headers()
+  const proto = hdrs.get('x-forwarded-proto') ?? 'http'
+  const host = hdrs.get('host') ?? 'localhost:3000'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? `${proto}://${host}`
+  const res = await fetchWithTimeout(`${baseUrl}/api/wiki/${encodeURIComponent(slug)}`, { timeoutMs: 5000, retries: 1 })
   if (!res.ok) {
     // 404 처리
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -123,10 +128,13 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
   )
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const slug = params.slug
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
   try {
-    const base = process.env.NEXT_PUBLIC_BASE_URL ?? ''
+    const hdrs = headers()
+    const proto = hdrs.get('x-forwarded-proto') ?? 'http'
+    const host = hdrs.get('host') ?? 'localhost:3000'
+    const base = process.env.NEXT_PUBLIC_BASE_URL ?? `${proto}://${host}`
     const res = await fetch(`${base}/api/wiki/${encodeURIComponent(slug)}`, { cache: 'no-store' })
     if (!res.ok) return { title: `위키 - ${slug}`, alternates: { canonical: `/wiki/${slug}` } }
     const data = await res.json()
