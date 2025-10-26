@@ -4,12 +4,11 @@ import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import ActionButtons from "@/app/wiki/components/ActionButtons"
 import InfoboxLP from "@/app/wiki/components/InfoboxLP"
-import dynamic from "next/dynamic"
-const ContentWithToc = dynamic(() => import("@/app/wiki/components/ContentWithToc"), { ssr: false })
-const RelatedPagesCard = dynamic(() => import("@/app/wiki/components/RelatedPagesCard"), { ssr: false })
-const RecentUpdatedCard = dynamic(() => import("@/app/wiki/components/RecentUpdatedCard"), { ssr: false })
-const ScrollTopButton = dynamic(() => import("@/app/wiki/components/ScrollTopButton"), { ssr: false })
-import { ChevronRight, Info, FileText, Clock } from "lucide-react"
+import ContentWithToc from "@/app/wiki/components/ContentWithToc"
+import RelatedPagesCard from "@/app/wiki/components/RelatedPagesCard"
+import RecentUpdatedCard from "@/app/wiki/components/RecentUpdatedCard"
+import ScrollTopButton from "@/app/wiki/components/ScrollTopButton"
+import { Info } from "lucide-react"
 export default async function WikiViewPage({ params }: { params: { slug: string } }) {
   const slug = params.slug
 
