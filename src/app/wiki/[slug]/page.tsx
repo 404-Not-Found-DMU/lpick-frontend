@@ -6,20 +6,19 @@ import InfoboxLP from "@/app/wiki/components/InfoboxLP"
 import dynamic from "next/dynamic"
 const ContentWithToc = dynamic(() => import("@/app/wiki/components/ContentWithToc"), { ssr: false })
 import { ChevronRight, Info, FileText, Clock } from "lucide-react"
+import RelatedPagesCard from "@/app/wiki/components/RelatedPagesCard"
+import RecentUpdatedCard from "@/app/wiki/components/RecentUpdatedCard"
 export default async function WikiViewPage({ params }: { params: { slug: string } }) {
   const slug = params.slug
 
   // 서버에서 문서 데이터 fetch
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/wiki/${encodeURIComponent(slug)}`, { cache: 'no-store' })
   if (!res.ok) {
-    // next/navigation 의 notFound를 쓰지 않고, 간단한 fallback 반환
-    // 필요 시 실제 notFound()로 교체 가능
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-2xl font-bold">문서를 불러오지 못했습니다.</h1>
-        <p className="mt-2 text-gray-600">잠시 후 다시 시도해주세요.</p>
-      </div>
-    )
+    // 404 처리
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const { notFound } = await import('next/navigation')
+    return notFound()
   }
   const data = await res.json()
 
@@ -110,50 +109,9 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-violet-500" />
-                관련 문서
-              </h3>
-              {wikiMeta.relatedPages.length > 0 ? (
-                <>
-                  <ul className="space-y-2">
-                    {wikiMeta.relatedPages.slice(0, 5).map((page: { title: string; slug: string }) => (
-                      <li key={page.slug}>
-                        <Link href={`/wiki/${page.slug}`} className="flex items-center text-violet-600 hover:underline">
-                          <ChevronRight className="w-4 h-4 mr-1 flex-shrink-0" />
-                          <span>{page.title}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                  {wikiMeta.relatedPages.length > 5 && (
-                    <div className="mt-3 text-right">
-                      <Link href={`/wiki/${encodeURIComponent(slug)}?tab=related`} className="text-sm text-gray-600 hover:text-violet-600 dark:text-gray-400">더보기</Link>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="text-sm text-gray-500 dark:text-gray-400">관련 문서가 없습니다.</div>
-              )}
-            </div>
+            <RelatedPagesCard slug={slug} />
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-violet-500" />
-                최근 수정된 문서
-              </h3>
-              <ul className="space-y-3">
-                {wikiMeta.recent.map((r) => (
-                  <li key={r.slug}>
-                    <Link href={`/wiki/${r.slug}`} className="block rounded hover:bg-gray-50 p-2 dark:hover:bg-gray-800/60">
-                      <div className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-violet-500">{r.title}</div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{timeAgo(r.updatedAt)}</p>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <RecentUpdatedCard slug={slug} />
             </div>
           </div>
         </div>
