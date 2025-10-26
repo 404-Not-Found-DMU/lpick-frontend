@@ -1,4 +1,5 @@
 import Link from "next/link"
+import type { Metadata } from "next"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import ActionButtons from "@/app/wiki/components/ActionButtons"
@@ -118,6 +119,40 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
       </main>
     </div>
   )
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const slug = params.slug
+  try {
+    const base = process.env.NEXT_PUBLIC_BASE_URL ?? ''
+    const res = await fetch(`${base}/api/wiki/${encodeURIComponent(slug)}`, { cache: 'no-store' })
+    if (!res.ok) return { title: `위키 - ${slug}`, alternates: { canonical: `/wiki/${slug}` } }
+    const data = await res.json()
+    const title: string = data.title ?? slug
+    const description: string = String(data.content ?? '').replace(/<[^>]*>/g, '').slice(0, 160)
+    const image: string | undefined = data.coverImage ?? '/logo.svg'
+    const url = `${base}/wiki/${encodeURIComponent(slug)}`
+    return {
+      title,
+      description,
+      alternates: { canonical: url },
+      openGraph: {
+        title,
+        description,
+        url,
+        images: image ? [{ url: image }] : undefined,
+        type: 'article',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: image ? [image] : undefined,
+      },
+    }
+  } catch {
+    return { title: `위키 - ${slug}`, alternates: { canonical: `/wiki/${slug}` } }
+  }
 }
 
 
