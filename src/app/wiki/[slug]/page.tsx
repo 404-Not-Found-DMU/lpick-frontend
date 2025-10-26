@@ -5,20 +5,7 @@ import ActionButtons from "@/app/wiki/components/ActionButtons"
 import InfoboxLP from "@/app/wiki/components/InfoboxLP"
 import dynamic from "next/dynamic"
 const ContentWithToc = dynamic(() => import("@/app/wiki/components/ContentWithToc"), { ssr: false })
-import {
-  Edit,
-  History,
-  MessageSquare,
-  Star,
-  Share2,
-  Bookmark,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
-  Info,
-  FileText,
-  Clock,
-} from "lucide-react"
+import { ChevronRight, Info, FileText, Clock } from "lucide-react"
 export default async function WikiViewPage({ params }: { params: { slug: string } }) {
   const slug = params.slug
 
@@ -43,6 +30,26 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
     views: (data.views ?? 0) as number,
     contributors: (data.contributors ?? 0) as number,
     relatedPages: (data.relatedPages ?? []) as { title: string; slug: string }[],
+    bookmarks: (data.bookmarks ?? 0) as number,
+    recent: (data.recent ?? []) as { title: string; slug: string; updatedAt: string }[],
+  }
+
+  function timeAgo(iso: string) {
+    const diff = Date.now() - new Date(iso).getTime()
+    const sec = Math.floor(diff / 1000)
+    if (sec < 60) return `${sec}초 전`
+    const min = Math.floor(sec / 60)
+    if (min < 60) return `${min}분 전`
+    const hr = Math.floor(min / 60)
+    if (hr < 24) return `${hr}시간 전`
+    const day = Math.floor(hr / 24)
+    if (day < 7) return `${day}일 전`
+    const wk = Math.floor(day / 7)
+    if (wk < 5) return `${wk}주 전`
+    const mo = Math.floor(day / 30)
+    if (mo < 12) return `${mo}개월 전`
+    const yr = Math.floor(day / 365)
+    return `${yr}년 전`
   }
 
   return (
@@ -77,6 +84,7 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
           </div>
 
           <div className="w-full lg:w-1/4">
+            <div className="sticky top-24">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                 <Info className="w-5 h-5 mr-2 text-violet-500" />
@@ -95,6 +103,10 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
                   <span className="text-gray-600 dark:text-gray-400">최근 수정</span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">{new Date(wikiMeta.lastUpdated).toLocaleString()}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">북마크</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{wikiMeta.bookmarks.toLocaleString()}</span>
+                </div>
               </div>
             </div>
 
@@ -103,16 +115,27 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
                 <FileText className="w-5 h-5 mr-2 text-violet-500" />
                 관련 문서
               </h3>
-              <ul className="space-y-2">
-                {wikiMeta.relatedPages.map((page: { title: string; slug: string }) => (
-                  <li key={page.slug}>
-                    <Link href={`/wiki/${page.slug}`} className="flex items-center text-violet-500 hover:underline">
-                      <ChevronRight className="w-4 h-4 mr-1 flex-shrink-0" />
-                      <span>{page.title}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              {wikiMeta.relatedPages.length > 0 ? (
+                <>
+                  <ul className="space-y-2">
+                    {wikiMeta.relatedPages.slice(0, 5).map((page: { title: string; slug: string }) => (
+                      <li key={page.slug}>
+                        <Link href={`/wiki/${page.slug}`} className="flex items-center text-violet-600 hover:underline">
+                          <ChevronRight className="w-4 h-4 mr-1 flex-shrink-0" />
+                          <span>{page.title}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  {wikiMeta.relatedPages.length > 5 && (
+                    <div className="mt-3 text-right">
+                      <Link href={`/wiki/${encodeURIComponent(slug)}?tab=related`} className="text-sm text-gray-600 hover:text-violet-600 dark:text-gray-400">더보기</Link>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-sm text-gray-500 dark:text-gray-400">관련 문서가 없습니다.</div>
+              )}
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -121,25 +144,16 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
                 최근 수정된 문서
               </h3>
               <ul className="space-y-3">
-                <li>
-                  <Link href="/wiki/miles-davis-kind-of-blue" className="block group">
-                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">Miles Davis - Kind of Blue</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">1시간 전</p>
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/wiki/technics-sl-1200mk7" className="block group">
-                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">Technics SL-1200MK7</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">3시간 전</p>
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/wiki/the-beatles-abbey-road" className="block group">
-                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">The Beatles - Abbey Road</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">5시간 전</p>
-                  </Link>
-                </li>
+                {wikiMeta.recent.map((r) => (
+                  <li key={r.slug}>
+                    <Link href={`/wiki/${r.slug}`} className="block rounded hover:bg-gray-50 p-2 dark:hover:bg-gray-800/60">
+                      <div className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-violet-500">{r.title}</div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{timeAgo(r.updatedAt)}</p>
+                    </Link>
+                  </li>
+                ))}
               </ul>
+            </div>
             </div>
           </div>
         </div>

@@ -18,6 +18,12 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       { title: '관련 문서 A', slug: 'related-a' },
       { title: '관련 문서 B', slug: 'related-b' },
     ],
+    bookmarks: 12,
+    recent: [
+      { title: 'Miles Davis - Kind of Blue', slug: 'miles-davis-kind-of-blue', updatedAt: new Date(now.getTime() - 60 * 60 * 1000).toISOString() },
+      { title: 'Technics SL-1200MK7', slug: 'technics-sl-1200mk7', updatedAt: new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString() },
+      { title: 'The Beatles - Abbey Road', slug: 'the-beatles-abbey-road', updatedAt: new Date(now.getTime() - 5 * 60 * 60 * 1000).toISOString() },
+    ],
   }
   return NextResponse.json(data)
 }
