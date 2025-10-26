@@ -6,12 +6,15 @@ export const useWiki = () => {
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/wiki/view/api') // 상대경로 API 호출
+    const id = typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : undefined;
+    if (!id) return;
+    fetch(`/api/wiki/${encodeURIComponent(id)}`)
       .then((res) => res.json())
       .then((json) => {
         setData(json);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   return { data, isLoading };
