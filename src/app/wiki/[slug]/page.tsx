@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import ActionButtons from "@/app/wiki/components/ActionButtons"
+import InfoboxLP from "@/app/wiki/components/InfoboxLP"
 import dynamic from "next/dynamic"
 const ContentWithToc = dynamic(() => import("@/app/wiki/components/ContentWithToc"), { ssr: false })
 import {
@@ -60,6 +61,18 @@ export default async function WikiViewPage({ params }: { params: { slug: string 
             </div>
 
             { /* 동적 로딩: 클라이언트에서 목차/스크롤스파이 */ }
+            {/* 카테고리별 인포박스 예시: LP */}
+            {data.category === 'lp' && (
+              <InfoboxLP data={{
+                title: data.title,
+                artist: data.artist ?? 'Unknown',
+                coverImage: data.coverImage,
+                releaseDate: data.releaseDate,
+                label: data.label,
+                genres: data.genres,
+              }} />
+            )}
+
             <ContentWithToc content={data.content} />
           </div>
 

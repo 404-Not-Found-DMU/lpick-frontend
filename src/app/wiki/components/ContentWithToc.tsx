@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ChevronDown, ChevronUp, Link as LinkIcon } from "lucide-react"
-import { MarkdownRenderer } from "@/app/wiki/edit/components/common/MarkdownRenderer"
+import WikiRenderer from "@/app/wiki/components/WikiRenderer"
 
 type HeadingItem = { id: string; text: string; level: 2 | 3 }
 
@@ -114,7 +114,7 @@ export default function ContentWithToc({ content }: { content: string }) {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+      <nav aria-label="목차" className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
         <div
           className="flex items-center justify-between cursor-pointer"
           onClick={() => setOpen((v) => !v)}
@@ -153,10 +153,10 @@ export default function ContentWithToc({ content }: { content: string }) {
             </ol>
           </div>
         )}
-      </div>
+      </nav>
 
       <div ref={containerRef} className="prose dark:prose-invert max-w-none bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-        <MarkdownRenderer>{content}</MarkdownRenderer>
+        <WikiRenderer content={content} components={components as any} />
       </div>
     </>
   )
