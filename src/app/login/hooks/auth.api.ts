@@ -1,17 +1,13 @@
 import { fetcher } from '@/hooks/api/fetchers';
 
-/**
- * 카카오 로그인 URL로 리다이렉트
- * 백엔드에서 OAuth 처리 후 access_token, refresh_token을 쿠키로 설정해줌
- */
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const redirectToKakaoLogin = (): void => {
-  window.location.href = 'https://api.lpick.in/oauth2/authorization/kakao';
+  // 환경 변수를 통해 가져온 BASE_URL을 사용하여 동적으로 URL을 구성
+  window.location.href = `${BASE_URL}/oauth2/authorization/kakao`;
 };
 
-/**
- * 토큰 갱신 API
- * 성공하면 토큰이 유효, 실패하면 토큰이 만료/무효
- */
+
 export const refreshToken = async (): Promise<boolean> => {
   try {
     await fetcher('/api/v1/auth/refresh', {
