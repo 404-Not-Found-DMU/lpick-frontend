@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/radio-group"
 import { Label } from "@/components/label"
 import { ArrowLeft, RotateCcw, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { fetcher } from "@/hooks/api/fetchers"
 
 interface Question {
   text: string
@@ -195,7 +196,7 @@ export default function LPTIPage() {
   const calculateResult = () => {
     setCurrentStep("loading")
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const scores = { EC: 0, AM: 0, IV: 0, ES: 0 }
 
       shuffledQuestions.forEach((question, index) => {
@@ -210,6 +211,19 @@ export default function LPTIPage() {
         (scores.AM > 0 ? "A" : "M") +
         (scores.IV > 0 ? "I" : "V") +
         (scores.ES > 0 ? "E" : "S")
+
+      try {
+        const apiPath = `/api/v1/user-info/lpti?lpti=${code}`
+
+        // fetcher를 사용하여 PATCH 요청 전송
+        await fetcher(apiPath, {
+          method: "PATCH",
+        })
+
+        console.log("LPTI 결과를 성공적으로 저장했습니다:", code)
+      } catch (error) {
+        console.error("LPTI 결과 저장에 실패했습니다:", error)
+      }
 
       setResult(lptiResults[code])
       setCurrentStep("result")
