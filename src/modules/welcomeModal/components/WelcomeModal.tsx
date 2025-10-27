@@ -13,6 +13,13 @@ const WelcomeModal = ({
 }: WelcomeModalProps) => {
   if (!isOpen) return null;
 
+  // userInfo가 없을 때 기본값 사용
+  const displayUserInfo = userInfo || {
+    nickname: '새로운 멤버',
+    profile: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=64&h=64&fit=crop&crop=face',
+    about: 'LPick에 오신 것을 환영합니다! 음악과 함께하는 특별한 여행을 시작해보세요.'
+  };
+
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -60,17 +67,17 @@ const WelcomeModal = ({
             {/* 프로필 이미지 */}
             <div className="relative">
               <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 ring-4 ring-white dark:ring-gray-900 shadow-lg">
-                {userInfo.profile ? (
+                {displayUserInfo.profile ? (
                   <Image
-                    src={userInfo.profile}
-                    alt={`${userInfo.nickname}님의 프로필`}
+                    src={displayUserInfo.profile}
+                    alt={`${displayUserInfo.nickname}님의 프로필`}
                     width={64}
                     height={64}
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-violet-500 to-lavender-400 text-white text-xl font-bold">
-                    {userInfo.nickname.charAt(0)}
+                    {displayUserInfo.nickname.charAt(0)}
                   </div>
                 )}
               </div>
@@ -79,11 +86,11 @@ const WelcomeModal = ({
             {/* 사용자 정보 */}
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                {userInfo.nickname}
+                {displayUserInfo.nickname}
               </h3>
-              {userInfo.about && (
+              {displayUserInfo.about && (
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                  {userInfo.about}
+                  {displayUserInfo.about}
                 </p>
               )}
             </div>
