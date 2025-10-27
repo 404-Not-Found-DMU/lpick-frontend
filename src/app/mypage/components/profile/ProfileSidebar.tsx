@@ -27,6 +27,21 @@ const ProfileSidebar = () => {
   const { handleLogout } = useLogout();
   const router = useRouter();
 
+  // LPTI 유효성 체크 함수
+  const hasValidLPTI = () => {
+    if (!userInfo?.lpti) return false;
+    
+    if (typeof userInfo.lpti === 'string') {
+      return userInfo.lpti.trim() !== '';
+    }
+    
+    if (typeof userInfo.lpti === 'object') {
+      return !!(userInfo.lpti.code && userInfo.lpti.code.trim() !== '');
+    }
+    
+    return false;
+  };
+
   // 컴포넌트 마운트 시 실제 사용자 정보로 동기화
   useEffect(() => {
     syncUserInfo();
@@ -70,20 +85,22 @@ const ProfileSidebar = () => {
 
       {/* LPTI Section */}
       <div className="mb-4 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-purple-50 p-3 dark:border-violet-900/30 dark:from-gray-800/30 dark:to-gray-800/10">
-        {userInfo?.lpti ? (
+        {hasValidLPTI() ? (
           <div>
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Music className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                 <span className="text-sm font-bold text-gray-900 dark:text-white">내 LPTI</span>
               </div>
-              <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">{userInfo.lpti.code}</span>
+              <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
+                {typeof userInfo!.lpti === 'string' ? userInfo!.lpti : userInfo!.lpti!.code}
+              </span>
             </div>
-            {userInfo.lpti.nickname && (
-              <p className="text-xs text-gray-700 dark:text-gray-300">{userInfo.lpti.nickname}</p>
+            {typeof userInfo!.lpti === 'object' && userInfo!.lpti.nickname && (
+              <p className="text-xs text-gray-700 dark:text-gray-300">{userInfo!.lpti.nickname}</p>
             )}
-            {userInfo.lpti.summary && (
-              <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{userInfo.lpti.summary}</p>
+            {typeof userInfo!.lpti === 'object' && userInfo!.lpti.summary && (
+              <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{userInfo!.lpti.summary}</p>
             )}
             <button 
               onClick={() => router.push('/lpti')}

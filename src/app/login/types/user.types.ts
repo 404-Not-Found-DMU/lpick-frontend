@@ -6,7 +6,7 @@ export interface UserInfo {
   nickname: string;
   about: string;
   profile: string;
-  lpti?: UserLPTIInfo;
+  lpti?: string | UserLPTIInfo;
 }
 
 /**
