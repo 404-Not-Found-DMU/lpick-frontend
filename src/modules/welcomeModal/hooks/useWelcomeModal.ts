@@ -53,12 +53,12 @@ export const useWelcomeModal = (): UseWelcomeModalReturn => {
     router.push('/lpti');
   };
 
-  // 사용자 정보가 있을 때만 모달에 전달할 정보 생성
-  const modalUserInfo = userInfo ? {
-    nickname: userInfo.nickname,
-    profile: userInfo.profile,
-    about: userInfo.about
-  } : null;
+  // 실제 사용자 정보를 우선 사용, 없을 때만 기본값 사용
+  const modalUserInfo = userInfo || {
+    nickname: '새로운 멤버',
+    profile: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=64&h=64&fit=crop&crop=face',
+    about: 'LPick에 오신 것을 환영합니다! 음악과 함께하는 특별한 여행을 시작해보세요.'
+  };
 
   return {
     isModalOpen,

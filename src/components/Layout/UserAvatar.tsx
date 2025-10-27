@@ -51,11 +51,8 @@ export const UserAvatar = () => {
 export const UserAvatarWithAuth = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
-  console.log('🔍 UserAvatarWithAuth 상태:', { isAuthenticated, isLoading });
-
   // 로딩 중일 때는 스켈레톤 표시
   if (isLoading) {
-    console.log('⏳ 로딩 중 - 스켈레톤 표시');
     return <div className="w-16 h-8 animate-pulse bg-gray-200 rounded dark:bg-gray-700"></div>;
   }
 
