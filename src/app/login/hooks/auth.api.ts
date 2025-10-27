@@ -1,7 +1,5 @@
 import { fetcher } from '@/hooks/api/fetchers';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
 export const redirectToKakaoLogin = (): void => {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   window.location.href = `${baseUrl}/oauth2/authorization/kakao`;
