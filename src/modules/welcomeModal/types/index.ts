@@ -11,7 +11,7 @@ export interface WelcomeModalUserInfo {
 export interface WelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userInfo: WelcomeModalUserInfo;
+  userInfo: WelcomeModalUserInfo | null;
   onTakeLPTI: () => void;
 }
 
