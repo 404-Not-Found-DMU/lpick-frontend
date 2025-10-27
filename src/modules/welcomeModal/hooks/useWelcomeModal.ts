@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
+import { UserInfo } from '@/app/login/types/user.types';
 
 import type { UseWelcomeModalReturn } from '../types/index';
 
@@ -26,7 +27,7 @@ export const useWelcomeModal = (): UseWelcomeModalReturn => {
   }, [userInfo]);
 
   // LPTI 존재 여부 검사 함수
-  const checkUserHasLPTI = (user: any): boolean => {
+  const checkUserHasLPTI = (user: UserInfo & { lpti?: string | { code: string } }): boolean => {
     if (!user.lpti) return false;
     
     // LPTI가 문자열인 경우
