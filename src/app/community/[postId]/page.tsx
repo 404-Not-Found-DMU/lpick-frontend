@@ -1,14 +1,18 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { PostContent, CommentSection, NotFound, Sidebar } from './components';
 import { usePostDetail } from './hooks/usePostDetail';
+import { useUserStore } from '@/store/userStore';
 
 const PostDetailPage = () => {
   const params = useParams();
-  const postId = Number(params.postId);
+  const articleId = params.postId as string; // URL의 postId를 articleId로 사용
   const [isMounted, setIsMounted] = useState(false);
+  
+  // 사용자 정보 가져오기
+  const { userInfo } = useUserStore();
 
   const {
     post,
@@ -20,6 +24,7 @@ const PostDetailPage = () => {
     isLiked,
     isBookmarked,
     loading,
+    error,
     handleLike,
     handleBookmark,
     handleCommentSubmit,
@@ -27,7 +32,14 @@ const PostDetailPage = () => {
     handleLoadMoreComments,
     handleEdit,
     handleDelete,
-  } = usePostDetail(postId);
+  } = usePostDetail(articleId);
+
+  // 수정/삭제 권한 체크
+  const canEdit = useMemo(() => {
+    if (!post || !userInfo) return false;
+    // 게시글 작성자와 현재 로그인한 사용자가 같은지 확인
+    return post.oauthId === userInfo.oauthId;
+  }, [post, userInfo]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -44,6 +56,26 @@ const PostDetailPage = () => {
               게시글을 불러오는 중...
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">잠시만 기다려주세요</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900">
+        <div className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center">
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-red-600 dark:text-red-400 mb-4">
+              게시글을 불러올 수 없습니다
+            </h3>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              다시 시도
+            </button>
           </div>
         </div>
       </div>
@@ -71,7 +103,7 @@ const PostDetailPage = () => {
               onBookmark={handleBookmark}
               onEdit={handleEdit}
               onDelete={handleDelete}
-              canEdit={true} // TODO: 실제 권한 체크
+              canEdit={canEdit} // 실제 권한 체크
             />
 
             <div className="mt-6">
