@@ -1,4 +1,4 @@
-import { MusicTrack } from '@/app/lplayer/temp/playlist.temp';
+import { MusicTrack } from '@/app/lplayer/api/playlist.api';
 import { create } from 'zustand';
 
 type LoopMode = 'none' | 'all' | 'one';

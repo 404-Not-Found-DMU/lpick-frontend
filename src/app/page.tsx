@@ -505,15 +505,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 환영 모달 */}
-      {userInfo && (
-        <WelcomeModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          userInfo={userInfo}
-          onTakeLPTI={handleTakeLPTI}
-        />
-      )}
+      {/* 환영 모달 - isModalOpen 상태와 userInfo 존재 여부로 표시 */}
+      <WelcomeModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        userInfo={userInfo}
+        onTakeLPTI={handleTakeLPTI}
+      />
     </div>
   )
 }
