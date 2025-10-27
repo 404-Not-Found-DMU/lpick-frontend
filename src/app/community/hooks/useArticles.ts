@@ -6,7 +6,6 @@ import {
   getLikedArticles
 } from '../api/article.api';
 import {
-  ArticleListResponse,
   ArticleDetail,
   ArticleListItem,
   PaginationParams
@@ -24,7 +23,10 @@ export const useArticles = (initialParams?: PaginationParams) => {
   const [error, setError] = useState<string | null>(null);
 
   // initialParams를 안정적으로 만들기 위해 useMemo 사용
-  const stableParams = useMemo(() => initialParams, [
+  const stableParams = useMemo(() => ({
+    page: initialParams?.page,
+    size: initialParams?.size
+  }), [
     initialParams?.page,
     initialParams?.size
   ]);
@@ -138,7 +140,10 @@ export const useMyArticles = (initialParams?: PaginationParams) => {
   const [error, setError] = useState<string | null>(null);
 
   // initialParams를 안정적으로 만들기 위해 useMemo 사용
-  const stableParams = useMemo(() => initialParams, [
+  const stableParams = useMemo(() => ({
+    page: initialParams?.page,
+    size: initialParams?.size
+  }), [
     initialParams?.page,
     initialParams?.size
   ]);
@@ -208,7 +213,10 @@ export const useLikedArticles = (initialParams?: PaginationParams) => {
   const [error, setError] = useState<string | null>(null);
 
   // initialParams를 안정적으로 만들기 위해 useMemo 사용
-  const stableParams = useMemo(() => initialParams, [
+  const stableParams = useMemo(() => ({
+    page: initialParams?.page,
+    size: initialParams?.size
+  }), [
     initialParams?.page,
     initialParams?.size
   ]);

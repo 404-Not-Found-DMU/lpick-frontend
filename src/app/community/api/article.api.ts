@@ -6,8 +6,7 @@ import {
   UpdateArticleRequest,
   MyArticlesResponse,
   LikedArticlesResponse,
-  PaginationParams,
-  ApiError
+  PaginationParams
 } from './types';
 
 /**

@@ -29,7 +29,6 @@ export const useCommunity = () => {
   // API 호출을 통한 게시글 데이터 조회
   const {
     articles,
-    totalElements,
     totalPages: apiTotalPages,
     loading,
     error,
