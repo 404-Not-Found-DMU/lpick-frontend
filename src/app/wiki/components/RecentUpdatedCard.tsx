@@ -19,10 +19,26 @@ export default function RecentUpdatedCard() {
     { staleTime: 60_000 },
   )
 
+  function toCategorySegment(cls: string): string {
+    switch (cls) {
+      case 'ARTIST':
+        return 'artist'
+      case 'GEAR':
+        return 'equipment'
+      case 'LP':
+        return 'lp'
+      case 'OTHER':
+        return 'other'
+      default:
+        return 'other'
+    }
+  }
+
   const items = (data ?? []).map((x) => ({
-    slug: x.wikiId,
+    id: x.wikiId,
     title: x.title,
     modifiedBefore: x.modifiedBefore,
+    category: toCategorySegment(x.wikiPageClass),
   }))
 
   return (
@@ -47,8 +63,8 @@ export default function RecentUpdatedCard() {
       ) : (
         <ul className="space-y-3">
           {items.map((r) => (
-            <li key={r.slug}>
-              <Link href={`/wiki/${r.slug}`} className="block rounded p-2 hover:bg-gray-50 dark:hover:bg-gray-800/60">
+            <li key={`${r.category}-${r.id}`}>
+              <Link href={`/wiki/${r.category}/${encodeURIComponent(r.id)}`} className="block rounded p-2 hover:bg-gray-50 dark:hover:bg-gray-800/60">
                 <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{r.title}</div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{r.modifiedBefore}</p>
               </Link>
