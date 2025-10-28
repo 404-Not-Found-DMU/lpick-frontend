@@ -2,29 +2,47 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+
 import { useUserStore } from '@/store/userStore';
 import { UserInfo } from '@/app/login/types/user.types';
-
-import type { UseWelcomeModalReturn } from '../types/index';
+import { 
+  UseWelcomeModalReturn, 
+  WelcomeModalUserInfo 
+} from '../types';
 
 /**
  * 환영 모달 관리 훅
  * - LPTI가 없는 사용자에게만 모달 표시
  * - 모달 표시/숨김 상태 관리  
  * - LPTI 검사 페이지 이동
+ * - 사용자 정보 로딩 완료 후 모달 표시
  */
 export const useWelcomeModal = (): UseWelcomeModalReturn => {
   const router = useRouter();
-  const { userInfo } = useUserStore();
+  const { userInfo, isLoading, getUserInfo } = useUserStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasTriedRefresh, setHasTriedRefresh] = useState(false);
 
   useEffect(() => {
-    // 사용자 정보가 있고 LPTI가 없거나 비어있는 경우에만 모달 표시
-    if (userInfo) {
-      const hasLPTI = checkUserHasLPTI(userInfo);
-      setIsModalOpen(!hasLPTI);
+    // 로딩이 완료되고 사용자 정보가 있을 때 LPTI 상태 확인
+    if (!isLoading && userInfo) {
+      // 사용자 정보가 불완전하고 아직 재시도하지 않은 경우에만 다시 로딩
+      if (!userInfo.nickname && !hasTriedRefresh) {
+        setHasTriedRefresh(true);
+        getUserInfo();
+        return;
+      }
+      
+      // 유효한 사용자 정보가 있을 때만 모달 표시 여부 결정
+      if (userInfo.nickname) {
+        const hasLPTI = checkUserHasLPTI(userInfo);
+        setIsModalOpen(!hasLPTI);
+      }
+    } else if (!isLoading && !userInfo) {
+      // 로그인하지 않은 상태
+      setIsModalOpen(false);
     }
-  }, [userInfo]);
+  }, [userInfo, isLoading, getUserInfo, hasTriedRefresh]);
 
   // LPTI 존재 여부 검사 함수
   const checkUserHasLPTI = (user: UserInfo & { lpti?: string | { code: string } }): boolean => {
@@ -44,7 +62,6 @@ export const useWelcomeModal = (): UseWelcomeModalReturn => {
   };
 
   const closeModal = () => {
-    // localStorage에 저장하지 않고 단순히 모달만 닫기
     setIsModalOpen(false);
   };
 
@@ -54,17 +71,25 @@ export const useWelcomeModal = (): UseWelcomeModalReturn => {
     router.push('/lpti');
   };
 
-  // 실제 사용자 정보를 우선 사용, 없을 때만 기본값 사용
-  const modalUserInfo = userInfo || {
+  // 실제 사용자 정보를 우선 사용, 로딩 중이거나 없을 때는 기본값 사용
+  // 사용자 정보를 WelcomeModalUserInfo 형태로 변환
+  const modalUserInfo: WelcomeModalUserInfo = userInfo && userInfo.nickname ? {
+    nickname: userInfo.nickname,
+    about: userInfo.about,
+    profile: userInfo.profile,
+    lpti: typeof userInfo.lpti === 'string' ? userInfo.lpti : userInfo.lpti?.code,
+    point: 0 // 기본값 설정 (실제 API에서 point 정보가 있다면 해당 값 사용)
+  } : {
     nickname: '새로운 멤버',
-    profile: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=64&h=64&fit=crop&crop=face',
-    about: 'LPick에 오신 것을 환영합니다! 음악과 함께하는 특별한 여행을 시작해보세요.'
+    profile: null,
+    about: 'LPick에 오신 것을 환영합니다!'
   };
 
   return {
     isModalOpen,
     closeModal,
     handleTakeLPTI,
-    userInfo: modalUserInfo
+    userInfo: modalUserInfo,
+    isLoading // 로딩 상태도 반환
   };
 };

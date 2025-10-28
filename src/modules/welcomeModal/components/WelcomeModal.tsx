@@ -1,6 +1,6 @@
 'use client';
 
-import { X, PartyPopper, Music, Target } from 'lucide-react';
+import { X, PartyPopper, Music, Target, User } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/Button';
 import type { WelcomeModalProps } from '../types/index';
@@ -16,7 +16,7 @@ const WelcomeModal = ({
   // userInfo가 없을 때 기본값 사용
   const displayUserInfo = userInfo || {
     nickname: '새로운 멤버',
-    profile: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=64&h=64&fit=crop&crop=face',
+    profile: null, // 기본 아바타 사용
     about: 'LPick에 오신 것을 환영합니다! 음악과 함께하는 특별한 여행을 시작해보세요.'
   };
 
@@ -76,8 +76,9 @@ const WelcomeModal = ({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-violet-500 to-lavender-400 text-white text-xl font-bold">
-                    {displayUserInfo.nickname.charAt(0)}
+                  /* Header와 동일한 기본 아바타 스타일 적용 */
+                  <div className="w-full h-full flex items-center justify-center border-2 border-violet-300 bg-gray-100 dark:border-violet-700 dark:bg-gray-800">
+                    <User className="h-8 w-8 text-violet-300 dark:text-violet-700" />
                   </div>
                 )}
               </div>

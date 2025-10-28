@@ -16,12 +16,13 @@ import type {
 export const getUserAlbums = async (params?: PaginationParams): Promise<UserAlbumsResponse> => {
   const searchParams = new URLSearchParams();
   
-  if (params?.page !== undefined) {
-    searchParams.append('page', params.page.toString());
-  }
-  if (params?.size !== undefined) {
-    searchParams.append('size', params.size.toString());
-  }
+  // 기본값을 1로 설정 (0-based에서 1-based로 변경)
+  const page = params?.page !== undefined ? params.page : 1;
+  const size = params?.size !== undefined ? params.size : 12;
+  
+  searchParams.append('page', page.toString());
+  searchParams.append('size', size.toString());
+  
   if (params?.sort) {
     searchParams.append('sort', params.sort);
   }
@@ -102,12 +103,13 @@ export const getUserAlbumsByOauthId = async (
 ): Promise<MyPageUserAlbumResponse> => {
   const searchParams = new URLSearchParams();
   
-  if (params?.page !== undefined) {
-    searchParams.append('page', params.page.toString());
-  }
-  if (params?.size !== undefined) {
-    searchParams.append('size', params.size.toString());
-  }
+  // 기본값을 1로 설정 (0-based에서 1-based로 변경)
+  const page = params?.page !== undefined ? params.page : 1;
+  const size = params?.size !== undefined ? params.size : 12;
+  
+  searchParams.append('page', page.toString());
+  searchParams.append('size', size.toString());
+  
   if (params?.sort) {
     searchParams.append('sort', params.sort);
   }
