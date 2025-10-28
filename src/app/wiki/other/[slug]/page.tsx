@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useMemo, useState } from "react"
 import { useParams } from "next/navigation"
+import Link from "next/link"
 import WikiLayout from "@/app/wiki/components/WikiLayout"
 import { Button } from "@/components/Button"
 import { Edit, History, MessageSquare, Star, Share2, Bookmark } from "lucide-react"
@@ -64,10 +65,12 @@ export default function WikiOtherPage() {
             <History className="w-4 h-4 mr-2" />
             역사
           </Button>
-          <Button variant="outline" size="sm" className="h-8">
-            <MessageSquare className="w-4 h-4 mr-2" />
-            토론
-          </Button>
+          <Link href={`/wiki/${encodeURIComponent(wikiId)}/discuss`} className="inline-flex" aria-label="문서 토론 페이지로 이동">
+            <Button variant="outline" size="sm" className="h-8">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              토론
+            </Button>
+          </Link>
           <Button variant="outline" size="sm" className="h-8">
             <Star className="w-4 h-4 mr-2" />
             평가
