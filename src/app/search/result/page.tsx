@@ -6,6 +6,7 @@ import { Button, Card, CardContent, Badge } from '@/components'
 import { useSearchParams } from 'next/navigation'
 import { useCustomQuery } from '@/hooks/useQuery'
 import { fetcher } from '@/hooks/api/fetchers'
+import { Suspense } from 'react'
  
 
 /**
@@ -14,7 +15,7 @@ import { fetcher } from '@/hooks/api/fetchers'
  * - 프로젝트 공용 컴포넌트( Button, Card, Badge ) 사용
  * - 실제 데이터 연동 전, 전달값이 없으면 섹션을 비표시하거나 빈 상태로 렌더링
  */
-export default function SearchResultPage() {
+function SearchResultContent() {
   const searchParams = useSearchParams()
   const keyword = searchParams.get('keyword') ?? ''
   const page = Number(searchParams.get('page') ?? '1')
@@ -201,6 +202,14 @@ export default function SearchResultPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-6 max-w-5xl text-sm text-gray-500">로딩 중...</div>}>
+      <SearchResultContent />
+    </Suspense>
   )
 }
 

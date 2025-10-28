@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Search, Image as ImageIcon } from 'lucide-react';
-import { Button } from '@/components/Button/Button';
 import { LPickLogo } from '@/assets/images/LPickLogo';
 import { ThemeSelector } from '@/modules';
 import { UserAvatarWithAuth } from '@/components/Layout/UserAvatar';
