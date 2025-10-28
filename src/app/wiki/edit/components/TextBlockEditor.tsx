@@ -8,11 +8,16 @@ import {
   DragEndEvent,
   DragOverlay,
   type DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { createPortal } from 'react-dom';
 import { nanoid } from 'nanoid';
@@ -52,6 +57,10 @@ interface TextBlockEditorProps {
 
 export function TextBlockEditor({ textBlocks, onTextBlocksChange }: TextBlockEditorProps) {
   const [activeBlock, setActiveBlock] = useState<TextBlock | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const handleAddBlock = () => {
     const newBlock: TextBlock = {
@@ -106,6 +115,7 @@ export function TextBlockEditor({ textBlocks, onTextBlocksChange }: TextBlockEdi
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       collisionDetection={closestCenter}
+      sensors={sensors}
     >
       <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-700">
         <ClientOnly fallback={<div className="space-y-4">텍스트 블록 로딩 중...</div>}>

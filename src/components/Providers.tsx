@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ToastProvider } from './Toast/ToastProvider';
 import { ReactNode, useState } from 'react';
 import { ToastProvider } from './Toast/ToastProvider';
 

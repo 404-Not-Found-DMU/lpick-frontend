@@ -7,6 +7,7 @@ import { Label } from "@/components/label"
 import { ArrowLeft, RotateCcw, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { fetcher } from "@/hooks/api/fetchers"
+import { useUserStore } from "@/store/userStore"
 
 interface Question {
   text: string
@@ -221,6 +222,10 @@ export default function LPTIPage() {
         })
 
         console.log("LPTI 결과를 성공적으로 저장했습니다:", code)
+        // 저장 후 사용자 정보 새로고침
+        try {
+          await useUserStore.getState().getUserInfo()
+        } catch {}
       } catch (error) {
         console.error("LPTI 결과 저장에 실패했습니다:", error)
       }

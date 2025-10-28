@@ -2,16 +2,15 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, Bell } from 'lucide-react';
-import { Button } from '@/components/Button/Button';
+import { Search, Image as ImageIcon } from 'lucide-react';
 import { LPickLogo } from '@/assets/images/LPickLogo';
 import { ThemeSelector } from '@/modules';
 import { UserAvatarWithAuth } from '@/components/Layout/UserAvatar';
 import clsx from 'clsx';
 import React, { useState, useEffect, useRef, MouseEvent, FormEvent, ChangeEvent } from 'react';
+import { fetcher } from '@/hooks/api/fetchers';
 
-// 환경 변수 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+// API 경로
 const API_PREFIX = '/api/v1/public/data';
 
 // 반환 타입
@@ -24,21 +23,11 @@ interface SearchResult {
 // 자동 완성 API 호출 함수
 const fetchAutocompleteSuggestions = async (query: string): Promise<SearchResult[]> => {
   if (!query || query.trim() === '') return [];
-
-  // 환경 변수를 사용하여 전체 URL 구성
-  const fullUrl = `${API_BASE_URL}${API_PREFIX}/autocomplete?keyword=${encodeURIComponent(query)}&size=8`;
-
+  const path = `${API_PREFIX}/autocomplete?keyword=${encodeURIComponent(query)}&size=8`;
   try {
-    const res = await fetch(fullUrl);
-    if (!res.ok) {
-      // 4xx 또는 5xx 오류 발생 시
-      console.error(`API 호출 실패: ${res.status} - URL: ${fullUrl}`);
-      return [];
-    }
-  
-    return (await res.json()) as SearchResult[];
+    const res = await fetcher<SearchResult[]>(path);
+    return Array.isArray(res) ? res : [];
   } catch (error) {
-    // 네트워크 오류 발생 시
     console.error('자동 완성 데이터를 불러오는 데 실패했습니다:', error);
     return [];
   }
@@ -59,6 +48,7 @@ const Header = () => {
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
   const [isFocused, setIsFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // 자동 완성 API 호출 로직
   useEffect(() => {
@@ -109,6 +99,22 @@ const Header = () => {
 
   // ... (console.log는 동일)
 
+  const renderHighlighted = (text: string, query: string) => {
+    if (!query) return text;
+    try {
+      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escaped})`, 'gi');
+      const parts = text.split(regex);
+      return parts.map((part, idx) =>
+        part.toLowerCase() === query.toLowerCase()
+          ? <span key={idx} className="font-semibold">{part}</span>
+          : <span key={idx}>{part}</span>
+      );
+    } catch {
+      return text;
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
       <div className="flex h-16 w-full items-center justify-between gap-5 px-4">
@@ -143,10 +149,34 @@ const Header = () => {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400 dark:text-gray-500" />
             <input
               placeholder="검색어를 입력하시거나 이미지를 업로드하세요."
-              className="h-10 w-full rounded-full border-gray-200 bg-gray-50 pl-10 pr-4 text-sm placeholder:text-gray-500 focus:border-lavender-400 focus:ring-lavender-400 dark:border-gray-700 dark:bg-gray-800 dark:placeholder:text-gray-500 dark:focus:border-lavender-500 dark:focus:ring-lavender-500"
+              className="h-10 w-full rounded-full border-gray-200 bg-gray-50 pl-10 pr-10 text-sm placeholder:text-gray-500 focus:border-lavender-400 focus:ring-lavender-400 dark:border-gray-700 dark:bg-gray-800 dark:placeholder:text-gray-500 dark:focus:border-lavender-500 dark:focus:ring-lavender-500"
               value={searchTerm}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
               onFocus={() => setIsFocused(true)}
+            />
+            {/* 이미지 업로드 아이콘 버튼 */}
+            <button
+              type="button"
+              aria-label="이미지 업로드"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              onClick={() => imageInputRef.current?.click()}
+            >
+              <ImageIcon className="h-5 w-5" />
+            </button>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const url = URL.createObjectURL(file);
+                  setIsFocused(false);
+                  setSuggestions([]);
+                  router.push(`/search/result?imageUrl=${encodeURIComponent(url)}`);
+                }
+              }}
             />
 
             {showSuggestions && (
@@ -161,7 +191,7 @@ const Header = () => {
                       {/* 이름 표시 부분 */}
                       <div className="flex items-center text-gray-700 dark:text-gray-200">
                         <Search className="inline-block h-3 w-3 mr-2 text-gray-500 dark:text-gray-400" />
-                        <span>{suggestion.name}</span>
+                        <span>{renderHighlighted(suggestion.name, searchTerm)}</span>
                       </div>
 
                       {/* 타입 배지 표시 부분 (신규) */}
@@ -180,10 +210,6 @@ const Header = () => {
 
         <div className="flex flex-shrink-0 items-center justify-end px-2">
           <ThemeSelector />
-          <Button variant="ghost" className="relative">
-            <Bell className="h-4 w-4" />
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-lavender-400 dark:bg-lavender-500" />
-          </Button>
         </div>
         <div className="flex-shrink-0">
           <UserAvatarWithAuth />
