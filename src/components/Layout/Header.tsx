@@ -2,7 +2,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, Bell, Image as ImageIcon } from 'lucide-react';
+import { Search, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { LPickLogo } from '@/assets/images/LPickLogo';
 import { ThemeSelector } from '@/modules';
@@ -205,10 +205,6 @@ const Header = () => {
 
         <div className="flex flex-shrink-0 items-center justify-end px-2">
           <ThemeSelector />
-          <Button variant="ghost" className="relative">
-            <Bell className="h-4 w-4" />
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-lavender-400 dark:bg-lavender-500" />
-          </Button>
         </div>
         <div className="flex-shrink-0">
           <UserAvatarWithAuth />
