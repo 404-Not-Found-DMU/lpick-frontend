@@ -29,7 +29,7 @@ const AlbumCollection = () => {
 
   // 컴포넌트 마운트 시 앨범 목록 조회
   React.useEffect(() => {
-    fetchAlbums({ page: 0, size: 12 });
+    fetchAlbums({ page: 1, size: 12 });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 이벤트 핸들러들

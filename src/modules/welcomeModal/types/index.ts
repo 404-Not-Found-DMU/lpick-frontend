@@ -4,8 +4,10 @@
 
 export interface WelcomeModalUserInfo {
   nickname: string;
-  profile: string;
-  about: string;
+  about?: string;
+  profile?: string | null;
+  lpti?: string;
+  point?: number;
 }
 
 export interface WelcomeModalProps {
@@ -20,4 +22,5 @@ export interface UseWelcomeModalReturn {
   closeModal: () => void;
   handleTakeLPTI: () => void;
   userInfo: WelcomeModalUserInfo | null;
+  isLoading: boolean; // 로딩 상태 추가
 }
