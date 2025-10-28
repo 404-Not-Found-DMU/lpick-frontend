@@ -11,8 +11,10 @@ import {
   ChevronRight,
   User,
   Lock,
+  Brain,
 } from 'lucide-react';
 import { useAccountDelete } from '../../hooks/useAccountDelete';
+import { useUserStore } from '@/store/userStore';
 
 interface ToggleSwitchProps {
   checked: boolean;
@@ -107,11 +109,27 @@ const MenuButton: React.FC<MenuButtonProps> = ({
 
 const SettingsTab: React.FC = () => {
   const { handleDeleteAccount, isLoading } = useAccountDelete();
+  const { userInfo } = useUserStore();
   const [privacy, setPrivacy] = useState<PrivacySettings>({
     profilePublic: true,
     postsPublic: true,
     activityPublic: false,
   });
+
+  // LPTI 유효성 체크 함수
+  const hasValidLPTI = () => {
+    if (!userInfo?.lpti) return false;
+    
+    if (typeof userInfo.lpti === 'string') {
+      return userInfo.lpti.trim() !== '';
+    }
+    
+    if (typeof userInfo.lpti === 'object') {
+      return !!(userInfo.lpti.code && userInfo.lpti.code.trim() !== '');
+    }
+    
+    return false;
+  };
 
   const updatePrivacy = (key: keyof PrivacySettings, value: boolean) => {
     setPrivacy((prev) => ({ ...prev, [key]: value }));
@@ -144,6 +162,54 @@ const SettingsTab: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* LPTI Information */}
+      <SettingCard
+        icon={Brain}
+        title="내 LPTI"
+        description="나의 LP 성향 유형"
+      >
+        <div className="space-y-4">
+          {hasValidLPTI() ? (
+            <div className="rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 p-4 dark:from-purple-900/20 dark:to-pink-900/20">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg">
+                  {typeof userInfo!.lpti === 'string' ? userInfo!.lpti : userInfo!.lpti!.code}
+                </div>
+                <div>
+                  <h5 className="font-semibold text-gray-900 dark:text-white">
+                    {typeof userInfo!.lpti === 'string' 
+                      ? userInfo!.lpti 
+                      : (userInfo!.lpti!.nickname || userInfo!.lpti!.code)
+                    }
+                  </h5>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    LP 성향 유형
+                  </p>
+                </div>
+              </div>
+              {typeof userInfo!.lpti === 'object' && userInfo!.lpti.summary && (
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  {userInfo!.lpti.summary}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <Brain className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-gray-600 dark:text-gray-400 mb-2">
+                아직 LPTI 검사를 받지 않았습니다
+              </p>
+              <button 
+                onClick={() => window.location.href = '/lpti'}
+                className="text-purple-600 hover:text-purple-700 font-medium text-sm transition-colors"
+              >
+                LPTI 검사 받기
+              </button>
+            </div>
+          )}
+        </div>
+      </SettingCard>
 
       {/* Privacy */}
       <SettingCard

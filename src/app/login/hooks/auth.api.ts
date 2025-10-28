@@ -11,10 +11,7 @@ export const redirectToKakaoLogin = (): void => {
   window.location.href = `${baseUrl}/oauth2/authorization/kakao`;
 };
 
-/**
- * 토큰 갱신 API
- * 성공하면 토큰이 유효, 실패하면 토큰이 만료/무효
- */
+
 export const refreshToken = async (): Promise<boolean> => {
   try {
     await fetcher('/api/v1/auth/refresh', {

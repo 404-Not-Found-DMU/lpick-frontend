@@ -1,12 +1,7 @@
-export interface MusicTrack {
-  id: number;
-  title: string;
-  artist: string;
-  mp3: string;
-  cover: string;
-}
+// API 파일에서 타입을 가져옴
+export type { MusicTrack } from '../api/playlist.api';
 
-export const tempPlaylist: MusicTrack[] = [
+export const tempPlaylist = [
   {
     id: 1,
     title: 'Pink Floyd - The Dark Side of the Moon',
