@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Input } from '@/components/Input/Input';
 import { Button } from '@/components/Button/Button';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { PostFormData } from '../../types/community.types';
+import { PostFormData, BoardType, TagType } from '../../types/community.types';
 import { Send, AlertCircle, Hash, FileText, Tag } from 'lucide-react';
 
 interface EnhancedPostFormProps {
@@ -13,19 +13,17 @@ interface EnhancedPostFormProps {
   isSubmitting: boolean;
 }
 
-const CATEGORIES = [
-  { id: 'all', label: '전체' },
-  { id: 'free', label: '자유게시판' },
-  { id: 'equipment', label: '장비' },
-  { id: 'record', label: '음반' },
-  { id: 'artist', label: '아티스트' },
+const BOARD_TYPES: { id: BoardType; label: string }[] = [
+  { id: '자유게시판', label: '자유게시판' },
+  { id: '음반', label: '음반' },
+  { id: '아티스트', label: '아티스트' },
+  { id: '장비', label: '장비' },
 ];
 
-const POST_TYPES = [
-  { id: 'all', label: '전체' },
-  { id: 'question', label: '질문' },
-  { id: 'info', label: '정보' },
-  { id: 'promotion', label: '홍보' },
+const BADGE_TYPES: { id: TagType; label: string }[] = [
+  { id: '질문', label: '질문' },
+  { id: '정보', label: '정보' },
+  { id: '홍보', label: '홍보' },
 ];
 
 export const EnhancedPostForm = ({
@@ -46,7 +44,7 @@ export const EnhancedPostForm = ({
   }, [formData.content]);
 
   const isFormComplete =
-    formData.title.trim() && formData.content.trim() && formData.category && formData.postType;
+    formData.title.trim() && formData.content.trim() && formData.boardType && formData.badgeType;
   const titleLength = formData.title.length;
 
   return (
@@ -86,23 +84,19 @@ export const EnhancedPostForm = ({
               게시판
             </div>
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.slice(1).map(
-                (
-                  category, // '전체' 제외하고 표시
-                ) => (
-                  <button
-                    key={category.id}
-                    onClick={() => updateFormData({ category: category.id })}
-                    className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
-                      formData.category === category.id
-                        ? 'border-violet-500 bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300'
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500'
-                    }`}
-                  >
-                    {category.label}
-                  </button>
-                ),
-              )}
+              {BOARD_TYPES.map((boardType) => (
+                <button
+                  key={boardType.id}
+                  onClick={() => updateFormData({ boardType: boardType.id })}
+                  className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
+                    formData.boardType === boardType.id
+                      ? 'border-violet-500 bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300'
+                      : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500'
+                  }`}
+                >
+                  {boardType.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -113,23 +107,19 @@ export const EnhancedPostForm = ({
               글머리
             </div>
             <div className="flex flex-wrap gap-2">
-              {POST_TYPES.slice(1).map(
-                (
-                  postType, // '전체' 제외하고 표시
-                ) => (
-                  <button
-                    key={postType.id}
-                    onClick={() => updateFormData({ postType: postType.id })}
-                    className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
-                      formData.postType === postType.id
-                        ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500'
-                    }`}
-                  >
-                    {postType.label}
-                  </button>
-                ),
-              )}
+              {BADGE_TYPES.map((badgeType) => (
+                <button
+                  key={badgeType.id}
+                  onClick={() => updateFormData({ badgeType: badgeType.id })}
+                  className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
+                    formData.badgeType === badgeType.id
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                      : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500'
+                  }`}
+                >
+                  {badgeType.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>

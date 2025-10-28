@@ -4,8 +4,8 @@ import { CommentItem } from './CommentItem';
 
 interface CommentListProps {
   comments: Comment[];
-  onCommentLike: (commentId: number) => void;
-  onReply: (commentId: number) => void;
+  onCommentLike: (commentId: number) => Promise<boolean>;
+  onReply: (commentId: number, replyText: string) => Promise<boolean>;
 }
 
 export const CommentList = ({ comments, onCommentLike, onReply }: CommentListProps) => {
