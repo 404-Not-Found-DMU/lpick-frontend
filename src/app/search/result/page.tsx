@@ -6,7 +6,7 @@ import { Button, Card, CardContent, Badge } from '@/components'
 import { useSearchParams } from 'next/navigation'
 import { useCustomQuery } from '@/hooks/useQuery'
 import { fetcher } from '@/hooks/api/fetchers'
-import { useState } from 'react'
+ 
 
 /**
  * 검색 결과 페이지 UI 스켈레톤
@@ -20,7 +20,8 @@ export default function SearchResultPage() {
   const page = Number(searchParams.get('page') ?? '1')
   const size = Number(searchParams.get('size') ?? '10')
   const searchedImageUrl: string | undefined = searchParams.get('imageUrl') ?? undefined
-  const [selectedImageUrl] = useState<string | undefined>(undefined)
+  const isImageSearch = Boolean(searchedImageUrl)
+  const isTextSearch = Boolean(keyword)
 
   type SearchItem = {
     id: string
@@ -47,43 +48,33 @@ export default function SearchResultPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6 max-w-5xl">
-        {/* 이미지 검색 결과 섹션 */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">이미지 검색 결과</h1>
-          <div className="flex items-center gap-4">
-            <div className="w-28 h-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
-              {selectedImageUrl || searchedImageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={selectedImageUrl || searchedImageUrl} alt="검색된 이미지" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                  이미지 미선택
-                </div>
-              )}
-            </div>
-            <div className="flex-1">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">검색된 이미지</p>
-              {isLoading ? (
-                <p className="text-gray-700 dark:text-gray-300">검색 중...</p>
-              ) : isError ? (
-                <p className="text-red-500">검색에 실패했습니다.</p>
-              ) : keyword ? (
-                results.length === 0 ? (
-                  <p className="text-gray-700 dark:text-gray-300">검색 결과가 없습니다.</p>
-                ) : (
-                  <p className="text-gray-700 dark:text-gray-300">
-                    &quot;{keyword}&quot;에 대한 <span className="font-bold text-violet-500 dark:text-violet-400">{results.length}</span>개 결과
-                  </p>
-                )
-              ) : (
-                <p className="text-gray-700 dark:text-gray-300">검색어를 입력해 주세요.</p>
-              )}
+        {/* 통합검색 헤더 (텍스트 검색 전용) */}
+        {isTextSearch && (
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">검색결과</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{keyword}에 대한 검색결과입니다.</p>
+          </div>
+        )}
+
+        {/* 이미지 검색 결과 섹션 (이미지 검색 전용, API 연동 예정) */}
+        {isImageSearch && (
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">이미지 검색 결과</h1>
+            <div className="flex items-center gap-4">
+              <div className="w-28 h-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={searchedImageUrl} alt="업로드한 이미지" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">업로드한 이미지</p>
+                <p className="text-gray-700 dark:text-gray-300">이미지 검색 API 연동 예정입니다.</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* 전체 빈 상태 (검색 결과 없음) */}
-        {!isLoading && !isError && keyword && results.length === 0 && (
+        {/* 전체 빈 상태 (검색 결과 없음) - 텍스트 검색에만 표시 */}
+        {!isImageSearch && !isLoading && !isError && keyword && results.length === 0 && (
           <div className="mb-6">
             <Card className="border-dashed">
               <CardContent className="py-10 flex flex-col items-center gap-2">
@@ -94,7 +85,8 @@ export default function SearchResultPage() {
           </div>
         )}
 
-        {/* 위키 문서 결과 */}
+        {/* 위키 문서 결과 (텍스트 검색 전용) */}
+        {!isImageSearch && (
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
             <Music className="w-5 h-5 mr-2 text-violet-500 dark:text-violet-400" />
@@ -140,8 +132,10 @@ export default function SearchResultPage() {
             </Card>
           )}
         </div>
+        )}
 
-        {/* 커뮤니티 게시글 결과 */}
+        {/* 커뮤니티 게시글 결과 (텍스트 검색 전용) */}
+        {!isImageSearch && (
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
             <MessageCircle className="w-5 h-5 mr-2 text-violet-500 dark:text-violet-400" />
@@ -204,6 +198,7 @@ export default function SearchResultPage() {
             </Card>
           )}
         </div>
+        )}
       </div>
     </div>
   )
