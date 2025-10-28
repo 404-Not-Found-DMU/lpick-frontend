@@ -42,8 +42,11 @@ function SearchResultContent() {
   )
 
   const results = data ?? []
-  const wikiItems = results.filter((r) => /wiki/i.test(r.documentType ?? ''))
-  const postItems = results.filter((r) => /community|post/i.test(r.documentType ?? ''))
+  const normalizeType = (t?: string) => (t ?? '').toUpperCase()
+  const isWikiType = (t: string) => ['ALBUM', 'ARTIST', 'GEAR', 'OTHER'].includes(t)
+  const isArticleType = (t: string) => t === 'ARTICLE'
+  const wikiItems = results.filter((r) => isWikiType(normalizeType(r.documentType)))
+  const postItems = results.filter((r) => isArticleType(normalizeType(r.documentType)))
   const firstWiki = wikiItems[0]
 
   return (
