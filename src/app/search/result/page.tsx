@@ -3,6 +3,9 @@
 import Link from 'next/link'
 import { ExternalLink, MessageCircle, Calendar, Disc, Music, Eye, Heart } from 'lucide-react'
 import { Button, Card, CardContent, Badge } from '@/components'
+import { useSearchParams } from 'next/navigation'
+import { useCustomQuery } from '@/hooks/useQuery'
+import { fetcher } from '@/hooks/api/fetchers'
 
 /**
  * 검색 결과 페이지 UI 스켈레톤
@@ -11,32 +14,33 @@ import { Button, Card, CardContent, Badge } from '@/components'
  * - 실제 데이터 연동 전, 전달값이 없으면 섹션을 비표시하거나 빈 상태로 렌더링
  */
 export default function SearchResultPage() {
-  // 실제 연동 시 검색 파라미터와 서버 데이터로 대체
-  const searchedImageUrl: string | undefined = undefined
-  const wiki: {
-    coverUrl?: string
-    type?: string
-    title?: string
-    artist?: string
-    year?: string
-    genre?: string
-    label?: string
-    href?: string
-    description?: string
-  } | null = null
-  const posts: Array<{
-    id: string | number
-    category?: string
-    prefix?: string
-    title?: string
-    author?: string
-    time?: string
-    likes?: number
-    comments?: number
-    views?: number
-    href?: string
-    excerpt?: string
-  }> | null = null
+  const searchParams = useSearchParams()
+  const keyword = searchParams.get('keyword') ?? ''
+  const page = Number(searchParams.get('page') ?? '1')
+  const size = Number(searchParams.get('size') ?? '10')
+  const searchedImageUrl: string | undefined = searchParams.get('imageUrl') ?? undefined
+
+  type SearchItem = {
+    id: string
+    name: string
+    documentType: string
+  }
+
+  const { data, isLoading, isError } = useCustomQuery<SearchItem[]>(
+    ['search', keyword, String(page), String(size)],
+    () =>
+      fetcher<SearchItem[]>(
+        `/api/v1/public/data/search?keyword=${encodeURIComponent(keyword)}&page=${page}&size=${size}`,
+      ),
+    {
+      enabled: Boolean(keyword),
+    },
+  )
+
+  const results = data ?? []
+  const wikiItems = results.filter((r) => /wiki/i.test(r.documentType ?? ''))
+  const postItems = results.filter((r) => /community|post/i.test(r.documentType ?? ''))
+  const firstWiki = wikiItems[0]
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -57,7 +61,17 @@ export default function SearchResultPage() {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">검색된 이미지</p>
-              <p className="text-gray-700 dark:text-gray-300">연동 후 결과 개수를 표시합니다.</p>
+              {isLoading ? (
+                <p className="text-gray-700 dark:text-gray-300">검색 중...</p>
+              ) : isError ? (
+                <p className="text-red-500">검색에 실패했습니다.</p>
+              ) : keyword ? (
+                <p className="text-gray-700 dark:text-gray-300">
+                  "{keyword}"에 대한 <span className="font-bold text-violet-500 dark:text-violet-400">{results.length}</span>개 결과
+                </p>
+              ) : (
+                <p className="text-gray-700 dark:text-gray-300">검색어를 입력해 주세요.</p>
+              )}
             </div>
           </div>
         </div>
@@ -69,73 +83,33 @@ export default function SearchResultPage() {
             위키 문서
           </h2>
 
-          {wiki ? (
+          {firstWiki ? (
             <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow">
               <CardContent className="py-2 px-4">
                 <div className="flex gap-4">
                   {/* 앨범 이미지 */}
                   <div className="w-40 h-40 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
-                    {wiki.coverUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={wiki.coverUrl} alt={wiki.title ?? 'cover'} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">이미지 없음</div>
-                    )}
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">이미지 없음</div>
                   </div>
 
                   {/* 앨범 정보 */}
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        {wiki.type ? (
-                          <Badge className="bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 mb-1.5">
-                            <Disc className="w-3 h-3 mr-1" />
-                            {wiki.type}
-                          </Badge>
-                        ) : null}
-                        {wiki.title ? (
-                          <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{wiki.title}</h3>
-                        ) : (
-                          <div className="h-6 w-48 bg-gray-100 dark:bg-gray-700 rounded" />
-                        )}
-                        {wiki.artist ? (
-                          <p className="text-lg text-gray-600 dark:text-gray-400 mt-0.5">{wiki.artist}</p>
-                        ) : (
-                          <div className="h-5 w-32 mt-1 bg-gray-100 dark:bg-gray-700 rounded" />
-                        )}
+                        <Badge className="bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 mb-1.5">
+                          <Disc className="w-3 h-3 mr-1" />
+                          WIKI
+                        </Badge>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{firstWiki.name}</h3>
                       </div>
-                      {wiki.href ? (
-                        <Link href={wiki.href}>
-                          <Button variant="outline" size="sm">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            문서 보기
-                          </Button>
-                        </Link>
-                      ) : null}
+                      <Link href="/wiki/view">
+                        <Button variant="outline" size="sm">
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          문서 보기
+                        </Button>
+                      </Link>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-2 mb-2.5">
-                      {wiki.year ? (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                          <Calendar className="w-4 h-4 mr-1.5" />
-                          <span>발매: {wiki.year}</span>
-                        </div>
-                      ) : null}
-                      {wiki.genre ? (
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          <span className="font-medium">장르:</span> {wiki.genre}
-                        </div>
-                      ) : null}
-                      {wiki.label ? (
-                        <div className="text-sm text-gray-600 dark:text-gray-400 col-span-2">
-                          <span className="font-medium">레이블:</span> {wiki.label}
-                        </div>
-                      ) : null}
-                    </div>
-
-                    {wiki.description ? (
-                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{wiki.description}</p>
-                    ) : null}
+                    <div className="text-sm text-gray-600 dark:text-gray-400">검색 결과에서 제공된 메타 정보가 없습니다.</div>
                   </div>
                 </div>
               </CardContent>
@@ -154,12 +128,12 @@ export default function SearchResultPage() {
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
             <MessageCircle className="w-5 h-5 mr-2 text-violet-500 dark:text-violet-400" />
             관련 커뮤니티 게시글
-            <Badge variant="secondary" className="ml-3">{posts?.length ?? 0}</Badge>
+            <Badge variant="secondary" className="ml-3">{postItems.length}</Badge>
           </h2>
 
-          {posts && posts.length > 0 ? (
+          {postItems.length > 0 ? (
             <div className="space-y-3">
-              {posts.map((post) => (
+              {postItems.map((post) => (
                 <Card
                   key={post.id}
                   className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-shadow"
@@ -167,53 +141,36 @@ export default function SearchResultPage() {
                   <CardContent className="py-2 px-4">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        {post.category ? (
-                          <Badge
-                            variant="outline"
-                            className="text-violet-500 dark:text-violet-400 border-violet-300 dark:border-violet-600"
-                          >
-                            {post.category}
-                          </Badge>
-                        ) : null}
+                        <Badge
+                          variant="outline"
+                          className="text-violet-500 dark:text-violet-400 border-violet-300 dark:border-violet-600"
+                        >
+                          COMMUNITY
+                        </Badge>
                       </div>
-                      {post.time ? (
-                        <span className="text-sm text-gray-400 dark:text-gray-500">{post.time}</span>
-                      ) : null}
+                      <span className="text-sm text-gray-400 dark:text-gray-500">&nbsp;</span>
                     </div>
 
-                    {post.href ? (
-                      <Link href={post.href} className="block mb-2">
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 hover:text-violet-500 dark:hover:text-violet-400 line-clamp-1">
-                          {post.prefix ? <span className="text-violet-500 dark:text-violet-400">[{post.prefix}] </span> : null}
-                          {post.title}
-                        </h3>
-                        {post.excerpt ? (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1.5 line-clamp-2">{post.excerpt}</p>
-                        ) : null}
-                      </Link>
-                    ) : (
-                      <div className="mb-2">
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">{post.title}</h3>
-                        {post.excerpt ? (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1.5 line-clamp-2">{post.excerpt}</p>
-                        ) : null}
-                      </div>
-                    )}
+                    <Link href={`/community/${post.id}`} className="block mb-2">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 hover:text-violet-500 dark:hover:text-violet-400 line-clamp-1">
+                        {post.name}
+                      </h3>
+                    </Link>
 
                     <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 pt-2.5 border-t border-gray-100 dark:border-gray-700">
-                      {post.author ? <span className="font-medium">{post.author}</span> : <span />}
+                      <span />
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
                           <Heart className="w-4 h-4" />
-                          <span>{post.likes ?? 0}</span>
+                          <span>0</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <MessageCircle className="w-4 h-4" />
-                          <span>{post.comments ?? 0}</span>
+                          <span>0</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Eye className="w-4 h-4" />
-                          <span>{post.views ?? 0}</span>
+                          <span>0</span>
                         </div>
                       </div>
                     </div>
