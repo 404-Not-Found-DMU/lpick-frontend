@@ -7,7 +7,7 @@ import {
   MyArticlesResponse,
   LikedArticlesResponse,
   PaginationParams
-} from './types';
+} from '../types/api.types';
 
 /**
  * 커뮤니티 게시글 API

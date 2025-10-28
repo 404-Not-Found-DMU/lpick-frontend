@@ -11,7 +11,7 @@ import {
 import {
   CreateArticleRequest,
   UpdateArticleRequest
-} from '../api/types';
+} from '../types/api.types';
 
 /**
  * 게시글 관리 훅 (CRUD 작업)

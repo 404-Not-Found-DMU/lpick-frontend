@@ -3,7 +3,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { SortOption, CommunityFilters, BoardType, TagType } from '../types/community.types';
 import { POSTS_PER_PAGE, FEATURED_POSTS_LIMIT } from '../constants';
 import { useArticles } from './useArticles';
-import { ArticleListItem } from '../api/types';
+import { ArticleListItem } from '../types/api.types';
 
 export const useCommunity = () => {
   const [filters, setFilters] = useState<CommunityFilters>({
@@ -63,7 +63,7 @@ export const useCommunity = () => {
       articleId: article.articleId,
       title: article.title,
       content: '', // 목록에서는 내용 없음
-      author: article.oauthId, // Post 타입에서는 string
+      author: article.author, // API에서 제공하는 author 필드 사용
       oauthId: article.oauthId,
       date: formatDate(article.createdAt),
       board: '자유게시판' as BoardType, // 기본값, 실제로는 게시판 정보 필요

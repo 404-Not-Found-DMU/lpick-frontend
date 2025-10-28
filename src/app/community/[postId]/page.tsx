@@ -29,6 +29,7 @@ const PostDetailPage = () => {
     handleBookmark,
     handleCommentSubmit,
     handleCommentLike,
+    handleReplySubmit,
     handleLoadMoreComments,
     handleEdit,
     handleDelete,
@@ -115,6 +116,7 @@ const PostDetailPage = () => {
                 onCommentChange={setNewComment}
                 onCommentSubmit={handleCommentSubmit}
                 onCommentLike={handleCommentLike}
+                onReply={handleReplySubmit}
                 onLoadMore={handleLoadMoreComments}
               />
             </div>

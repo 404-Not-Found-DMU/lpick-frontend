@@ -1,9 +1,9 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PostFormData } from '../../types/community.types';
+import { PostFormData, BoardTypeMapping, BadgeTypeMapping } from '../../types/community.types';
 import { useArticleManager } from '../../hooks/useArticleManager';
-import { CreateArticleRequest } from '../../api/types';
+import { CreateArticleRequest } from '../../types/api.types';
 
 export const usePostForm = () => {
   const router = useRouter();
@@ -18,6 +18,8 @@ export const usePostForm = () => {
     content: '',
     category: '',
     postType: '',
+    boardType: '자유게시판',  // 기본값
+    badgeType: '질문',       // 기본값
   });
 
   const updateFormData = (updates: Partial<PostFormData>) => {
@@ -42,6 +44,8 @@ export const usePostForm = () => {
       const articleData: CreateArticleRequest = {
         title: formData.title.trim(),
         content: formData.content.trim(),
+        type: BoardTypeMapping.toApi(formData.boardType),
+        badge: BadgeTypeMapping.toApi(formData.badgeType),
       };
 
       const success = await createNewArticle(articleData);

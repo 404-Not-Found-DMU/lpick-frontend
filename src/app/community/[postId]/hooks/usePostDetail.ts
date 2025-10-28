@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Post, Comment } from '../../types/community.types';
+import { useToast } from '@/components/Toast/ToastProvider';
+import { Post, Comment, BoardTypeMapping, BadgeTypeMapping, convertApiCommentToUiComment } from '../../types/community.types';
 import { useArticle } from '../../hooks/useArticles';
 import { useArticleInteractions, useArticleManager } from '../../hooks/useArticleManager';
-import { getSampleComments } from '../data/sampleComments';
+import { useComments, useCommentManager, useCommentInteractions } from '../../hooks';
 
 export const usePostDetail = (articleId: string) => {
   const router = useRouter();
+  const { push: toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [allComments, setAllComments] = useState<Comment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,6 +37,22 @@ export const usePostDetail = (articleId: string) => {
     updateExistingArticle,
     deleteExistingArticle
   } = useArticleManager();
+
+  // 댓글 관련 훅들
+  const {
+    comments: apiComments,
+    fetchComments,
+    refresh: refreshComments
+  } = useComments(articleId, { page: 1, size: 50 }); // 충분한 크기로 설정
+
+  const {
+    createNewComment,
+    createNewReply
+  } = useCommentManager();
+
+  const {
+    handleCommentLike: apiHandleCommentLike
+  } = useCommentInteractions();
 
   // 게시글 데이터를 Post 형태로 변환
   const post: Post | null = useMemo(() => {
@@ -65,7 +83,7 @@ export const usePostDetail = (articleId: string) => {
       articleId: article.articleId,
       title: article.title,
       content: article.content,
-      author: article.oauthId, // Post 타입에서는 string
+      author: article.author, // API에서 제공하는 author 필드 사용
       oauthId: article.oauthId,
       date: formatDate(article.createdAt),
       board: '자유게시판', // 기본값, 실제로는 게시판 정보 필요
@@ -90,15 +108,52 @@ export const usePostDetail = (articleId: string) => {
     setIsMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!isMounted || !article) return;
+  // API 댓글을 UI 댓글로 변환
+  const convertedComments = useMemo(() => {
+    if (!apiComments || !articleId) return [];
+    
+    const allComments: Comment[] = [];
+    
+    // 부모 댓글들을 변환
+    apiComments.forEach(apiComment => {
+      // 삭제된 댓글은 제외
+      if (apiComment.isDel === 'Y') return;
+      
+      const parentComment = convertApiCommentToUiComment(apiComment, articleId);
+      allComments.push(parentComment);
+      
+      // 자식 댓글들도 변환
+      if (apiComment.childsCommentList && apiComment.childsCommentList.length > 0) {
+        apiComment.childsCommentList.forEach(childApiComment => {
+          const childComment = convertApiCommentToUiComment(childApiComment, articleId);
+          allComments.push(childComment);
+        });
+      }
+    });
+    
+    return allComments;
+  }, [apiComments, articleId]);
 
-    // TODO: 댓글 API 연동 필요 - 현재는 임시 데이터 사용
-    const allCommentsData = getSampleComments(parseInt(articleId) || 0);
-    setAllComments(allCommentsData);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || !articleId) return;
+    
+    // 댓글 데이터 로드
+    fetchComments();
+  }, [articleId, isMounted, fetchComments]);
+
+  // 변환된 댓글을 전체 댓글과 현재 댓글로 설정
+  useEffect(() => {
+    console.log('API 댓글 데이터:', apiComments);
+    console.log('변환된 댓글 데이터:', convertedComments);
+    
+    setAllComments(convertedComments);
     // 첫 페이지 댓글만 표시
-    setComments(allCommentsData.slice(0, commentsPerPage));
-  }, [articleId, isMounted, article, commentsPerPage]);
+    setComments(convertedComments.slice(0, commentsPerPage));
+  }, [convertedComments, commentsPerPage, apiComments]);
 
   // 페이지 변경시 댓글 업데이트
   useEffect(() => {
@@ -125,36 +180,102 @@ export const usePostDetail = (articleId: string) => {
     }
   }, [article, isBookmarked, toggleBookmark, refreshArticle]);
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  const handleCommentSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !articleId) return;
 
-    // TODO: 댓글 생성 API 연동 필요
-    const comment: Comment = {
-      id: Math.floor(Math.random() * 10000) + 1000,
-      postId: parseInt(articleId) || 0,
-      author: '현재사용자',
-      content: newComment,
-      date: '2025-01-15',
-      likes: 0,
-    };
+    const success = await createNewComment(articleId, {
+      comment: newComment.trim()
+    });
 
-    setComments([...comments, comment]);
-    setNewComment('');
-  };
+    if (success) {
+      setNewComment('');
+      // 댓글 목록 새로고침
+      await refreshComments();
+      toast('댓글이 작성되었습니다.', 'success');
+    } else {
+      toast('댓글 작성에 실패했습니다. 다시 시도해주세요.', 'error');
+    }
+  }, [newComment, articleId, createNewComment, refreshComments, toast]);
 
-  const handleCommentLike = (commentId: number) => {
-    // TODO: 댓글 좋아요 API 연동 필요
-    setComments(
-      comments.map((comment) =>
-        comment.id === commentId ? { ...comment, likes: comment.likes + 1 } : comment,
-      ),
-    );
-  };
+  const handleCommentLike = useCallback(async (commentId: number): Promise<boolean> => {
+    console.log('댓글 좋아요 클릭:', commentId);
+    
+    // UI commentId로부터 실제 API commentId 찾기
+    let realCommentId: string | undefined;
+    
+    // 모든 API 댓글과 자식 댓글을 확인
+    apiComments?.forEach(comment => {
+      // 부모 댓글 확인
+      const match = comment.commentId.match(/\d+/g);
+      const parentUiId = match && match.length > 0 ? parseInt(match[match.length - 1]) : 0;
+      
+      if (parentUiId === commentId) {
+        realCommentId = comment.commentId;
+        return;
+      }
+      
+      // 자식 댓글들 확인
+      comment.childsCommentList?.forEach(child => {
+        const childMatch = child.commentId.match(/\d+/g);
+        const childUiId = childMatch && childMatch.length > 0 ? parseInt(childMatch[childMatch.length - 1]) : 0;
+        
+        if (childUiId === commentId) {
+          realCommentId = child.commentId;
+        }
+      });
+    });
 
-  const handleLoadMoreComments = () => {
+    if (!realCommentId) {
+      console.error('실제 댓글 ID를 찾을 수 없습니다:', commentId);
+      console.log('사용 가능한 댓글들:', apiComments?.map(c => ({
+        commentId: c.commentId,
+        children: c.childsCommentList?.map(child => child.commentId)
+      })));
+      toast('댓글을 찾을 수 없습니다.', 'error');
+      return false;
+    }
+
+    console.log('댓글 좋아요 요청:', { uiId: commentId, realId: realCommentId });
+    
+    // 현재 좋아요 상태 찾기
+    const currentComment = convertedComments.find(c => c.id === commentId);
+    const isCurrentlyLiked = currentComment?.liked || false;
+    
+    console.log('현재 좋아요 상태:', { 
+      commentId, 
+      isCurrentlyLiked, 
+      currentComment: {
+        id: currentComment?.id,
+        likes: currentComment?.likes,
+        liked: currentComment?.liked
+      }
+    });
+    
+    const result = await apiHandleCommentLike(realCommentId, isCurrentlyLiked);
+    if (result.success) {
+      console.log('댓글 좋아요/취소 성공');
+      // 댓글 목록 새로고침
+      await refreshComments();
+      return true;
+    } else {
+      console.error('댓글 좋아요/취소 실패:', result.message);
+      
+      // 에러 메시지에 따라 다른 처리
+      if (result.message?.includes('ALREADY_HAS_LIKE')) {
+        toast('이미 좋아요를 누른 댓글입니다.', 'info');
+      } else if (result.message?.includes('404')) {
+        toast('댓글을 찾을 수 없습니다.', 'error');
+      } else {
+        toast(result.message || '댓글 좋아요에 실패했습니다. 다시 시도해주세요.', 'error');
+      }
+      return false;
+    }
+  }, [apiComments, convertedComments, apiHandleCommentLike, refreshComments, toast]);
+
+  const handleLoadMoreComments = useCallback(() => {
     setCurrentPage(currentPage + 1);
-  };
+  }, [currentPage]);
 
   const handleEdit = useCallback(async () => {
     if (!article) return;
@@ -166,16 +287,18 @@ export const usePostDetail = (articleId: string) => {
     
     const success = await updateExistingArticle(article.articleId, {
       title: newTitle,
-      content: article.content
+      content: article.content,
+      type: BoardTypeMapping.toApi('자유게시판'), // 기본값 (API 응답에 해당 정보가 없으므로)
+      badge: BadgeTypeMapping.toApi('질문')      // 기본값 (API 응답에 해당 정보가 없으므로)
     });
     
     if (success) {
-      alert('게시글이 수정되었습니다.');
+      toast('게시글이 수정되었습니다.', 'success');
       refreshArticle(); // 데이터 새로고침
     } else {
-      alert(`게시글 수정에 실패했습니다. ${managerError || ''}`);
+      toast(`게시글 수정에 실패했습니다. ${managerError || ''}`, 'error');
     }
-  }, [article, updateExistingArticle, refreshArticle, managerError]);
+  }, [article, updateExistingArticle, refreshArticle, managerError, toast]);
 
   const handleDelete = useCallback(async () => {
     if (!article) return;
@@ -186,12 +309,58 @@ export const usePostDetail = (articleId: string) => {
     const success = await deleteExistingArticle(article.articleId);
     
     if (success) {
-      alert('게시글이 삭제되었습니다.');
+      toast('게시글이 삭제되었습니다.', 'success');
       router.push('/community'); // 커뮤니티 목록으로 이동
     } else {
-      alert(`게시글 삭제에 실패했습니다. ${managerError || ''}`);
+      toast(`게시글 삭제에 실패했습니다. ${managerError || ''}`, 'error');
     }
-  }, [article, deleteExistingArticle, router, managerError]);
+  }, [article, deleteExistingArticle, router, managerError, toast]);
+
+  const handleReplySubmit = useCallback(async (
+    parentCommentId: number, 
+    replyText: string
+  ): Promise<boolean> => {
+    if (!replyText.trim() || !articleId) return false;
+
+    // UI commentId로부터 실제 API commentId 찾기
+    let realParentCommentId: string | undefined;
+    
+    // 부모 댓글의 실제 ID 찾기
+    apiComments?.forEach(comment => {
+      const match = comment.commentId.match(/\d+/g);
+      const parentUiId = match && match.length > 0 ? parseInt(match[match.length - 1]) : 0;
+      
+      if (parentUiId === parentCommentId) {
+        realParentCommentId = comment.commentId;
+      }
+    });
+
+    if (!realParentCommentId) {
+      console.error('부모 댓글 ID를 찾을 수 없습니다:', parentCommentId);
+      toast('댓글을 찾을 수 없습니다.', 'error');
+      return false;
+    }
+
+    console.log('답글 작성 요청:', { 
+      parentUiId: parentCommentId, 
+      realParentId: realParentCommentId,
+      replyText 
+    });
+
+    const success = await createNewReply(articleId, realParentCommentId, {
+      comment: replyText.trim()
+    });
+
+    if (success) {
+      toast('답글이 작성되었습니다.', 'success');
+      // 댓글 목록 새로고침
+      await refreshComments();
+      return true;
+    } else {
+      toast('답글 작성에 실패했습니다. 다시 시도해주세요.', 'error');
+      return false;
+    }
+  }, [articleId, apiComments, createNewReply, refreshComments, toast]);
 
   const totalPages = Math.ceil(allComments.length / commentsPerPage);
   const hasMoreComments = currentPage < totalPages;
@@ -219,6 +388,7 @@ export const usePostDetail = (articleId: string) => {
     handleBookmark,
     handleCommentSubmit,
     handleCommentLike,
+    handleReplySubmit,
     handleLoadMoreComments,
     handleEdit,
     handleDelete,

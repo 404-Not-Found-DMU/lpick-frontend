@@ -13,7 +13,8 @@ interface CommentSectionProps {
   newComment: string;
   onCommentChange: (value: string) => void;
   onCommentSubmit: (e: React.FormEvent) => void;
-  onCommentLike?: (commentId: number) => void;
+  onCommentLike?: (commentId: number) => Promise<boolean>;
+  onReply?: (commentId: number, replyText: string) => Promise<boolean>;
   onLoadMore?: () => void;
 }
 
@@ -25,17 +26,23 @@ export const CommentSection = ({
   onCommentChange,
   onCommentSubmit,
   onCommentLike,
+  onReply,
   onLoadMore,
 }: CommentSectionProps) => {
   const [sortBy, setSortBy] = useState<CommentSortOption>('latest');
 
-  const handleCommentLike = (commentId: number) => {
-    onCommentLike?.(commentId);
+  const handleCommentLike = async (commentId: number): Promise<boolean> => {
+    if (onCommentLike) {
+      return await onCommentLike(commentId);
+    }
+    return false;
   };
 
-  const handleReply = (commentId: number) => {
-    console.log('답글 달기:', commentId);
-    // TODO: 답글 로직 구현
+  const handleReply = async (commentId: number, replyText: string): Promise<boolean> => {
+    if (onReply) {
+      return await onReply(commentId, replyText);
+    }
+    return false;
   };
 
   const handleSortChange = (sort: CommentSortOption) => {

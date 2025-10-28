@@ -9,7 +9,7 @@ import {
   ArticleDetail,
   ArticleListItem,
   PaginationParams
-} from '../api/types';
+} from '../types/api.types';
 
 /**
  * 게시글 목록 조회 훅
