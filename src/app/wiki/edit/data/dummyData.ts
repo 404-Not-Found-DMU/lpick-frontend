@@ -192,3 +192,74 @@ export const dummyDataMap = {
 export const getDummyData = <C extends keyof typeof dummyDataMap>(category: C) => {
   return dummyDataMap[category];
 };
+
+// slug 기반 더미 위키 데이터 생성
+export type DummyWiki = {
+  category: keyof typeof dummyDataMap
+  title: string
+  artist?: string
+  coverImage?: string
+  releaseDate?: string
+  label?: string
+  genres?: string[]
+  content: string
+}
+
+const slugToCategory: Record<string, keyof typeof dummyDataMap> = {
+  'pink-floyd-dark-side-of-the-moon': 'lp',
+  'david-bowie': 'artist',
+  'fender-stratocaster': 'equipment',
+  'rock-history': 'other',
+};
+
+export function getDummyWikiBySlug(slug: string): DummyWiki {
+  const key = slugToCategory[slug] ?? 'lp';
+  const base = getDummyData(key as keyof typeof dummyDataMap);
+
+  // 공통 markdown 콘텐츠 생성
+  const content = (base.textBlocks ?? [])
+    .map((b) => `${b.depth === 1 ? '##' : '###'} ${b.title}\n${b.content}`)
+    .join('\n\n');
+
+  if (key === 'lp') {
+    const lpBase = base as typeof dummyLPData;
+    const info = lpBase.categoryData.data.infobox;
+    return {
+      category: 'lp',
+      title: info.title,
+      artist: info.artist,
+      coverImage: info.coverUrl,
+      releaseDate: info.releaseDate,
+      label: info.label,
+      genres: info.genre ? [info.genre] : [],
+      content,
+    };
+  }
+
+  if (key === 'artist') {
+    const artistBase = base as typeof dummyArtistData;
+    const info = artistBase.categoryData.data;
+    return {
+      category: 'artist',
+      title: info.name,
+      content,
+    };
+  }
+
+  if (key === 'equipment') {
+    const equipBase = base as typeof dummyEquipmentData;
+    const info = equipBase.categoryData.data;
+    return {
+      category: 'equipment',
+      title: info.name,
+      content,
+    };
+  }
+
+  const info = (base as typeof dummyOtherData).categoryData.data;
+  return {
+    category: 'other',
+    title: info.title,
+    content,
+  };
+}

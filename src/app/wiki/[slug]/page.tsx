@@ -1,11 +1,11 @@
 import type { Metadata } from "next"
 import { headers } from "next/headers"
-import { Badge } from "@/components/Badge"
 import ActionButtons from "@/app/wiki/components/ActionButtons"
 import InfoboxLP from "@/app/wiki/components/InfoboxLP"
 import ContentWithToc from "@/app/wiki/components/ContentWithToc"
 import ScrollTopButton from "@/app/wiki/components/ScrollTopButton"
 import WikiLayout from "@/app/wiki/components/WikiLayout"
+import { getDummyWikiBySlug } from "@/app/wiki/edit/data/dummyData"
 export default async function WikiViewPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
@@ -28,7 +28,35 @@ export default async function WikiViewPage({ params }: { params: Promise<{ slug:
     throw new Error('unreachable')
   }
 
-  const hdrs = headers()
+  const hdrs = await headers()
+
+  // 개발/임시: 더미 데이터로 확인하기 (환경변수로 활성화)
+  if (process.env.NEXT_PUBLIC_WIKI_DUMMY === 'true') {
+    const dummy = getDummyWikiBySlug(slug)
+    const title = dummy.title
+    const dummyContent = `# 개요\n더미 데이터로 렌더링된 문서입니다.\n\n${dummy.content}`
+
+    return (
+      <>
+        <a href="#wiki-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 rounded bg-violet-600 px-3 py-2 text-white">본문으로 건너뛰기</a>
+        <WikiLayout
+          title={title}
+          category={'문서'}
+          lastUpdated={new Date().toLocaleString()}
+          views={0}
+          contributors={0}
+          bookmarks={0}
+          relatedPages={[]}
+          showDocInfo={false}
+          showRelatedPages={false}
+          headerActions={<ActionButtons slug={slug} />}
+        >
+          <ContentWithToc content={dummyContent} />
+        </WikiLayout>
+        <ScrollTopButton />
+      </>
+    )
+  }
   const proto = hdrs.get('x-forwarded-proto') ?? 'http'
   const host = hdrs.get('host') ?? 'localhost:3000'
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? `${proto}://${host}`
@@ -65,7 +93,9 @@ export default async function WikiViewPage({ params }: { params: Promise<{ slug:
         views={wikiMeta.views}
         contributors={wikiMeta.contributors}
         bookmarks={wikiMeta.bookmarks}
-        relatedPages={wikiMeta.relatedPages}
+        relatedPages={[]}
+        showDocInfo={false}
+        showRelatedPages={false}
         headerActions={<ActionButtons slug={slug} />}
       >
         {/* 카테고리별 인포박스 예시: LP */}
@@ -90,7 +120,7 @@ export default async function WikiViewPage({ params }: { params: Promise<{ slug:
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
   try {
-    const hdrs = headers()
+    const hdrs = await headers()
     const proto = hdrs.get('x-forwarded-proto') ?? 'http'
     const host = hdrs.get('host') ?? 'localhost:3000'
     const base = process.env.NEXT_PUBLIC_BASE_URL ?? `${proto}://${host}`

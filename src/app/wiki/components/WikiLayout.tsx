@@ -17,6 +17,9 @@ interface WikiLayoutProps {
   relatedPages?: RelatedPage[]
   headerActions?: React.ReactNode
   children: React.ReactNode
+  showDocInfo?: boolean
+  showRelatedPages?: boolean
+  badgeClassName?: string
 }
 
 export default function WikiLayout({
@@ -29,6 +32,9 @@ export default function WikiLayout({
   relatedPages = [],
   headerActions,
   children,
+  showDocInfo = true,
+  showRelatedPages = true,
+  badgeClassName,
 }: WikiLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -39,7 +45,7 @@ export default function WikiLayout({
             {/* 문서 헤더 */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
               <div className="flex items-center mb-2">
-                <Badge className="bg-violet-500/10 text-violet-500 font-normal mr-2">{category}</Badge>
+                <Badge className={`${badgeClassName ?? 'bg-violet-500/10 text-violet-500'} font-normal mr-2`}>{category}</Badge>
                 <span className="text-sm text-gray-500 dark:text-gray-400">최근 수정: {lastUpdated}</span>
               </div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{title}</h1>
@@ -53,35 +59,37 @@ export default function WikiLayout({
           {/* 사이드바 */}
           <div className="w-full lg:w-1/4">
             {/* 문서 정보 */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                <Info className="w-5 h-5 mr-2 text-violet-500" />
-                문서 정보
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">조회수</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{views.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">기여자</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{contributors}명</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">최근 수정</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{lastUpdated}</span>
-                </div>
-                {typeof bookmarks === 'number' && (
+            {showDocInfo && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                  <Info className="w-5 h-5 mr-2 text-violet-500" />
+                  문서 정보
+                </h3>
+                <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">북마크</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{bookmarks.toLocaleString()}</span>
+                    <span className="text-gray-600 dark:text-gray-400">조회수</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{views.toLocaleString()}</span>
                   </div>
-                )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">기여자</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{contributors}명</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">최근 수정</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{lastUpdated}</span>
+                  </div>
+                  {typeof bookmarks === 'number' && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">북마크</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{bookmarks.toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* 관련 문서 */}
-            {relatedPages && relatedPages.length > 0 && (
+            {showRelatedPages && relatedPages && relatedPages.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                   <FileText className="w-5 h-5 mr-2 text-violet-500" />
