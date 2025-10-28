@@ -1,53 +1,29 @@
 "use client"
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Clock } from "lucide-react"
+import { useCustomQuery } from "@/hooks/useQuery"
+import { fetcher } from "@/hooks/api/fetchers"
 
-type Recent = { title: string; slug: string; updatedAt: string }
+type RecentApi = { wikiId: string; title: string; modifiedBefore: string; wikiPageClass: string }
 
-function timeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime()
-  const sec = Math.floor(diff / 1000)
-  if (sec < 60) return `${sec}초 전`
-  const min = Math.floor(sec / 60)
-  if (min < 60) return `${min}분 전`
-  const hr = Math.floor(min / 60)
-  if (hr < 24) return `${hr}시간 전`
-  const day = Math.floor(hr / 24)
-  if (day < 7) return `${day}일 전`
-  const wk = Math.floor(day / 7)
-  if (wk < 5) return `${wk}주 전`
-  const mo = Math.floor(day / 30)
-  if (mo < 12) return `${mo}개월 전`
-  const yr = Math.floor(day / 365)
-  return `${yr}년 전`
-}
+// API가 modifiedBefore를 바로 내려주므로 추가 가공 없이 표시합니다.
 
-export default function RecentUpdatedCard({ slug, initial }: { slug: string; initial?: Recent[] }) {
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [items, setItems] = useState<Recent[]>(initial ?? [])
+export default function RecentUpdatedCard() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const res = await fetch(`/api/wiki/${encodeURIComponent(slug)}`)
-      if (!res.ok) throw new Error("failed")
-      const json = await res.json()
-      setItems((json.recent ?? []) as Recent[])
-    } catch {
-      setError("최근 수정 문서를 불러오지 못했습니다.")
-    } finally {
-      setLoading(false)
-    }
-  }, [slug])
+  const { data, isLoading, isError } = useCustomQuery<RecentApi[]>(
+    ["recent-modify"],
+    () => fetcher<RecentApi[]>("/api/v1/public/wiki/recent-modify"),
+    { staleTime: 60_000 },
+  )
 
-  useEffect(() => {
-    if (!initial || initial.length === 0) fetchData()
-    else setLoading(false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchData, initial])
+  const items = (data ?? []).map((x) => ({
+    slug: x.wikiId,
+    title: x.title,
+    modifiedBefore: x.modifiedBefore,
+  }))
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -56,16 +32,15 @@ export default function RecentUpdatedCard({ slug, initial }: { slug: string; ini
         최근 수정된 문서
       </h3>
 
-      {loading ? (
+      {!mounted || isLoading ? (
         <ul className="space-y-3 animate-pulse">
           {Array.from({ length: 3 }).map((_, i) => (
             <li key={i} className="h-5 rounded bg-gray-100 dark:bg-gray-700" />
           ))}
         </ul>
-      ) : error ? (
+      ) : isError ? (
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          {error}
-          <button className="ml-2 text-violet-600 hover:underline" onClick={fetchData}>다시 시도</button>
+          최근 수정 문서를 불러오지 못했습니다.
         </div>
       ) : items.length === 0 ? (
         <div className="text-sm text-gray-500 dark:text-gray-400">최근 수정 문서가 없습니다.</div>
@@ -75,7 +50,7 @@ export default function RecentUpdatedCard({ slug, initial }: { slug: string; ini
             <li key={r.slug}>
               <Link href={`/wiki/${r.slug}`} className="block rounded p-2 hover:bg-gray-50 dark:hover:bg-gray-800/60">
                 <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{r.title}</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{timeAgo(r.updatedAt)}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{r.modifiedBefore}</p>
               </Link>
             </li>
           ))}

@@ -18,6 +18,7 @@ import {
   Clock,
 } from "lucide-react"
 import { LivePreview } from "@/app/wiki/edit/components/preview/LivePreview"
+import RecentUpdatedCard from "../components/RecentUpdatedCard"
 import { getDummyData } from "@/app/wiki/edit/data/dummyData"
 import type { WikiCategory } from "@/types/hierarchical.editor.types"
 
@@ -180,26 +181,7 @@ export default function WikiViewPage() {
                 <Clock className="w-5 h-5 mr-2 text-violet-500" />
                 최근 수정된 문서
               </h3>
-              <ul className="space-y-3">
-                <li>
-                  <Link href="/wiki/miles-davis-kind-of-blue" className="block group">
-                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">Miles Davis - Kind of Blue</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">1시간 전</p>
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/wiki/technics-sl-1200mk7" className="block group">
-                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">Technics SL-1200MK7</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">3시간 전</p>
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/wiki/the-beatles-abbey-road" className="block group">
-                    <h4 className="text-gray-800 dark:text-gray-200 group-hover:text-violet-500 font-medium">The Beatles - Abbey Road</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">5시간 전</p>
-                  </Link>
-                </li>
-              </ul>
+              <RecentUpdatedCard />
             </div>
           </div>
         </div>
