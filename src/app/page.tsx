@@ -7,66 +7,81 @@ import { Button } from "@/components/Button"
 import { Card, CardContent } from "@/components/Card"
 import { Badge } from "@/components/Badge"
 import { WelcomeModal, useWelcomeModal } from "@/modules/welcomeModal"
+import { fetcher } from "@/hooks/api/fetchers"
+
+type RecommendAlbum = {
+  albumId: string
+  name: string
+  profile: string
+  releaseDate: string
+  releaseCountry: string
+  label: string
+  lpti: string
+  imageUrl: string
+}
+
+type UIAlbum = {
+  id: string
+  title: string
+  artist: string
+  year: string
+  imageUrl: string
+  gradient: string
+}
+
+const GRADIENTS = [
+  "from-red-300 via-red-200 to-orange-200 dark:from-red-900 dark:via-red-800 dark:to-orange-900",
+  "from-violet-100 via-lavender-100 to-violet-200 dark:from-violet-900 dark:via-lavender-900 dark:to-violet-800",
+  "from-amber-50 via-yellow-50 to-yellow-100 dark:from-amber-900 dark:via-yellow-900 dark:to-yellow-800",
+  "from-pink-200 via-pink-100 to-rose-100 dark:from-pink-900 dark:via-pink-800 dark:to-rose-900",
+  "from-purple-300 via-purple-200 to-indigo-200 dark:from-purple-900 dark:via-purple-800 dark:to-indigo-900",
+]
 
 export default function HomePage() {
-  const [currentSlide, setCurrentSlide] = useState(2) // 중앙 앨범이 활성화된 상태
+  const [currentSlide, setCurrentSlide] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [featuredAlbums, setFeaturedAlbums] = useState<UIAlbum[]>([])
+  const [loadingAlbums, setLoadingAlbums] = useState<boolean>(true)
+  const [albumError, setAlbumError] = useState<string | null>(null)
   
   // 환영 모달 훅
   const { isModalOpen, closeModal, handleTakeLPTI, userInfo } = useWelcomeModal()
 
-  const featuredAlbums = [
-    {
-      id: 1,
-      title: "Midnights",
-      artist: "Taylor Swift",
-      year: "2022",
-      imageUrl: "https://upload.wikimedia.org/wikipedia/en/9/9f/Midnights_-_Taylor_Swift.png",
-      gradient: "from-red-300 via-red-200 to-orange-200 dark:from-red-900 dark:via-red-800 dark:to-orange-900",
-    },
-    {
-      id: 2,
-      title: "Abbey Road",
-      artist: "The Beatles",
-      year: "1969",
-      imageUrl: "https://upload.wikimedia.org/wikipedia/en/4/42/Beatles_-_Abbey_Road.jpg",
-      gradient: "from-violet-100 via-lavender-100 to-violet-200 dark:from-violet-900 dark:via-lavender-900 dark:to-violet-800",
-    },
-    {
-      id: 3,
-      title: "The Dark Side of the Moon",
-      artist: "Pink Floyd",
-      year: "1973",
-      imageUrl: "https://upload.wikimedia.org/wikipedia/en/3/3b/Dark_Side_of_the_Moon.png",
-      gradient: "from-amber-50 via-yellow-50 to-yellow-100 dark:from-amber-900 dark:via-yellow-900 dark:to-yellow-800",
-    },
-    {
-      id: 4,
-      title: "Thriller",
-      artist: "Michael Jackson",
-      year: "1982",
-      imageUrl: "https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png",
-      gradient: "from-pink-200 via-pink-100 to-rose-100 dark:from-pink-900 dark:via-pink-800 dark:to-rose-900",
-    },
-    {
-      id: 5,
-      title: "Back in Black",
-      artist: "AC/DC",
-      year: "1980",
-      imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQy8AIKPU8BPTIBzfF3y0oQcoejjeBLKZZoHw&s",
-      gradient:
-        "from-purple-300 via-purple-200 to-indigo-200 dark:from-purple-900 dark:via-purple-800 dark:to-indigo-900",
-    },
-  ]
+  useEffect(() => {
+    let active = true
+    async function load() {
+      try {
+        setLoadingAlbums(true)
+        const data = await fetcher<RecommendAlbum[]>(`/api/v1/public/data/album/recommend`)
+        if (!active) return
+        const mapped: UIAlbum[] = (data || []).slice(0, 5).map((a, idx) => ({
+          id: a.albumId,
+          title: a.name,
+          artist: a.profile,
+          year: a.releaseDate ? String(new Date(a.releaseDate).getFullYear()) : "",
+          imageUrl: a.imageUrl,
+          gradient: GRADIENTS[idx % GRADIENTS.length],
+        }))
+        setFeaturedAlbums(mapped)
+        setCurrentSlide(0)
+      } catch {
+        if (active) setAlbumError("추천 앨범을 불러오지 못했습니다.")
+      } finally {
+        if (active) setLoadingAlbums(false)
+      }
+    }
+    load()
+    return () => { active = false }
+  }, [])
 
   const nextSlide = () => {
-    if (isAnimating) return
+    if (isAnimating || featuredAlbums.length === 0) return
     setIsAnimating(true)
     setCurrentSlide((prev) => (prev + 1) % featuredAlbums.length)
   }
 
   const prevSlide = () => {
-    if (isAnimating) return
+    if (isAnimating || featuredAlbums.length === 0) return
     setIsAnimating(true)
     setCurrentSlide((prev) => (prev - 1 + featuredAlbums.length) % featuredAlbums.length)
   }
@@ -184,12 +199,22 @@ export default function HomePage() {
 
           {/* 중앙 앨범 정보 */}
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
-              {featuredAlbums[currentSlide].artist} - {featuredAlbums[currentSlide].title}
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              {featuredAlbums[currentSlide].year} · The 1st Remake Album
-            </p>
+            {loadingAlbums && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">로딩 중...</p>
+            )}
+            {!loadingAlbums && featuredAlbums.length > 0 && (
+              <>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  {featuredAlbums[currentSlide].artist} - {featuredAlbums[currentSlide].title}
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {featuredAlbums[currentSlide].year}
+                </p>
+              </>
+            )}
+            {albumError && (
+              <p className="text-sm text-red-500">{albumError}</p>
+            )}
           </div>
 
           {/* 앨범 캐러셀 */}
