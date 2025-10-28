@@ -25,21 +25,6 @@ export function OtherForm({ data, onUpdate }: OtherFormProps) {
           />
         </CardContent>
       </Card>
-
-      {/* 마크다운 에디터 */}
-      <Card className="bg-white dark:bg-gray-800 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">내용</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <textarea
-            value={data.content}
-            onChange={(e) => handleFieldChange("content", e.target.value)}
-            placeholder="자유롭게 내용을 작성하세요. 마크다운을 지원합니다..."
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 min-h-[400px] resize-y"
-          />
-        </CardContent>
-      </Card>
     </div>
   );
-} 
+}

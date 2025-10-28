@@ -45,7 +45,7 @@ export function SortableTextBlock({ block, numbering, onUpdate, onDelete }: Sort
           {...attributes}
           {...listeners}
           className="cursor-grab p-2 mt-1 text-gray-400 hover:text-gray-600"
-          aria-label="Drag to reorder"
+          aria-label={`${numbering} 섹션 순서 변경 (스페이스로 잡기, 화살표로 이동)`}
         >
           <GripVertical className="w-5 h-5" />
         </div>

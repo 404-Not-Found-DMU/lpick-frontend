@@ -8,9 +8,9 @@ import { ThemeSelector } from '@/modules';
 import { UserAvatarWithAuth } from '@/components/Layout/UserAvatar';
 import clsx from 'clsx';
 import React, { useState, useEffect, useRef, MouseEvent, FormEvent, ChangeEvent } from 'react';
+import { fetcher } from '@/hooks/api/fetchers';
 
-// 환경 변수 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+// API 경로
 const API_PREFIX = '/api/v1/public/data';
 
 // 반환 타입
@@ -23,21 +23,11 @@ interface SearchResult {
 // 자동 완성 API 호출 함수
 const fetchAutocompleteSuggestions = async (query: string): Promise<SearchResult[]> => {
   if (!query || query.trim() === '') return [];
-
-  // 환경 변수를 사용하여 전체 URL 구성
-  const fullUrl = `${API_BASE_URL}${API_PREFIX}/autocomplete?keyword=${encodeURIComponent(query)}&size=8`;
-
+  const path = `${API_PREFIX}/autocomplete?keyword=${encodeURIComponent(query)}&size=8`;
   try {
-    const res = await fetch(fullUrl);
-    if (!res.ok) {
-      // 4xx 또는 5xx 오류 발생 시
-      console.error(`API 호출 실패: ${res.status} - URL: ${fullUrl}`);
-      return [];
-    }
-  
-    return (await res.json()) as SearchResult[];
+    const res = await fetcher<SearchResult[]>(path);
+    return Array.isArray(res) ? res : [];
   } catch (error) {
-    // 네트워크 오류 발생 시
     console.error('자동 완성 데이터를 불러오는 데 실패했습니다:', error);
     return [];
   }
@@ -108,6 +98,22 @@ const Header = () => {
   const showSuggestions = isFocused && suggestions.length > 0 && searchTerm.length > 0;
 
   // ... (console.log는 동일)
+
+  const renderHighlighted = (text: string, query: string) => {
+    if (!query) return text;
+    try {
+      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escaped})`, 'gi');
+      const parts = text.split(regex);
+      return parts.map((part, idx) =>
+        part.toLowerCase() === query.toLowerCase()
+          ? <span key={idx} className="font-semibold">{part}</span>
+          : <span key={idx}>{part}</span>
+      );
+    } catch {
+      return text;
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
@@ -185,7 +191,7 @@ const Header = () => {
                       {/* 이름 표시 부분 */}
                       <div className="flex items-center text-gray-700 dark:text-gray-200">
                         <Search className="inline-block h-3 w-3 mr-2 text-gray-500 dark:text-gray-400" />
-                        <span>{suggestion.name}</span>
+                        <span>{renderHighlighted(suggestion.name, searchTerm)}</span>
                       </div>
 
                       {/* 타입 배지 표시 부분 (신규) */}

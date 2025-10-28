@@ -7,6 +7,7 @@ import type {
 } from "@/types/hierarchical.editor.types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card/Card"
 import { Input } from "@/components/Input"
+import { Select } from "@/components"
 import { Button } from "@/components/Button"
 import { Plus, Edit, Trash2, GripVertical } from "lucide-react"
 import { useState } from "react"
@@ -31,6 +32,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { createPortal } from 'react-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/Dialog';
 
 type ArtistFormProps = CategoryFormProps<ArtistInfo>;
 
@@ -82,6 +84,7 @@ function SortableDiscographyItem({ item, onEdit, onDelete }: SortableDiscography
           {...attributes}
           {...listeners}
           className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          aria-label={`디스코그래피 항목 순서 변경: ${item.title} (스페이스로 잡기, 화살표로 이동)`}
         >
           <GripVertical className="h-4 w-4" />
         </button>
@@ -147,6 +150,7 @@ function SortableActivityItem({ item, onEdit, onDelete }: SortableActivityItemPr
           {...attributes}
           {...listeners}
           className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          aria-label={`활동 이력 항목 순서 변경: ${item.title} (스페이스로 잡기, 화살표로 이동)`}
         >
           <GripVertical className="h-4 w-4" />
         </button>
@@ -290,32 +294,36 @@ export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">이름</label>
+              <label className="block text-sm font-medium mb-2" htmlFor="artist-name">이름</label>
               <Input
+                id="artist-name"
                 value={data.name}
                 onChange={(e) => handleFieldChange("name", e.target.value)}
                 placeholder="아티스트명을 입력하세요"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">국가</label>
+              <label className="block text-sm font-medium mb-2" htmlFor="artist-country">국가</label>
               <Input
+                id="artist-country"
                 value={data.country}
                 onChange={(e) => handleFieldChange("country", e.target.value)}
                 placeholder="국가를 입력하세요"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">활동 기간</label>
+              <label className="block text-sm font-medium mb-2" htmlFor="artist-activePeriod">활동 기간</label>
               <Input
+                id="artist-activePeriod"
                 value={data.activePeriod}
                 onChange={(e) => handleFieldChange("activePeriod", e.target.value)}
                 placeholder="예: 1990-현재, 2005-2015"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">이미지 URL</label>
+              <label className="block text-sm font-medium mb-2" htmlFor="artist-imageUrl">이미지 URL</label>
               <Input
+                id="artist-imageUrl"
                 value={data.imageUrl}
                 onChange={(e) => handleFieldChange("imageUrl", e.target.value)}
                 placeholder="이미지 URL을 입력하세요"
@@ -465,133 +473,141 @@ export function ArtistForm({ data, onUpdate }: ArtistFormProps) {
         </CardContent>
       </Card>
 
-      {/* 디스코그래피 편집 모달 */}
-      {editingDiscography && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">디스코그래피 편집</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">제목</label>
-                <Input
-                  value={editingDiscography.title}
-                  onChange={(e) => setEditingDiscography({...editingDiscography, title: e.target.value})}
-                  placeholder="앨범/싱글 제목"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">발매일</label>
-                <Input
-                  type="date"
-                  value={editingDiscography.releaseDate}
-                  onChange={(e) => setEditingDiscography({...editingDiscography, releaseDate: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">유형</label>
-                <select
+      {/* 디스코그래피 편집 모달 - Dialog */}
+      <Dialog open={!!editingDiscography} onOpenChange={(open) => !open && setEditingDiscography(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>디스코그래피 편집</DialogTitle>
+          </DialogHeader>
+          {editingDiscography && (
+            <>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">제목</label>
+                  <Input
+                    value={editingDiscography.title}
+                    onChange={(e) => setEditingDiscography({...editingDiscography, title: e.target.value})}
+                    placeholder="앨범/싱글 제목"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">발매일</label>
+                  <Input
+                    type="date"
+                    value={editingDiscography.releaseDate}
+                    onChange={(e) => setEditingDiscography({...editingDiscography, releaseDate: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">유형</label>
+                <Select
                   value={editingDiscography.type}
                   onChange={(e) => setEditingDiscography({...editingDiscography, type: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
+                  aria-label="디스코그래피 유형"
                 >
                   <option value="">유형 선택</option>
                   {RELEASE_TYPES.map(type => (
                     <option key={type} value={type}>{type}</option>
                   ))}
-                </select>
+                </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">역할</label>
+                  <Input
+                    value={editingDiscography.role}
+                    onChange={(e) => setEditingDiscography({...editingDiscography, role: e.target.value})}
+                    placeholder="작곡, 작사, 프로듀싱 등"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">역할</label>
-                <Input
-                  value={editingDiscography.role}
-                  onChange={(e) => setEditingDiscography({...editingDiscography, role: e.target.value})}
-                  placeholder="작곡, 작사, 프로듀싱 등"
-                />
+              <div className="flex gap-2 mt-6">
+                <Button
+                  onClick={() => handleSaveDiscography(editingDiscography)}
+                  className="flex-1"
+                >
+                  저장
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditingDiscography(null)}
+                  className="flex-1"
+                >
+                  취소
+                </Button>
               </div>
-            </div>
-            <div className="flex gap-2 mt-6">
-              <Button
-                onClick={() => handleSaveDiscography(editingDiscography)}
-                className="flex-1"
-              >
-                저장
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setEditingDiscography(null)}
-                className="flex-1"
-              >
-                취소
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
-      {/* 활동 이력 편집 모달 */}
-      {editingActivity && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">활동 이력 편집</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">연도</label>
-                <Input
-                  value={editingActivity.year}
-                  onChange={(e) => setEditingActivity({...editingActivity, year: e.target.value})}
-                  placeholder="예: 2020"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">제목</label>
-                <Input
-                  value={editingActivity.title}
-                  onChange={(e) => setEditingActivity({...editingActivity, title: e.target.value})}
-                  placeholder="활동 제목"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">유형</label>
-                <select
+      {/* 활동 이력 편집 모달 - Dialog */}
+      <Dialog open={!!editingActivity} onOpenChange={(open) => !open && setEditingActivity(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>활동 이력 편집</DialogTitle>
+          </DialogHeader>
+          {editingActivity && (
+            <>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">연도</label>
+                  <Input
+                    value={editingActivity.year}
+                    onChange={(e) => setEditingActivity({...editingActivity, year: e.target.value})}
+                    placeholder="예: 2020"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">제목</label>
+                  <Input
+                    value={editingActivity.title}
+                    onChange={(e) => setEditingActivity({...editingActivity, title: e.target.value})}
+                    placeholder="활동 제목"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">유형</label>
+                <Select
                   value={editingActivity.type}
                   onChange={(e) => setEditingActivity({...editingActivity, type: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
+                  aria-label="활동 이력 유형"
                 >
                   <option value="">유형 선택</option>
                   {ACTIVITY_TYPES.map(type => (
                     <option key={type} value={type}>{type}</option>
                   ))}
-                </select>
+                </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">설명</label>
+                  <textarea
+                    value={editingActivity.description}
+                    onChange={(e) => setEditingActivity({...editingActivity, description: e.target.value})}
+                    placeholder="활동에 대한 설명"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
+                    rows={3}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">설명</label>
-                <textarea
-                  value={editingActivity.description}
-                  onChange={(e) => setEditingActivity({...editingActivity, description: e.target.value})}
-                  placeholder="활동에 대한 설명"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
-                  rows={3}
-                />
+              <div className="flex gap-2 mt-6">
+                <Button
+                  onClick={() => handleSaveActivity(editingActivity)}
+                  className="flex-1"
+                >
+                  저장
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditingActivity(null)}
+                  className="flex-1"
+                >
+                  취소
+                </Button>
               </div>
-            </div>
-            <div className="flex gap-2 mt-6">
-              <Button
-                onClick={() => handleSaveActivity(editingActivity)}
-                className="flex-1"
-              >
-                저장
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setEditingActivity(null)}
-                className="flex-1"
-              >
-                취소
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
