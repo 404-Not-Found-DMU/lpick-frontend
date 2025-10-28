@@ -6,6 +6,7 @@ import { Button, Card, CardContent, Badge } from '@/components'
 import { useSearchParams } from 'next/navigation'
 import { useCustomQuery } from '@/hooks/useQuery'
 import { fetcher } from '@/hooks/api/fetchers'
+import { useState } from 'react'
 
 /**
  * 검색 결과 페이지 UI 스켈레톤
@@ -19,6 +20,7 @@ export default function SearchResultPage() {
   const page = Number(searchParams.get('page') ?? '1')
   const size = Number(searchParams.get('size') ?? '10')
   const searchedImageUrl: string | undefined = searchParams.get('imageUrl') ?? undefined
+  const [selectedImageUrl] = useState<string | undefined>(undefined)
 
   type SearchItem = {
     id: string
@@ -50,9 +52,9 @@ export default function SearchResultPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">이미지 검색 결과</h1>
           <div className="flex items-center gap-4">
             <div className="w-28 h-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
-              {searchedImageUrl ? (
+              {selectedImageUrl || searchedImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={searchedImageUrl} alt="검색된 이미지" className="w-full h-full object-cover" />
+                <img src={selectedImageUrl || searchedImageUrl} alt="검색된 이미지" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
                   이미지 미선택
@@ -70,7 +72,7 @@ export default function SearchResultPage() {
                   <p className="text-gray-700 dark:text-gray-300">검색 결과가 없습니다.</p>
                 ) : (
                   <p className="text-gray-700 dark:text-gray-300">
-                    "{keyword}"에 대한 <span className="font-bold text-violet-500 dark:text-violet-400">{results.length}</span>개 결과
+                    &quot;{keyword}&quot;에 대한 <span className="font-bold text-violet-500 dark:text-violet-400">{results.length}</span>개 결과
                   </p>
                 )
               ) : (

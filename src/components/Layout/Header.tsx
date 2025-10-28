@@ -2,7 +2,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { LPickLogo } from '@/assets/images/LPickLogo';
 import { ThemeSelector } from '@/modules';
@@ -59,6 +59,7 @@ const Header = () => {
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
   const [isFocused, setIsFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // 자동 완성 API 호출 로직
   useEffect(() => {
@@ -143,10 +144,34 @@ const Header = () => {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400 dark:text-gray-500" />
             <input
               placeholder="검색어를 입력하시거나 이미지를 업로드하세요."
-              className="h-10 w-full rounded-full border-gray-200 bg-gray-50 pl-10 pr-4 text-sm placeholder:text-gray-500 focus:border-lavender-400 focus:ring-lavender-400 dark:border-gray-700 dark:bg-gray-800 dark:placeholder:text-gray-500 dark:focus:border-lavender-500 dark:focus:ring-lavender-500"
+              className="h-10 w-full rounded-full border-gray-200 bg-gray-50 pl-10 pr-10 text-sm placeholder:text-gray-500 focus:border-lavender-400 focus:ring-lavender-400 dark:border-gray-700 dark:bg-gray-800 dark:placeholder:text-gray-500 dark:focus:border-lavender-500 dark:focus:ring-lavender-500"
               value={searchTerm}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
               onFocus={() => setIsFocused(true)}
+            />
+            {/* 이미지 업로드 아이콘 버튼 */}
+            <button
+              type="button"
+              aria-label="이미지 업로드"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              onClick={() => imageInputRef.current?.click()}
+            >
+              <ImageIcon className="h-5 w-5" />
+            </button>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const url = URL.createObjectURL(file);
+                  setIsFocused(false);
+                  setSuggestions([]);
+                  router.push(`/search/result?imageUrl=${encodeURIComponent(url)}`);
+                }
+              }}
             />
 
             {showSuggestions && (
