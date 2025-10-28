@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, Reply, MoreHorizontal } from 'lucide-react';
 import { Comment } from '../../types/community.types';
 
 interface CommentItemProps {
   comment: Comment;
-  onLike: (commentId: number) => void;
-  onReply: (commentId: number) => void;
+  onLike: (commentId: number) => Promise<boolean>;
+  onReply: (commentId: number, replyText: string) => Promise<boolean>;
   isReply?: boolean;
 }
 
@@ -30,24 +30,46 @@ const renderContentWithMentions = (content: string) => {
   });
 };
 
-export const CommentItem = ({ comment, onLike, isReply = false }: CommentItemProps) => {
-  const [isLiked, setIsLiked] = useState(false);
+export const CommentItem = ({ comment, onLike, onReply, isReply = false }: CommentItemProps) => {
+  const [isLiked, setIsLiked] = useState(comment.liked || false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyText, setReplyText] = useState('');
+  const [isLikeLoading, setIsLikeLoading] = useState(false);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    onLike(comment.id);
+  // 댓글 데이터가 변경될 때 좋아요 상태 동기화
+  useEffect(() => {
+    setIsLiked(comment.liked || false);
+  }, [comment.liked]);
+
+  const handleLike = async () => {
+    if (isLikeLoading) return;
+    
+    setIsLikeLoading(true);
+    
+    try {
+      const success = await onLike(comment.id);
+      // API 호출이 성공했을 때는 새로고침을 기다림 (useEffect에서 처리)
+      if (!success) {
+        // 실패한 경우에만 로그 출력
+        console.log('Like action failed');
+      }
+    } catch (error) {
+      // 에러는 이미 onLike에서 처리됨
+      console.error('Like error:', error);
+    } finally {
+      setIsLikeLoading(false);
+    }
   };
 
-  const handleReplySubmit = (e: React.FormEvent) => {
+  const handleReplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!replyText.trim()) return;
 
-    // TODO: 답글 제출 로직
-    console.log('답글 제출:', replyText);
-    setReplyText('');
-    setShowReplyForm(false);
+    const success = await onReply(comment.id, replyText.trim());
+    if (success) {
+      setReplyText('');
+      setShowReplyForm(false);
+    }
   };
 
   return (
@@ -105,12 +127,13 @@ export const CommentItem = ({ comment, onLike, isReply = false }: CommentItemPro
             <div className="flex items-center gap-4">
               <button
                 onClick={handleLike}
+                disabled={isLikeLoading}
                 className={`flex items-center gap-1 transition-all hover:scale-110 ${
                   isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
-                }`}
+                } ${isLikeLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-                <span className="text-xs font-medium">{comment.likes + (isLiked ? 1 : 0)}</span>
+                <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''} ${isLikeLoading ? 'animate-pulse' : ''}`} />
+                <span className="text-xs font-medium">{comment.likes}</span>
               </button>
 
               {!isReply && (
@@ -122,10 +145,6 @@ export const CommentItem = ({ comment, onLike, isReply = false }: CommentItemPro
                   <span className="text-xs font-medium">답글</span>
                 </button>
               )}
-
-              <button className="text-xs font-medium text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
-                공유
-              </button>
             </div>
 
             {/* 답글 작성 폼 */}

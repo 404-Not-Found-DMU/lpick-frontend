@@ -31,8 +31,8 @@ export const Providers = ({ children }: ProvidersProps) => {
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         {children}
+        <ReactQueryDevtools initialIsOpen={false} />
       </ToastProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }; 

@@ -8,8 +8,8 @@ export const usePostNavigation = () => {
   const router = useRouter();
 
   const navigateToPost = useCallback(
-    (postId: number) => {
-      router.push(`/community/${postId}`);
+    (articleId: string | number) => {
+      router.push(`/community/${articleId}`);
     },
     [router],
   );

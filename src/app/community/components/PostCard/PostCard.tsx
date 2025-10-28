@@ -13,7 +13,9 @@ export const PostCard = ({ post }: PostCardProps) => {
   const { navigateToPost } = usePostNavigation();
 
   const handleClick = () => {
-    navigateToPost(post.id);
+    // articleId가 있으면 사용하고, 없으면 id를 문자열로 변환해서 사용
+    const articleId = post.articleId || post.id.toString();
+    navigateToPost(articleId);
   };
 
   return (

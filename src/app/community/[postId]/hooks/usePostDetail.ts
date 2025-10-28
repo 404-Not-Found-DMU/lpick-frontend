@@ -1,43 +1,159 @@
-import { useState, useEffect } from 'react';
-import { Post, Comment } from '../../types/community.types';
-import { SAMPLE_POSTS } from '../../temp/community.temp';
-import { getSampleComments } from '../data/sampleComments';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast/ToastProvider';
+import { Post, Comment, BoardTypeMapping, BadgeTypeMapping, convertApiCommentToUiComment } from '../../types/community.types';
+import { useArticle } from '../../hooks/useArticles';
+import { useArticleInteractions, useArticleManager } from '../../hooks/useArticleManager';
+import { useComments, useCommentManager, useCommentInteractions } from '../../hooks';
 
-export const usePostDetail = (postId: number) => {
-  const [post, setPost] = useState<Post | null>(null);
+export const usePostDetail = (articleId: string) => {
+  const router = useRouter();
+  const { push: toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [allComments, setAllComments] = useState<Comment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [commentsPerPage] = useState(5);
   const [newComment, setNewComment] = useState('');
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+
+  // API 훅 사용
+  const {
+    article,
+    loading: articleLoading,
+    error: articleError,
+    refresh: refreshArticle
+  } = useArticle(articleId);
+
+  const {
+    loading: interactionLoading,
+    error: interactionError,
+    toggleLike,
+    toggleBookmark
+  } = useArticleInteractions();
+
+  const {
+    loading: managerLoading,
+    error: managerError,
+    updateExistingArticle,
+    deleteExistingArticle
+  } = useArticleManager();
+
+  // 댓글 관련 훅들
+  const {
+    comments: apiComments,
+    fetchComments,
+    refresh: refreshComments
+  } = useComments(articleId, { page: 1, size: 50 }); // 충분한 크기로 설정
+
+  const {
+    createNewComment,
+    createNewReply
+  } = useCommentManager();
+
+  const {
+    handleCommentLike: apiHandleCommentLike
+  } = useCommentInteractions();
+
+  // 게시글 데이터를 Post 형태로 변환
+  const post: Post | null = useMemo(() => {
+    if (!article) return null;
+
+    // ISO 날짜를 YYYY-MM-DD 형식으로 변환
+    const formatDate = (isoString: string) => {
+      try {
+        return new Date(isoString).toISOString().split('T')[0];
+      } catch {
+        return isoString; // 파싱 실패 시 원본 반환
+      }
+    };
+
+    // articleId에서 고유한 숫자 ID 생성 (해시 기반)
+    const generateNumericId = (articleId: string) => {
+      let hash = 0;
+      for (let i = 0; i < articleId.length; i++) {
+        const char = articleId.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // 32비트 정수로 변환
+      }
+      return Math.abs(hash);
+    };
+
+    return {
+      id: generateNumericId(article.articleId),
+      articleId: article.articleId,
+      title: article.title,
+      content: article.content,
+      author: article.author, // API에서 제공하는 author 필드 사용
+      oauthId: article.oauthId,
+      date: formatDate(article.createdAt),
+      board: '자유게시판', // 기본값, 실제로는 게시판 정보 필요
+      tag: undefined, // 태그 정보 필요
+      likes: article.likeCount,
+      likeCount: article.likeCount,
+      comments: article.commentCount,
+      commentCount: article.commentCount,
+      bookmarkCount: article.bookmarkCount,
+      liked: article.liked,
+      bookmarked: article.bookmarked,
+      views: 0, // 조회수 정보 필요
+      image: '', // 이미지 정보 필요
+    };
+  }, [article]);
+
+  const isLiked = article?.liked || false;
+  const isBookmarked = article?.bookmarked || false;
+  const loading = articleLoading || interactionLoading || managerLoading;
 
   useEffect(() => {
     setIsMounted(true);
-    setLoading(true);
+  }, []);
+
+  // API 댓글을 UI 댓글로 변환
+  const convertedComments = useMemo(() => {
+    if (!apiComments || !articleId) return [];
+    
+    const allComments: Comment[] = [];
+    
+    // 부모 댓글들을 변환
+    apiComments.forEach(apiComment => {
+      // 삭제된 댓글은 제외
+      if (apiComment.isDel === 'Y') return;
+      
+      const parentComment = convertApiCommentToUiComment(apiComment, articleId);
+      allComments.push(parentComment);
+      
+      // 자식 댓글들도 변환
+      if (apiComment.childsCommentList && apiComment.childsCommentList.length > 0) {
+        apiComment.childsCommentList.forEach(childApiComment => {
+          const childComment = convertApiCommentToUiComment(childApiComment, articleId);
+          allComments.push(childComment);
+        });
+      }
+    });
+    
+    return allComments;
+  }, [apiComments, articleId]);
+
+  useEffect(() => {
+    setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || !articleId) return;
+    
+    // 댓글 데이터 로드
+    fetchComments();
+  }, [articleId, isMounted, fetchComments]);
 
-    // TODO: API에서 실제 데이터 가져오기
-    const foundPost = SAMPLE_POSTS.find((p: Post) => p.id === postId);
-    if (foundPost) {
-      setPost({
-        ...foundPost,
-        content: foundPost.content || '게시글 내용이 없습니다.',
-        comments: 12,
-      });
-      const allCommentsData = getSampleComments(postId);
-      setAllComments(allCommentsData);
-      // 첫 페이지 댓글만 표시
-      setComments(allCommentsData.slice(0, commentsPerPage));
-    }
-    setLoading(false);
-  }, [postId, isMounted, commentsPerPage]);
+  // 변환된 댓글을 전체 댓글과 현재 댓글로 설정
+  useEffect(() => {
+    console.log('API 댓글 데이터:', apiComments);
+    console.log('변환된 댓글 데이터:', convertedComments);
+    
+    setAllComments(convertedComments);
+    // 첫 페이지 댓글만 표시
+    setComments(convertedComments.slice(0, commentsPerPage));
+  }, [convertedComments, commentsPerPage, apiComments]);
 
   // 페이지 변경시 댓글 업데이트
   useEffect(() => {
@@ -46,64 +162,212 @@ export const usePostDetail = (postId: number) => {
     setComments(allComments.slice(0, endIndex));
   }, [currentPage, allComments, commentsPerPage]);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    if (post) {
-      setPost({
-        ...post,
-        likes: isLiked ? post.likes - 1 : post.likes + 1,
-      });
+  const handleLike = useCallback(async () => {
+    if (!article) return;
+    
+    const success = await toggleLike(article.articleId, isLiked);
+    if (success) {
+      refreshArticle(); // 게시글 데이터 새로고침
     }
-  };
+  }, [article, isLiked, toggleLike, refreshArticle]);
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-  };
+  const handleBookmark = useCallback(async () => {
+    if (!article) return;
+    
+    const success = await toggleBookmark(article.articleId, isBookmarked);
+    if (success) {
+      refreshArticle(); // 게시글 데이터 새로고침
+    }
+  }, [article, isBookmarked, toggleBookmark, refreshArticle]);
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  const handleCommentSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !articleId) return;
 
-    const comment: Comment = {
-      id: Math.floor(Math.random() * 10000) + 1000, // 더 안정적인 ID 생성
-      postId: postId,
-      author: '현재사용자',
-      content: newComment,
-      date: '2025-01-15', // 고정된 날짜 사용 (임시)
-      likes: 0,
-    };
+    const success = await createNewComment(articleId, {
+      comment: newComment.trim()
+    });
 
-    setComments([...comments, comment]);
-    setNewComment('');
-
-    if (post) {
-      setPost({ ...post, comments: post.comments + 1 });
+    if (success) {
+      setNewComment('');
+      // 댓글 목록 새로고침
+      await refreshComments();
+      toast('댓글이 작성되었습니다.', 'success');
+    } else {
+      toast('댓글 작성에 실패했습니다. 다시 시도해주세요.', 'error');
     }
-  };
+  }, [newComment, articleId, createNewComment, refreshComments, toast]);
 
-  const handleCommentLike = (commentId: number) => {
-    setComments(
-      comments.map((comment) =>
-        comment.id === commentId ? { ...comment, likes: comment.likes + 1 } : comment,
-      ),
-    );
-  };
+  const handleCommentLike = useCallback(async (commentId: number): Promise<boolean> => {
+    console.log('댓글 좋아요 클릭:', commentId);
+    
+    // UI commentId로부터 실제 API commentId 찾기
+    let realCommentId: string | undefined;
+    
+    // 모든 API 댓글과 자식 댓글을 확인
+    apiComments?.forEach(comment => {
+      // 부모 댓글 확인
+      const match = comment.commentId.match(/\d+/g);
+      const parentUiId = match && match.length > 0 ? parseInt(match[match.length - 1]) : 0;
+      
+      if (parentUiId === commentId) {
+        realCommentId = comment.commentId;
+        return;
+      }
+      
+      // 자식 댓글들 확인
+      comment.childsCommentList?.forEach(child => {
+        const childMatch = child.commentId.match(/\d+/g);
+        const childUiId = childMatch && childMatch.length > 0 ? parseInt(childMatch[childMatch.length - 1]) : 0;
+        
+        if (childUiId === commentId) {
+          realCommentId = child.commentId;
+        }
+      });
+    });
 
-  const handleLoadMoreComments = () => {
+    if (!realCommentId) {
+      console.error('실제 댓글 ID를 찾을 수 없습니다:', commentId);
+      console.log('사용 가능한 댓글들:', apiComments?.map(c => ({
+        commentId: c.commentId,
+        children: c.childsCommentList?.map(child => child.commentId)
+      })));
+      toast('댓글을 찾을 수 없습니다.', 'error');
+      return false;
+    }
+
+    console.log('댓글 좋아요 요청:', { uiId: commentId, realId: realCommentId });
+    
+    // 현재 좋아요 상태 찾기
+    const currentComment = convertedComments.find(c => c.id === commentId);
+    const isCurrentlyLiked = currentComment?.liked || false;
+    
+    console.log('현재 좋아요 상태:', { 
+      commentId, 
+      isCurrentlyLiked, 
+      currentComment: {
+        id: currentComment?.id,
+        likes: currentComment?.likes,
+        liked: currentComment?.liked
+      }
+    });
+    
+    const result = await apiHandleCommentLike(realCommentId, isCurrentlyLiked);
+    if (result.success) {
+      console.log('댓글 좋아요/취소 성공');
+      // 댓글 목록 새로고침
+      await refreshComments();
+      return true;
+    } else {
+      console.error('댓글 좋아요/취소 실패:', result.message);
+      
+      // 에러 메시지에 따라 다른 처리
+      if (result.message?.includes('ALREADY_HAS_LIKE')) {
+        toast('이미 좋아요를 누른 댓글입니다.', 'info');
+      } else if (result.message?.includes('404')) {
+        toast('댓글을 찾을 수 없습니다.', 'error');
+      } else {
+        toast(result.message || '댓글 좋아요에 실패했습니다. 다시 시도해주세요.', 'error');
+      }
+      return false;
+    }
+  }, [apiComments, convertedComments, apiHandleCommentLike, refreshComments, toast]);
+
+  const handleLoadMoreComments = useCallback(() => {
     setCurrentPage(currentPage + 1);
-  };
+  }, [currentPage]);
 
-  const handleEdit = () => {
-    console.log('게시글 수정');
-  };
+  const handleEdit = useCallback(async () => {
+    if (!article) return;
+    
+    // TODO: 게시글 수정 모달/페이지로 이동하거나 인라인 편집 구현
+    // 현재는 간단한 prompt로 제목만 수정
+    const newTitle = prompt('새 제목을 입력하세요:', article.title);
+    if (!newTitle || newTitle === article.title) return;
+    
+    const success = await updateExistingArticle(article.articleId, {
+      title: newTitle,
+      content: article.content,
+      type: BoardTypeMapping.toApi('자유게시판'), // 기본값 (API 응답에 해당 정보가 없으므로)
+      badge: BadgeTypeMapping.toApi('질문')      // 기본값 (API 응답에 해당 정보가 없으므로)
+    });
+    
+    if (success) {
+      toast('게시글이 수정되었습니다.', 'success');
+      refreshArticle(); // 데이터 새로고침
+    } else {
+      toast(`게시글 수정에 실패했습니다. ${managerError || ''}`, 'error');
+    }
+  }, [article, updateExistingArticle, refreshArticle, managerError, toast]);
 
-  const handleDelete = () => {
-    console.log('게시글 삭제');
-  };
+  const handleDelete = useCallback(async () => {
+    if (!article) return;
+    
+    const confirmed = confirm('정말로 이 게시글을 삭제하시겠습니까?');
+    if (!confirmed) return;
+    
+    const success = await deleteExistingArticle(article.articleId);
+    
+    if (success) {
+      toast('게시글이 삭제되었습니다.', 'success');
+      router.push('/community'); // 커뮤니티 목록으로 이동
+    } else {
+      toast(`게시글 삭제에 실패했습니다. ${managerError || ''}`, 'error');
+    }
+  }, [article, deleteExistingArticle, router, managerError, toast]);
+
+  const handleReplySubmit = useCallback(async (
+    parentCommentId: number, 
+    replyText: string
+  ): Promise<boolean> => {
+    if (!replyText.trim() || !articleId) return false;
+
+    // UI commentId로부터 실제 API commentId 찾기
+    let realParentCommentId: string | undefined;
+    
+    // 부모 댓글의 실제 ID 찾기
+    apiComments?.forEach(comment => {
+      const match = comment.commentId.match(/\d+/g);
+      const parentUiId = match && match.length > 0 ? parseInt(match[match.length - 1]) : 0;
+      
+      if (parentUiId === parentCommentId) {
+        realParentCommentId = comment.commentId;
+      }
+    });
+
+    if (!realParentCommentId) {
+      console.error('부모 댓글 ID를 찾을 수 없습니다:', parentCommentId);
+      toast('댓글을 찾을 수 없습니다.', 'error');
+      return false;
+    }
+
+    console.log('답글 작성 요청:', { 
+      parentUiId: parentCommentId, 
+      realParentId: realParentCommentId,
+      replyText 
+    });
+
+    const success = await createNewReply(articleId, realParentCommentId, {
+      comment: replyText.trim()
+    });
+
+    if (success) {
+      toast('답글이 작성되었습니다.', 'success');
+      // 댓글 목록 새로고침
+      await refreshComments();
+      return true;
+    } else {
+      toast('답글 작성에 실패했습니다. 다시 시도해주세요.', 'error');
+      return false;
+    }
+  }, [articleId, apiComments, createNewReply, refreshComments, toast]);
 
   const totalPages = Math.ceil(allComments.length / commentsPerPage);
   const hasMoreComments = currentPage < totalPages;
   const remainingComments = allComments.length - comments.length;
+
+  // 에러 처리
+  const error = articleError || interactionError || managerError;
 
   return {
     post,
@@ -119,10 +383,12 @@ export const usePostDetail = (postId: number) => {
     isLiked,
     isBookmarked,
     loading,
+    error,
     handleLike,
     handleBookmark,
     handleCommentSubmit,
     handleCommentLike,
+    handleReplySubmit,
     handleLoadMoreComments,
     handleEdit,
     handleDelete,
