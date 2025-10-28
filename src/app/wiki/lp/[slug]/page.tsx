@@ -6,10 +6,9 @@ import { Button } from "@/components/Button"
 import Link from "next/link"
 import { Edit, History, MessageSquare, Star, Share2, Bookmark } from "lucide-react"
 import BlocksWithToc from "@/app/wiki/components/BlocksWithToc"
-import type { WikiCategory } from "@/types/hierarchical.editor.types"
+import type { WikiCategory, TextBlock, CategoryData } from "@/types/hierarchical.editor.types"
 import { fetcher } from "@/hooks/api/fetchers"
 
-type TextBlock = { id: string; depth: number; title: string; content: string }
 type WikiContent = { textBlocks: TextBlock[]; categoryData: { type: WikiCategory; data: unknown } }
 type WikiDetail = { wikiId: string; title: string; content: WikiContent; modifiedAt?: string | null }
 
@@ -92,7 +91,7 @@ export default function WikiLPPage() {
         <BlocksWithToc
           textBlocks={textBlocks}
           category={category}
-          categoryData={categoryData as unknown}
+          categoryData={categoryData as CategoryData}
           linkColorClass="text-violet-500"
           showIndex={false}
         />

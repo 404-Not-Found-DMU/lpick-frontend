@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 
-export default function WikiDiscussRedirect({ params }: { params: { slug: string } }) {
-  redirect(`/wiki/discuss?docId=${encodeURIComponent(params.slug)}`)
+export default async function WikiDiscussRedirect({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  redirect(`/wiki/discuss?docId=${encodeURIComponent(slug)}`)
 }
 
 

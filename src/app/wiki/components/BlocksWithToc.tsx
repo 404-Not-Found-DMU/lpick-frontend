@@ -2,14 +2,12 @@
 import { useState } from "react"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { LivePreview } from "@/app/wiki/edit/components/preview/LivePreview"
-import type { WikiCategory } from "@/types/hierarchical.editor.types"
-
-type TextBlockRef = { id: string; title: string }
+import type { WikiCategory, TextBlock, CategoryData } from "@/types/hierarchical.editor.types"
 
 interface BlocksWithTocProps {
-  textBlocks: TextBlockRef[]
+  textBlocks: TextBlock[]
   category: WikiCategory
-  categoryData: unknown
+  categoryData: CategoryData
   linkColorClass?: string
   showIndex?: boolean
   topInfo?: React.ReactNode
@@ -63,7 +61,7 @@ export default function BlocksWithToc({
         <LivePreview 
           category={category}
           categoryData={categoryData}
-          textBlocks={textBlocks as any}
+          textBlocks={textBlocks}
         />
       </div>
     </>

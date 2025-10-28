@@ -10,9 +10,9 @@ function blocksToMarkdown(blocks: Array<{ id: string; title: string; content: st
     .join('\n\n')
 }
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   // TODO: 실제 백엔드 연동으로 교체
-  const { id } = params
+  const { id } = await params
   const now = new Date()
   // 카테고리별 위키 더미 데이터 4종
   // 1) LP 문서: /wiki/lp-dark-side-of-the-moon (또는 기존 test-lp 호환)

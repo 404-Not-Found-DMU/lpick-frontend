@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ChevronDown, ChevronUp, Link as LinkIcon } from "lucide-react"
 import WikiRenderer from "@/app/wiki/components/WikiRenderer"
+import type ReactMarkdown from "react-markdown"
 
 type HeadingItem = { id: string; text: string; level: 2 | 3 }
 
@@ -12,6 +13,8 @@ function slugify(text: string): string {
     .replace(/[`~!@#$%^&*()_+\-={}|\[\]\\:";'<>?,./]/g, '')
     .replace(/\s+/g, '-')
 }
+
+type MarkdownComponents = Parameters<typeof ReactMarkdown>[0]["components"]
 
 export default function ContentWithToc({ content }: { content: string }) {
   const [headings, setHeadings] = useState<HeadingItem[]>([])
@@ -38,10 +41,11 @@ export default function ContentWithToc({ content }: { content: string }) {
     }
   }, [open])
 
-  const components = useMemo(() => {
+  const components = useMemo<MarkdownComponents>(() => {
+    type HeadingProps = React.ComponentPropsWithoutRef<'h2'>
     function makeHeading(level: 2 | 3) {
-      return function Heading({ children }: { children: React.ReactNode }) {
-        const plain = Array.isArray(children) ? children.join(' ') : (typeof children === 'string' ? children : '')
+      return function Heading({ children, ...rest }: HeadingProps) {
+        const plain = Array.isArray(children) ? (children as unknown[]).join(' ') : (typeof children === 'string' ? children : '')
         const text = String(plain ?? '')
         const id = slugify(text)
         if (!collectedRef.current.has(id)) {
@@ -49,7 +53,7 @@ export default function ContentWithToc({ content }: { content: string }) {
         }
         const Tag = (level === 2 ? 'h2' : 'h3') as 'h2' | 'h3'
         return (
-          <Tag id={id} className="group scroll-mt-24">
+          <Tag id={id} className="group scroll-mt-24" {...rest}>
             <span>{children}</span>
             <button
               type="button"
