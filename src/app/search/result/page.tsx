@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ExternalLink, MessageCircle, Calendar, Disc, Music, Eye, Heart } from 'lucide-react'
+import { ExternalLink, MessageCircle, Disc, Music, Eye, Heart } from 'lucide-react'
 import { Button, Card, CardContent, Badge } from '@/components'
 import { useSearchParams } from 'next/navigation'
 import { useCustomQuery } from '@/hooks/useQuery'
@@ -66,15 +66,31 @@ export default function SearchResultPage() {
               ) : isError ? (
                 <p className="text-red-500">검색에 실패했습니다.</p>
               ) : keyword ? (
-                <p className="text-gray-700 dark:text-gray-300">
-                  "{keyword}"에 대한 <span className="font-bold text-violet-500 dark:text-violet-400">{results.length}</span>개 결과
-                </p>
+                results.length === 0 ? (
+                  <p className="text-gray-700 dark:text-gray-300">검색 결과가 없습니다.</p>
+                ) : (
+                  <p className="text-gray-700 dark:text-gray-300">
+                    "{keyword}"에 대한 <span className="font-bold text-violet-500 dark:text-violet-400">{results.length}</span>개 결과
+                  </p>
+                )
               ) : (
                 <p className="text-gray-700 dark:text-gray-300">검색어를 입력해 주세요.</p>
               )}
             </div>
           </div>
         </div>
+
+        {/* 전체 빈 상태 (검색 결과 없음) */}
+        {!isLoading && !isError && keyword && results.length === 0 && (
+          <div className="mb-6">
+            <Card className="border-dashed">
+              <CardContent className="py-10 flex flex-col items-center gap-2">
+                <div className="text-gray-700 dark:text-gray-300 font-medium">검색 결과가 없습니다.</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">다른 키워드로 다시 시도해 보세요.</div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* 위키 문서 결과 */}
         <div className="mb-6">
