@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { CategoryData, TextBlock, WikiCategory } from '@/types/hierarchical.editor.types';
+import type { CategoryData, TextBlock, WikiCategory, InfoboxData, TracklistData, ArtistInfo, EquipmentInfo, OtherInfo } from '@/types/hierarchical.editor.types';
 import { getDummyData } from '../data/dummyData';
 
 interface UseWikiEditorProps {
@@ -12,10 +12,56 @@ interface UseWikiEditorProps {
 }
 
 export function useWikiEditor({ category, initialData, onSave }: UseWikiEditorProps) {
-  // 카테고리별 기본 데이터 생성
+  // 카테고리별 기본(빈) 데이터 생성
   const getDefaultCategoryData = useCallback((): CategoryData => {
-    const dummyData = getDummyData(category);
-    return dummyData.categoryData;
+    switch (category) {
+      case 'lp': {
+        const emptyInfobox: InfoboxData = {
+          title: '',
+          artist: '',
+          coverUrl: '',
+          releaseDate: '',
+          genre: '',
+          label: '',
+          tableColor: '',
+          lpInfos: []
+        };
+        const emptyTracklist: TracklistData = { tracks: [] };
+        return { type: 'lp', data: { infobox: emptyInfobox, tracklist: emptyTracklist } };
+      }
+      case 'artist': {
+        const emptyArtist: ArtistInfo = {
+          name: '',
+          country: '',
+          activePeriod: '',
+          roles: [],
+          imageUrl: '',
+          discography: [],
+          activities: []
+        };
+        return { type: 'artist', data: emptyArtist };
+      }
+      case 'equipment': {
+        const emptyEquipment: EquipmentInfo = {
+          name: '',
+          brand: '',
+          releaseYear: '',
+          description: '',
+          equipmentType: 'other',
+          imageUrl: ''
+        };
+        return { type: 'equipment', data: emptyEquipment };
+      }
+      case 'other': {
+        const emptyOther: OtherInfo = {
+          title: '',
+          content: ''
+        };
+        return { type: 'other', data: emptyOther };
+      }
+      default:
+        return { type: 'other', data: { title: '', content: '' } };
+    }
   }, [category]);
 
   // 초기 데이터 설정
@@ -24,7 +70,7 @@ export function useWikiEditor({ category, initialData, onSave }: UseWikiEditorPr
   );
 
   const [textBlocks, setTextBlocks] = useState<TextBlock[]>(
-    initialData?.textBlocks || getDummyData(category).textBlocks
+    initialData?.textBlocks || []
   );
 
   // 카테고리 데이터 업데이트
@@ -91,6 +137,13 @@ export function useWikiEditor({ category, initialData, onSave }: UseWikiEditorPr
     setTextBlocks(data.textBlocks);
   }, []);
 
+  // 예시 데이터 로드
+  const loadExampleData = useCallback(() => {
+    const example = getDummyData(category);
+    setCategoryData(example.categoryData);
+    setTextBlocks(example.textBlocks);
+  }, [category]);
+
   // 문서 제목 생성
   const getDocumentTitle = useCallback((): string => {
     switch (category) {
@@ -130,6 +183,7 @@ export function useWikiEditor({ category, initialData, onSave }: UseWikiEditorPr
     handleSave,
     handleExportJson,
     handleImportJson,
+    loadExampleData,
     getDocumentTitle
   };
 } 

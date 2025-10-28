@@ -7,8 +7,8 @@ import { Button } from "@/components/Button"
 import { Plus, Trash2, ChevronDown, ChevronRight, GripVertical } from "lucide-react"
 import { useState } from "react"
 import { nanoid } from "nanoid"
-import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core"
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { DndContext, closestCenter, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { DeleteConfirmModal } from "../common/DeleteConfirmModal"
 import type { InfoboxData, LPInfo } from "@/types/hierarchical.editor.types"
@@ -45,7 +45,7 @@ function SortableLPItem({ lp, index, isExpanded, onToggleExpansion, onLPChange, 
               {...attributes}
               {...listeners}
               className="cursor-grab p-1 text-gray-400 hover:text-gray-600"
-              aria-label="Drag to reorder"
+              aria-label={`LP #${index + 1} 순서 변경 (스페이스로 잡기, 화살표로 이동)`}
             >
               <GripVertical className="w-4 h-4" />
             </div>
@@ -226,6 +226,10 @@ function SortableLPItem({ lp, index, isExpanded, onToggleExpansion, onLPChange, 
 
 export function InfoboxForm({ data, onUpdate }: InfoboxFormProps) {
   const [expandedLPs, setExpandedLPs] = useState<Set<string>>(new Set())
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
 
   const handleChange = (field: keyof InfoboxData, value: string) => {
     onUpdate({ ...data, [field]: value })
@@ -286,36 +290,36 @@ export function InfoboxForm({ data, onUpdate }: InfoboxFormProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="title">앨범명</Label>
-          <Input id="title" value={data.title} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("title", e.target.value)} />
+          <Label htmlFor="infobox-title">앨범명</Label>
+          <Input id="infobox-title" value={data.title} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("title", e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="artist">아티스트</Label>
-          <Input id="artist" value={data.artist} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("artist", e.target.value)} />
+          <Label htmlFor="infobox-artist">아티스트</Label>
+          <Input id="infobox-artist" value={data.artist} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("artist", e.target.value)} />
         </div>
       </div>
       <div>
-        <Label htmlFor="coverUrl">커버 이미지 URL</Label>
-        <Input id="coverUrl" value={data.coverUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("coverUrl", e.target.value)} />
+        <Label htmlFor="infobox-coverUrl">커버 이미지 URL</Label>
+        <Input id="infobox-coverUrl" value={data.coverUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("coverUrl", e.target.value)} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <Label htmlFor="releaseDate">발매일</Label>
+          <Label htmlFor="infobox-releaseDate">발매일</Label>
           <Input
-            id="releaseDate"
+            id="infobox-releaseDate"
             type="date"
             value={data.releaseDate}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("releaseDate", e.target.value)}
           />
         </div>
         <div className="col-span-2">
-          <Label htmlFor="genre">장르</Label>
-          <Input id="genre" value={data.genre} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("genre", e.target.value)} />
+          <Label htmlFor="infobox-genre">장르</Label>
+          <Input id="infobox-genre" value={data.genre} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("genre", e.target.value)} />
         </div>
       </div>
       <div>
-        <Label htmlFor="label">레이블</Label>
-        <Input id="label" value={data.label} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("label", e.target.value)} />
+        <Label htmlFor="infobox-label">레이블</Label>
+        <Input id="infobox-label" value={data.label} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange("label", e.target.value)} />
       </div>
       
       {/* LP 정보 섹션 */}
@@ -328,7 +332,7 @@ export function InfoboxForm({ data, onUpdate }: InfoboxFormProps) {
           </Button>
         </div>
         
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
           <SortableContext items={data.lpInfos?.map(lp => lp.id) || []} strategy={verticalListSortingStrategy}>
             {data.lpInfos?.map((lp, index) => (
               <SortableLPItem

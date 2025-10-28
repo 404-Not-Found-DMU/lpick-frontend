@@ -1,6 +1,8 @@
 import type { EquipmentInfo, CategoryFormProps } from "@/types/hierarchical.editor.types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card/Card"
 import { Input } from "@/components/Input"
+import { Select } from "@/components"
+import { Textarea } from "@/components/textarea"
 
 type EquipmentFormProps = CategoryFormProps<EquipmentInfo>;
 
@@ -98,14 +100,14 @@ export function EquipmentForm({ data, onUpdate }: EquipmentFormProps) {
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">진공관 여부</label>
-              <select
+              <Select
                 value={(data.ampInfo?.hasVacuumTubes as boolean) ? 'true' : 'false'}
                 onChange={(e) => handleTypeSpecificChange('amp', 'hasVacuumTubes', e.target.value === 'true')}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
+                aria-label="진공관 여부"
               >
                 <option value="false">아니오</option>
                 <option value="true">예</option>
-              </select>
+              </Select>
             </div>
           </div>
         );
@@ -172,10 +174,10 @@ export function EquipmentForm({ data, onUpdate }: EquipmentFormProps) {
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">장비 분류</label>
-              <select
+              <Select
                 value={data.equipmentType}
                 onChange={(e) => handleFieldChange("equipmentType", e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
+                aria-label="장비 분류"
               >
                 <option value="">분류 선택</option>
                 <option value="turntable">턴테이블</option>
@@ -183,7 +185,7 @@ export function EquipmentForm({ data, onUpdate }: EquipmentFormProps) {
                 <option value="amp">앰프</option>
                 <option value="headphone">헤드폰</option>
                 <option value="other">기타</option>
-              </select>
+              </Select>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-2">이미지 URL</label>
@@ -197,11 +199,10 @@ export function EquipmentForm({ data, onUpdate }: EquipmentFormProps) {
           
           <div>
             <label className="block text-sm font-medium mb-2">간단 설명</label>
-            <textarea
+            <Textarea
               value={data.description}
               onChange={(e) => handleFieldChange("description", e.target.value)}
               placeholder="장비에 대한 간단한 설명을 입력하세요"
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lavender-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600"
               rows={3}
             />
           </div>

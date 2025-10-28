@@ -1,7 +1,13 @@
 import { fetcher } from '@/hooks/api/fetchers';
 
+/**
+ * 카카오 로그인 URL로 리다이렉트
+ * 백엔드에서 OAuth 처리 후 access_token, refresh_token을 쿠키로 설정해줌
+ */
+
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const redirectToKakaoLogin = (): void => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   window.location.href = `${baseUrl}/oauth2/authorization/kakao`;
 };
 
