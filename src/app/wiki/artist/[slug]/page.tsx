@@ -1,23 +1,56 @@
 "use client"
+import { useEffect, useMemo, useState } from "react"
+import { useParams } from "next/navigation"
 import WikiLayout from "@/app/wiki/components/WikiLayout"
 import { Button } from "@/components/Button"
 import { Edit, History, MessageSquare, Star, Share2, Bookmark } from "lucide-react"
-import { getDummyData } from "@/app/wiki/edit/data/dummyData"
-import type { WikiCategory } from "@/types/hierarchical.editor.types"
 import BlocksWithToc from "@/app/wiki/components/BlocksWithToc"
+import type { WikiCategory } from "@/types/hierarchical.editor.types"
+import { fetcher } from "@/hooks/api/fetchers"
+
+type TextBlock = { id: string; depth: number; title: string; content: string }
+type WikiContent = { textBlocks: TextBlock[]; categoryData: { type: WikiCategory; data: unknown } }
+type WikiDetail = { wikiId: string; title: string; content: WikiContent; modifiedAt?: string | null }
 
 export default function WikiArtistPage() {
-  const wikiData = getDummyData('artist')
-  const category: WikiCategory = 'artist'
-  const categoryData = wikiData.categoryData
-  const textBlocks = wikiData.textBlocks
-  const title = categoryData.data.name
+  const params = useParams() as { slug: string }
+  const wikiId = params?.slug
+
+  const [data, setData] = useState<WikiDetail | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    async function run() {
+      if (!wikiId) return
+      try {
+        setLoading(true)
+        const res = await fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`)
+        if (active) setData(res)
+      } catch {
+        if (active) setError("문서를 불러오지 못했습니다.")
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    run()
+    return () => { active = false }
+  }, [wikiId])
+
+  const category: WikiCategory = useMemo(() => {
+    return (data?.content?.categoryData?.type ?? "artist") as WikiCategory
+  }, [data])
+
+  const title = data?.title ?? (loading ? "로딩 중..." : error ? "문서 로드 실패" : "")
+  const categoryData = data?.content?.categoryData
+  const textBlocks = data?.content?.textBlocks ?? []
 
   return (
     <WikiLayout
       title={title}
       category={"아티스트"}
-      lastUpdated={"2023년 5월 18일"}
+      lastUpdated={data?.modifiedAt ? new Date(data.modifiedAt).toLocaleString() : "2023년 5월 18일"}
       views={892}
       contributors={18}
       badgeClassName="bg-purple-500/10 text-purple-500"
@@ -51,13 +84,21 @@ export default function WikiArtistPage() {
         </div>
       )}
     >
-      <BlocksWithToc
-        textBlocks={textBlocks}
-        category={category}
-        categoryData={categoryData}
-        linkColorClass="text-purple-500"
-        showIndex={false}
-      />
+      {!error && !loading && categoryData && (
+        <BlocksWithToc
+          textBlocks={textBlocks}
+          category={category}
+          categoryData={categoryData as unknown}
+          linkColorClass="text-purple-500"
+          showIndex={false}
+        />
+      )}
+      {loading && (
+        <div className="text-sm text-muted-foreground">로딩 중...</div>
+      )}
+      {error && (
+        <div className="text-red-500 text-sm">{error}</div>
+      )}
     </WikiLayout>
   )
 }

@@ -57,7 +57,7 @@ export default function CategoryEditorPage() {
               content: { categoryData, textBlocks }
             });
 
-            router.push(`/wiki/${id}`);
+            router.push(`/wiki/${category}/${id}`);
           } catch (e) {
             console.error('위키 생성 실패:', e);
             alert('위키 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
