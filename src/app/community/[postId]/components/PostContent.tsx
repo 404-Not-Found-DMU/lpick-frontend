@@ -2,6 +2,9 @@
 
 import Image from 'next/image';
 import { Clock, Edit3, Trash2, Eye, Heart, Bookmark, MessageSquare } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeSanitize from 'rehype-sanitize';
 import { Post } from '../../types/community.types';
 
 interface PostContentProps {
@@ -180,11 +183,75 @@ export const PostContent = ({
 
         {/* 본문 내용 */}
         <div className="mb-4">
-          <div className="prose prose-gray dark:prose-invert max-w-none">
-            <div
-              className="whitespace-pre-wrap leading-relaxed text-gray-800 dark:text-gray-200"
-              dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br>') }}
-            />
+          <div className="prose prose-sm sm:prose-base prose-gray dark:prose-invert max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeSanitize]}
+              components={{
+                // 커스텀 스타일링
+                h1: ({ node, ...props }) => (
+                  <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white" {...props} />
+                ),
+                h2: ({ node, ...props }) => (
+                  <h2 className="text-xl font-bold mb-3 text-gray-900 dark:text-white" {...props} />
+                ),
+                h3: ({ node, ...props }) => (
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white" {...props} />
+                ),
+                p: ({ node, ...props }) => (
+                  <p className="mb-4 leading-relaxed text-gray-800 dark:text-gray-200" {...props} />
+                ),
+                ul: ({ node, ...props }) => (
+                  <ul className="mb-4 ml-6 list-disc space-y-2 text-gray-800 dark:text-gray-200" {...props} />
+                ),
+                ol: ({ node, ...props }) => (
+                  <ol className="mb-4 ml-6 list-decimal space-y-2 text-gray-800 dark:text-gray-200" {...props} />
+                ),
+                li: ({ node, ...props }) => (
+                  <li className="leading-relaxed" {...props} />
+                ),
+                blockquote: ({ node, ...props }) => (
+                  <blockquote className="border-l-4 border-violet-500 pl-4 italic text-gray-700 dark:text-gray-300 my-4" {...props} />
+                ),
+                code: ({ node, inline, ...props }: any) =>
+                  inline ? (
+                    <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm text-red-600 dark:bg-gray-800 dark:text-red-400" {...props} />
+                  ) : (
+                    <code className="block rounded-lg bg-gray-100 p-4 text-sm dark:bg-gray-800 overflow-x-auto" {...props} />
+                  ),
+                pre: ({ node, ...props }) => (
+                  <pre className="mb-4 rounded-lg bg-gray-100 p-4 dark:bg-gray-800 overflow-x-auto" {...props} />
+                ),
+                a: ({ node, ...props }) => (
+                  <a className="text-violet-600 hover:text-violet-700 underline dark:text-violet-400 dark:hover:text-violet-300" {...props} target="_blank" rel="noopener noreferrer" />
+                ),
+                img: ({ node, ...props }) => (
+                  <img className="rounded-lg my-4 max-w-full h-auto" {...props} alt={props.alt || ''} />
+                ),
+                table: ({ node, ...props }) => (
+                  <div className="overflow-x-auto my-4">
+                    <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700" {...props} />
+                  </div>
+                ),
+                thead: ({ node, ...props }) => (
+                  <thead className="bg-gray-50 dark:bg-gray-800" {...props} />
+                ),
+                tbody: ({ node, ...props }) => (
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900" {...props} />
+                ),
+                th: ({ node, ...props }) => (
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-gray-900 dark:text-white" {...props} />
+                ),
+                td: ({ node, ...props }) => (
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300" {...props} />
+                ),
+                hr: ({ node, ...props }) => (
+                  <hr className="my-6 border-gray-300 dark:border-gray-700" {...props} />
+                ),
+              }}
+            >
+              {post.content}
+            </ReactMarkdown>
           </div>
         </div>
 
