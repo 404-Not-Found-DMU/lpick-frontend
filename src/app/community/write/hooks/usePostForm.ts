@@ -52,7 +52,8 @@ export const usePostForm = () => {
       
       if (success) {
         alert('게시글이 성공적으로 작성되었습니다! 🎉');
-        router.push('/community');
+        // 캐시 무효화를 위해 타임스탬프 추가
+        router.push(`/community?refresh=${Date.now()}`);
       } else {
         alert(`게시글 작성에 실패했습니다. ${error || '다시 시도해주세요.'}`);
       }

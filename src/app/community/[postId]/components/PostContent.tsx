@@ -189,63 +189,72 @@ export const PostContent = ({
               rehypePlugins={[rehypeSanitize]}
               components={{
                 // 커스텀 스타일링
-                h1: ({ node, ...props }) => (
+                h1: ({ ...props }) => (
                   <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white" {...props} />
                 ),
-                h2: ({ node, ...props }) => (
+                h2: ({ ...props }) => (
                   <h2 className="text-xl font-bold mb-3 text-gray-900 dark:text-white" {...props} />
                 ),
-                h3: ({ node, ...props }) => (
+                h3: ({ ...props }) => (
                   <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white" {...props} />
                 ),
-                p: ({ node, ...props }) => (
+                p: ({ ...props }) => (
                   <p className="mb-4 leading-relaxed text-gray-800 dark:text-gray-200" {...props} />
                 ),
-                ul: ({ node, ...props }) => (
+                ul: ({ ...props }) => (
                   <ul className="mb-4 ml-6 list-disc space-y-2 text-gray-800 dark:text-gray-200" {...props} />
                 ),
-                ol: ({ node, ...props }) => (
+                ol: ({ ...props }) => (
                   <ol className="mb-4 ml-6 list-decimal space-y-2 text-gray-800 dark:text-gray-200" {...props} />
                 ),
-                li: ({ node, ...props }) => (
+                li: ({ ...props }) => (
                   <li className="leading-relaxed" {...props} />
                 ),
-                blockquote: ({ node, ...props }) => (
+                blockquote: ({ ...props }) => (
                   <blockquote className="border-l-4 border-violet-500 pl-4 italic text-gray-700 dark:text-gray-300 my-4" {...props} />
                 ),
-                code: ({ node, inline, ...props }: any) =>
+                code: ({ inline, ...props }: React.HTMLAttributes<HTMLElement> & { inline?: boolean }) =>
                   inline ? (
                     <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm text-red-600 dark:bg-gray-800 dark:text-red-400" {...props} />
                   ) : (
                     <code className="block rounded-lg bg-gray-100 p-4 text-sm dark:bg-gray-800 overflow-x-auto" {...props} />
                   ),
-                pre: ({ node, ...props }) => (
+                pre: ({ ...props }) => (
                   <pre className="mb-4 rounded-lg bg-gray-100 p-4 dark:bg-gray-800 overflow-x-auto" {...props} />
                 ),
-                a: ({ node, ...props }) => (
+                a: ({ ...props }) => (
                   <a className="text-violet-600 hover:text-violet-700 underline dark:text-violet-400 dark:hover:text-violet-300" {...props} target="_blank" rel="noopener noreferrer" />
                 ),
-                img: ({ node, ...props }) => (
-                  <img className="rounded-lg my-4 max-w-full h-auto" {...props} alt={props.alt || ''} />
+                img: ({ ...props }) => (
+                  <div className="my-4 max-w-full">
+                    <Image 
+                      src={String(props.src || '')} 
+                      alt={String(props.alt || '')} 
+                      width={800} 
+                      height={600} 
+                      className="rounded-lg object-contain" 
+                      style={{ width: 'auto', height: 'auto', maxWidth: '100%' }}
+                    />
+                  </div>
                 ),
-                table: ({ node, ...props }) => (
+                table: ({ ...props }) => (
                   <div className="overflow-x-auto my-4">
                     <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700" {...props} />
                   </div>
                 ),
-                thead: ({ node, ...props }) => (
+                thead: ({ ...props }) => (
                   <thead className="bg-gray-50 dark:bg-gray-800" {...props} />
                 ),
-                tbody: ({ node, ...props }) => (
+                tbody: ({ ...props }) => (
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900" {...props} />
                 ),
-                th: ({ node, ...props }) => (
+                th: ({ ...props }) => (
                   <th className="px-4 py-2 text-left text-sm font-semibold text-gray-900 dark:text-white" {...props} />
                 ),
-                td: ({ node, ...props }) => (
+                td: ({ ...props }) => (
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300" {...props} />
                 ),
-                hr: ({ node, ...props }) => (
+                hr: ({ ...props }) => (
                   <hr className="my-6 border-gray-300 dark:border-gray-700" {...props} />
                 ),
               }}

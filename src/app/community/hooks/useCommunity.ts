@@ -1,11 +1,13 @@
 'use client';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { SortOption, CommunityFilters, BoardType, TagType } from '../types/community.types';
 import { POSTS_PER_PAGE, FEATURED_POSTS_LIMIT } from '../constants';
 import { useArticles } from './useArticles';
 import { ArticleListItem } from '../types/api.types';
 
 export const useCommunity = () => {
+  const searchParams = useSearchParams();
   const [filters, setFilters] = useState<CommunityFilters>({
     board: 'all',
     sortBy: 'latest',
@@ -123,6 +125,19 @@ export const useCommunity = () => {
     setCurrentPage(page);
     loadPage(page); // API는 1-based 페이징
   }, [loadPage]);
+
+  // URL refresh 매개변수 감지하여 자동 새로고침
+  useEffect(() => {
+    const refreshParam = searchParams.get('refresh');
+    if (refreshParam) {
+      // refresh 매개변수가 있으면 데이터 새로고침
+      refresh();
+      // URL에서 refresh 매개변수 제거
+      const url = new URL(window.location.href);
+      url.searchParams.delete('refresh');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [searchParams, refresh]);
 
   return {
     featuredPosts,
