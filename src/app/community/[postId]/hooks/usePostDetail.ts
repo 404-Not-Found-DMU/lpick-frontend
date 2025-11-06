@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast/ToastProvider';
-import { Post, Comment, BoardTypeMapping, BadgeTypeMapping, convertApiCommentToUiComment } from '../../types/community.types';
+import { Post, Comment, convertApiCommentToUiComment } from '../../types/community.types';
 import { useArticle } from '../../hooks/useArticles';
 import { useArticleInteractions, useArticleManager } from '../../hooks/useArticleManager';
 import { useComments, useCommentManager, useCommentInteractions } from '../../hooks';
@@ -34,7 +34,6 @@ export const usePostDetail = (articleId: string) => {
   const {
     loading: managerLoading,
     error: managerError,
-    updateExistingArticle,
     deleteExistingArticle
   } = useArticleManager();
 
@@ -277,28 +276,10 @@ export const usePostDetail = (articleId: string) => {
     setCurrentPage(currentPage + 1);
   }, [currentPage]);
 
-  const handleEdit = useCallback(async () => {
-    if (!article) return;
-    
-    // TODO: 게시글 수정 모달/페이지로 이동하거나 인라인 편집 구현
-    // 현재는 간단한 prompt로 제목만 수정
-    const newTitle = prompt('새 제목을 입력하세요:', article.title);
-    if (!newTitle || newTitle === article.title) return;
-    
-    const success = await updateExistingArticle(article.articleId, {
-      title: newTitle,
-      content: article.content,
-      type: BoardTypeMapping.toApi('자유게시판'), // 기본값 (API 응답에 해당 정보가 없으므로)
-      badge: BadgeTypeMapping.toApi('질문')      // 기본값 (API 응답에 해당 정보가 없으므로)
-    });
-    
-    if (success) {
-      toast('게시글이 수정되었습니다.', 'success');
-      refreshArticle(); // 데이터 새로고침
-    } else {
-      toast(`게시글 수정에 실패했습니다. ${managerError || ''}`, 'error');
-    }
-  }, [article, updateExistingArticle, refreshArticle, managerError, toast]);
+  const handleEdit = useCallback(() => {
+    // 게시글 작성 페이지로 이동하면서 편집 모드로 설정
+    router.push(`/community/write?edit=${articleId}`);
+  }, [router, articleId]);
 
   const handleDelete = useCallback(async () => {
     if (!article) return;

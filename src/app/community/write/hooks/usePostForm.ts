@@ -1,17 +1,30 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { PostFormData, BoardTypeMapping, BadgeTypeMapping } from '../../types/community.types';
 import { useArticleManager } from '../../hooks/useArticleManager';
-import { CreateArticleRequest } from '../../types/api.types';
+import { useArticle } from '../../hooks/useArticles';
+import { CreateArticleRequest, UpdateArticleRequest } from '../../types/api.types';
 
 export const usePostForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editArticleId = searchParams.get('edit'); // URL에서 edit 파라미터 확인
+  const isEditMode = !!editArticleId;
+  
   const {
     loading: isSubmitting,
     error,
-    createNewArticle
+    createNewArticle,
+    updateExistingArticle
   } = useArticleManager();
+
+  // 수정 모드일 때 기존 게시글 데이터 불러오기
+  const {
+    article: existingArticle,
+    loading: articleLoading,
+    error: articleError
+  } = useArticle(editArticleId || '');
 
   const [formData, setFormData] = useState<PostFormData>({
     title: '',
@@ -21,6 +34,20 @@ export const usePostForm = () => {
     boardType: '자유게시판',  // 기본값
     badgeType: '질문',       // 기본값
   });
+
+  // 수정 모드일 때 기존 데이터로 폼 초기화
+  useEffect(() => {
+    if (isEditMode && existingArticle && !articleLoading) {
+      setFormData({
+        title: existingArticle.title,
+        content: existingArticle.content,
+        category: '',
+        postType: '',
+        boardType: '자유게시판', // TODO: API에서 게시판 타입 매핑
+        badgeType: '질문',      // TODO: API에서 뱃지 타입 매핑
+      });
+    }
+  }, [isEditMode, existingArticle, articleLoading]);
 
   const updateFormData = (updates: Partial<PostFormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
@@ -41,25 +68,45 @@ export const usePostForm = () => {
     }
 
     try {
-      const articleData: CreateArticleRequest = {
-        title: formData.title.trim(),
-        content: formData.content.trim(),
-        type: BoardTypeMapping.toApi(formData.boardType),
-        badge: BadgeTypeMapping.toApi(formData.badgeType),
-      };
+      if (isEditMode && editArticleId) {
+        // 수정 모드
+        const updateData: UpdateArticleRequest = {
+          title: formData.title.trim(),
+          content: formData.content.trim(),
+          type: BoardTypeMapping.toApi(formData.boardType),
+          badge: BadgeTypeMapping.toApi(formData.badgeType),
+        };
 
-      const success = await createNewArticle(articleData);
-      
-      if (success) {
-        alert('게시글이 성공적으로 작성되었습니다! 🎉');
-        // 캐시 무효화를 위해 타임스탬프 추가
-        router.push(`/community?refresh=${Date.now()}`);
+        const success = await updateExistingArticle(editArticleId, updateData);
+        
+        if (success) {
+          alert('게시글이 성공적으로 수정되었습니다! 🎉');
+          router.push(`/community/${editArticleId}`);
+        } else {
+          alert(`게시글 수정에 실패했습니다. ${error || '다시 시도해주세요.'}`);
+        }
       } else {
-        alert(`게시글 작성에 실패했습니다. ${error || '다시 시도해주세요.'}`);
+        // 생성 모드
+        const articleData: CreateArticleRequest = {
+          title: formData.title.trim(),
+          content: formData.content.trim(),
+          type: BoardTypeMapping.toApi(formData.boardType),
+          badge: BadgeTypeMapping.toApi(formData.badgeType),
+        };
+
+        const success = await createNewArticle(articleData);
+        
+        if (success) {
+          alert('게시글이 성공적으로 작성되었습니다! 🎉');
+          // 캐시 무효화를 위해 타임스탬프 추가
+          router.push(`/community?refresh=${Date.now()}`);
+        } else {
+          alert(`게시글 작성에 실패했습니다. ${error || '다시 시도해주세요.'}`);
+        }
       }
     } catch (err) {
-      console.error('게시글 작성 실패:', err);
-      alert('게시글 작성에 실패했습니다. 다시 시도해주세요.');
+      console.error('게시글 처리 실패:', err);
+      alert('게시글 처리에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -80,12 +127,14 @@ export const usePostForm = () => {
   };
 
   const isFormValid = formData.title.trim() && formData.content.trim();
+  const isLoading = isSubmitting || (isEditMode && articleLoading);
 
   return {
     formData,
-    isSubmitting,
+    isSubmitting: isLoading,
     isFormValid,
-    error,
+    isEditMode,
+    error: error || articleError,
     updateFormData,
     handleSubmit,
     handleSubmitWrapper,

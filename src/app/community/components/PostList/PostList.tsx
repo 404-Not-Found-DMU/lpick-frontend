@@ -89,7 +89,7 @@ export const PostList = ({ posts, sortBy, onSortChange, loading = false }: PostL
           {posts.map((post) => (
             <PostCard 
               key={post.articleId || `post-${post.id}-${post.title.slice(0, 10)}`} 
-              post={post} 
+              post={post}
             />
           ))}
         </div>
