@@ -1,10 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Input } from '@/components/Input/Input';
 import { Button } from '@/components/Button/Button';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { PostFormData, BoardType, TagType } from '../../types/community.types';
-import { Send, AlertCircle, Hash, FileText, Tag } from 'lucide-react';
+import { Send, AlertCircle, Hash, FileText, Tag, Save } from 'lucide-react';
 
 interface EnhancedPostFormProps {
   formData: PostFormData;
@@ -33,6 +34,8 @@ export const EnhancedPostForm = ({
   isSubmitting,
 }: EnhancedPostFormProps) => {
   const [wordCount, setWordCount] = useState(0);
+  const searchParams = useSearchParams();
+  const isEditMode = !!searchParams.get('edit');
 
   useEffect(() => {
     // Markdown에서 실제 텍스트 길이 계산
@@ -138,7 +141,7 @@ export const EnhancedPostForm = ({
             <RichTextEditor
               value={formData.content}
               onChange={(value) => updateFormData({ content: value })}
-              placeholder="당신의 이야기를 들려주세요... 마크다운 문법을 사용할 수 있고, 에디터에서 이미지도 첨부할 수 있습니다."
+              placeholder="내용을 입력하세요"
               className="border-0"
             />
           </div>
@@ -158,12 +161,12 @@ export const EnhancedPostForm = ({
             {isSubmitting ? (
               <div className="flex items-center gap-2">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                게시하는 중...
+                {isEditMode ? '수정하는 중...' : '게시하는 중...'}
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Send className="h-4 w-4" />
-                게시하기
+                {isEditMode ? <Save className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+                {isEditMode ? '수정하기' : '게시하기'}
               </div>
             )}
           </Button>

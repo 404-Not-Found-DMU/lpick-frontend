@@ -20,7 +20,7 @@ export const PostCard = ({ post }: PostCardProps) => {
 
   return (
     <div
-      className="dark:hover:bg-gray-750 group cursor-pointer overflow-hidden rounded-lg bg-white p-3 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md dark:bg-gray-800 sm:p-4"
+      className="group cursor-pointer overflow-hidden rounded-lg bg-white p-3 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md dark:bg-gray-800 dark:hover:bg-gray-750 sm:p-4"
       onClick={handleClick}
     >
       <div className="flex items-start gap-3 sm:gap-4">
