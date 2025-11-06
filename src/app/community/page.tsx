@@ -1,8 +1,9 @@
 'use client';
+import { Suspense } from 'react';
 import { Header, FeaturedSection, PostList, Pagination } from './components';
 import { useCommunity } from './hooks/useCommunity';
 
-const CommunityPage = () => {
+const CommunityPageContent = () => {
   const {
     featuredPosts,
     recentPosts,
@@ -73,6 +74,14 @@ const CommunityPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const CommunityPage = () => {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">로딩 중...</div>}>
+      <CommunityPageContent />
+    </Suspense>
   );
 };
 

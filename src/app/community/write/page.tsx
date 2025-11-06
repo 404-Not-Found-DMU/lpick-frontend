@@ -1,9 +1,10 @@
 'use client';
 
+import { Suspense } from 'react';
 import { EnhancedPostForm, WriteHeader } from './components';
 import { usePostForm } from './hooks/usePostForm';
 
-const WritePage = () => {
+const WritePageContent = () => {
   const { formData, isSubmitting, updateFormData, handleSubmitWrapper } = usePostForm();
 
   return (
@@ -30,6 +31,14 @@ const WritePage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const WritePage = () => {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">로딩 중...</div>}>
+      <WritePageContent />
+    </Suspense>
   );
 };
 
