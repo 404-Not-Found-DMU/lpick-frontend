@@ -65,7 +65,7 @@ export const FeaturedSection = ({ posts, loading = false }: FeaturedSectionProps
           {posts.map((post) => (
             <FeaturedCard 
               key={post.articleId || `featured-${post.id}-${post.title.slice(0, 10)}`} 
-              post={post} 
+              post={post}
             />
           ))}
         </div>
