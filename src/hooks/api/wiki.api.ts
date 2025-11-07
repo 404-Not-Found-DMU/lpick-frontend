@@ -19,4 +19,29 @@ export async function createWikiPage(payload: CreateWikiRequest): Promise<Create
     });
 }
 
+// 위키 리비전 생성: POST /api/v1/wiki/{wikiId}/revision
+export interface CreateWikiRevisionRequest {
+    content: unknown;
+}
+
+export interface CreateWikiRevisionResponse {
+    revisionId: string;
+    content: unknown;
+    createdAt: string;
+    createWho?: {
+        oauthId?: string;
+        nickName?: string;
+    };
+}
+
+export async function createWikiRevision(
+    wikiId: string,
+    payload: CreateWikiRevisionRequest
+): Promise<CreateWikiRevisionResponse> {
+    return fetcher<CreateWikiRevisionResponse>(`/api/v1/wiki/${encodeURIComponent(wikiId)}/revision`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    });
+}
+
 

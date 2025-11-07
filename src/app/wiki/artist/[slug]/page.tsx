@@ -57,10 +57,12 @@ export default function WikiArtistPage() {
       showDocInfo={false}
       headerActions={(
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" size="sm" className="h-8">
-            <Edit className="w-4 h-4 mr-2" />
-            편집하기
-          </Button>
+          <Link href={`/wiki/${encodeURIComponent(wikiId)}/edit`} className="inline-flex" aria-label="문서 편집 페이지로 이동">
+            <Button variant="outline" size="sm" className="h-8">
+              <Edit className="w-4 h-4 mr-2" />
+              편집하기
+            </Button>
+          </Link>
           <Button variant="outline" size="sm" className="h-8">
             <History className="w-4 h-4 mr-2" />
             역사
