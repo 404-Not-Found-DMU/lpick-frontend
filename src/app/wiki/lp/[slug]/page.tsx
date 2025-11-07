@@ -66,7 +66,7 @@ export default function WikiLPPage() {
             <History className="w-4 h-4 mr-2" />
             역사
           </Button>
-          <Link href="/wiki/discuss" className="inline-flex">
+          <Link href={`/wiki/${encodeURIComponent(wikiId)}/discuss`} className="inline-flex" aria-label="문서 토론 페이지로 이동">
             <Button variant="outline" size="sm" className="h-8">
               <MessageSquare className="w-4 h-4 mr-2" />
               토론

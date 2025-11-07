@@ -5,6 +5,7 @@ import { Suspense, useState } from "react";
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from "@/components";
 import { Textarea } from "@/components/textarea";
 import { useDiscussions } from "../hooks/useDiscussions";
+import { createDebate } from "@/hooks/api/wiki.debate.api";
 import type { DiscussionCategory, DiscussionStance } from "../types";
 
 const categories: DiscussionCategory[] = ["내용", "표기", "분류", "문서관리", "기타"];
@@ -27,6 +28,7 @@ function NewDiscussionInner() {
   const [author] = useState("현재사용자");
   const [submitting, setSubmitting] = useState(false);
   const [docInput, setDocInput] = useState(docId ?? "");
+  const [revisionId, setRevisionId] = useState("");
 
   const canSubmit = title.trim().length > 0 && content.trim().length > 0 && isReady && !submitting;
 
@@ -49,13 +51,39 @@ function NewDiscussionInner() {
     return value.replace(/\s+/g, "-");
   };
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
     setSubmitting(true);
-    const normalized = normalizeDocId(docInput) ?? docId;
-    const thread = createThread({ title, category, content, author, docId: normalized, stance });
-    router.push(`/wiki/discuss/${thread.id}`);
+    try {
+      const normalized = normalizeDocId(docInput) ?? docId;
+      // docId가 있고 revisionId가 있어야 API 생성 가능
+      if (normalized) {
+        if (!revisionId.trim()) {
+          alert("revisionId를 입력하세요.");
+          setSubmitting(false);
+          return;
+        }
+        const debateSubject = category === "표기" ? "REPRESENTATION" : "DETAIL";
+        const res = (await createDebate(normalized, {
+          debateName: title,
+          debateSubject,
+          revisionId: revisionId.trim(),
+        } as any)) as any;
+        const newId: string | undefined = res?.id;
+        if (!newId) throw new Error("생성 결과에 id가 없습니다.");
+        router.push(`/wiki/discuss/${newId}`);
+        return;
+      }
+      // 문서와 연결하지 않는 경우: 기존 로컬 훅 fallback 유지
+      const thread = createThread({ title, category, content, author, docId: normalized, stance });
+      router.push(`/wiki/discuss/${thread.id}`);
+    } catch (err) {
+      console.error(err);
+      alert("토론을 생성하지 못했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -82,6 +110,19 @@ function NewDiscussionInner() {
             <div>
               <label className="mb-1 block text-sm font-medium">제목</label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="토론 제목을 입력하세요" />
+            </div>
+
+            {/** API 생성에 필요한 revisionId 입력 */}
+            <div>
+              <label className="mb-1 block text-sm font-medium">revisionId</label>
+              <Input
+                value={revisionId}
+                onChange={(e) => setRevisionId(e.target.value)}
+                placeholder="예) 최근 문서 리비전 ID"
+              />
+              {docInput && (
+                <div className="mt-1 text-xs text-gray-500">문서와 연결하여 생성 시 필수입니다.</div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input, Badge } from "@/components";
 import { useDiscussions } from "./hooks/useDiscussions";
 import type { DiscussionCategory, DiscussionStatus } from "./types";
+import { useWikiDebates, ApiDebateThread } from "./hooks/useWikiDebates";
 
 const categoryOptions: { label: string; value: DiscussionCategory | "all" }[] = [
   { label: "전체", value: "all" },
@@ -34,10 +35,32 @@ function WikiDiscussListInner() {
   const [status, setStatus] = useState<DiscussionStatus | "all">("all");
   const [sortBy, setSortBy] = useState<"updated" | "opinions">("updated");
 
-  const threads = useMemo(
-    () => (isReady ? listThreads({ q, category, status, docId: docIdFromQuery, sortBy }) : []),
-    [isReady, listThreads, q, category, status, docIdFromQuery, sortBy],
-  );
+  // API 연동: 특정 문서의 토론 목록
+  const wikiDebatesQuery = docIdFromQuery
+    ? useWikiDebates(docIdFromQuery)
+    : undefined;
+
+  const threads = useMemo(() => {
+    // docId가 있으면 API 데이터 우선
+    if (docIdFromQuery) {
+      const items: ApiDebateThread[] | undefined = wikiDebatesQuery?.data;
+      if (items && items.length > 0) {
+        // 간단 필터/정렬 (제목 검색, 상태/카테고리)
+        const filtered = items
+          .filter((t) => (q ? (t.title || "").toLowerCase().includes(q.toLowerCase()) : true))
+          .filter((t) => (category === "all" ? true : (t.category as DiscussionCategory) === category))
+          .filter((t) => (status === "all" ? true : (t.status as DiscussionStatus) === status));
+        if (sortBy === "opinions") {
+          return [...filtered].sort((a, b) => (b.opinionsCount || 0) - (a.opinionsCount || 0));
+        }
+        return [...filtered].sort((a, b) => (b.lastUpdatedAt || "").localeCompare(a.lastUpdatedAt || ""));
+      }
+      // API 데이터가 아직 없으면 빈 배열 반환 (로딩/에러는 아래에서 처리)
+      return [] as ApiDebateThread[];
+    }
+    // docId 없으면 로컬 목데이터 훅 사용
+    return isReady ? listThreads({ q, category, status, docId: docIdFromQuery, sortBy }) : [];
+  }, [docIdFromQuery, wikiDebatesQuery?.data, isReady, listThreads, q, category, status, sortBy]);
 
   const docTitle = useMemo(() => {
     if (!docIdFromQuery) return null;
@@ -137,6 +160,12 @@ function WikiDiscussListInner() {
       )}
 
       <div className="mt-6 space-y-3">
+        {docIdFromQuery && wikiDebatesQuery?.isLoading && (
+          <div className="rounded-lg border p-8 text-center text-gray-500">불러오는 중...</div>
+        )}
+        {docIdFromQuery && wikiDebatesQuery?.isError && (
+          <div className="rounded-lg border p-8 text-center text-red-500">토론 목록을 불러오지 못했습니다.</div>
+        )}
         {threads.map((t) => (
           <div key={t.id} className="block rounded-lg border p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
             <div className="flex items-center justify-between gap-2">
@@ -149,7 +178,7 @@ function WikiDiscussListInner() {
                   </Badge>
                 </div>
                 <div className="mt-1 text-sm text-gray-500">
-                  개설자 {t.createdBy} · 의견 {t.opinionsCount} · 최근 업데이트 {new Date(t.lastUpdatedAt).toLocaleString()}
+                  개설자 {t.createdBy ?? "-"} · 의견 {t.opinionsCount ?? 0} · 최근 업데이트 {t.lastUpdatedAt ? new Date(t.lastUpdatedAt).toLocaleString() : "-"}
                 </div>
               </div>
               {t.docId && (
