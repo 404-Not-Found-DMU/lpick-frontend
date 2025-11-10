@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { UniversalWikiEditor } from '../../components/UniversalWikiEditor';
 import type { WikiCategory, TextBlock, CategoryData } from '@/types/hierarchical.editor.types';
 import { fetcher } from '@/hooks/api/fetchers';
-import { updateWikiPage } from '@/hooks/api/wiki.api';
+import { createWikiRevision } from '@/hooks/api/wiki.api';
 
 type WikiContent = { textBlocks: TextBlock[]; categoryData: CategoryData };
 type WikiDetail = { wikiId: string; title: string; content: WikiContent; modifiedAt?: string | null };
@@ -101,24 +101,7 @@ export default function EditExistingWikiPage() {
         initialData={initialData}
         onSave={async ({ categoryData, textBlocks }) => {
           try {
-            let title = data?.title || '문서';
-            switch (categoryData.type) {
-              case 'lp':
-                title = categoryData.data.infobox.title || title;
-                break;
-              case 'artist':
-                title = categoryData.data.name || title;
-                break;
-              case 'equipment':
-                title = categoryData.data.name || title;
-                break;
-              case 'other':
-                title = categoryData.data.title || title;
-                break;
-            }
-
-            await updateWikiPage(wikiId, {
-              title,
+            await createWikiRevision(wikiId, {
               content: { categoryData, textBlocks },
             });
 

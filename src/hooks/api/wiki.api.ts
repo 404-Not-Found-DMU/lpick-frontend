@@ -31,4 +31,25 @@ export async function updateWikiPage(id: string, payload: UpdateWikiRequest): Pr
     });
 }
 
+export interface CreateRevisionRequest {
+    content: unknown;
+}
+
+export interface CreateRevisionResponse {
+    revisionId: string;
+    content: unknown;
+    createdAt: string;
+    createWho: {
+        oauthId: string;
+        nickName: string;
+    };
+}
+
+export async function createWikiRevision(id: string, payload: CreateRevisionRequest): Promise<CreateRevisionResponse> {
+    return fetcher<CreateRevisionResponse>(`/api/v1/wiki/${encodeURIComponent(id)}/revision`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    });
+}
+
 
