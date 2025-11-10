@@ -19,4 +19,16 @@ export async function createWikiPage(payload: CreateWikiRequest): Promise<Create
     });
 }
 
+export interface UpdateWikiRequest {
+    title: string;
+    content: unknown;
+}
+
+export async function updateWikiPage(id: string, payload: UpdateWikiRequest): Promise<void> {
+    return fetcher<void>(`/api/v1/wiki/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+    });
+}
+
 

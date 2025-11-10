@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useMemo, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import WikiLayout from "@/app/wiki/components/WikiLayout"
 import { Button } from "@/components/Button"
 import { Edit, History, MessageSquare, Star, Share2, Bookmark } from "lucide-react"
@@ -14,6 +14,7 @@ type WikiDetail = { wikiId: string; title: string; content: WikiContent; modifie
 export default function WikiArtistPage() {
   const params = useParams() as { slug: string }
   const wikiId = params?.slug
+  const router = useRouter()
 
   const [data, setData] = useState<WikiDetail | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
@@ -56,7 +57,7 @@ export default function WikiArtistPage() {
       showDocInfo={false}
       headerActions={(
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" size="sm" className="h-8">
+          <Button variant="outline" size="sm" className="h-8" onClick={() => router.push(`/wiki/edit/artist/${encodeURIComponent(wikiId)}`)}>
             <Edit className="w-4 h-4 mr-2" />
             편집하기
           </Button>
