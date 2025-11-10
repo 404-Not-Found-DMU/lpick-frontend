@@ -34,26 +34,45 @@ export default function WikiEquipmentPage() {
       setRevError(null)
       try {
         setLoading(true)
-        const base = await fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`)
-        if (!active) return
         if (rev) {
           try {
             const revisionRes = await getWikiRevision(wikiId, rev)
             if (!active) return
+            const revContent = (revisionRes?.content ?? {}) as WikiContent
+            let derivedTitle = '문서'
+            const cd = (revContent as any)?.categoryData
+            switch (cd?.type) {
+              case 'lp':
+                derivedTitle = cd?.data?.infobox?.title || '문서'
+                break
+              case 'artist':
+                derivedTitle = cd?.data?.name || '문서'
+                break
+              case 'equipment':
+                derivedTitle = cd?.data?.name || '문서'
+                break
+              case 'other':
+                derivedTitle = cd?.data?.title || '문서'
+                break
+            }
             setData({
-              wikiId: base.wikiId,
-              title: base.title,
-              content: revisionRes.content as unknown as WikiContent,
+              wikiId: wikiId,
+              title: derivedTitle,
+              content: revContent,
               modifiedAt: revisionRes.createdAt
             })
             setRevision(revisionRes)
           } catch {
+            if (!active) return
+            const base = await fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`)
             if (!active) return
             setData(base)
             setRevision(null)
             setRevError("해당 리비전을 불러오지 못해 최신 문서를 표시합니다.")
           }
         } else {
+          const base = await fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`)
+          if (!active) return
           setData(base)
           setRevision(null)
         }

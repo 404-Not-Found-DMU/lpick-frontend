@@ -91,7 +91,40 @@ export async function getWikiRevisions(
 export type RevisionDetail = RevisionItem;
 
 export async function getWikiRevision(id: string, version: string): Promise<RevisionDetail> {
-    return fetcher<RevisionDetail>(`/api/v1/wiki/${encodeURIComponent(id)}/revision/${encodeURIComponent(version)}`);
+    // 1) 서버 명세 우선: 경로 파라미터 (/revision/{version})
+    try {
+        const res = await fetcher<RevisionDetail>(`/api/v1/wiki/${encodeURIComponent(id)}/revision/${encodeURIComponent(version)}`);
+        if (res && typeof (res as unknown as { content?: unknown }).content === 'string') {
+            try {
+                const parsed = JSON.parse((res as unknown as { content: string }).content);
+                return { ...(res as any), content: parsed } as RevisionDetail;
+            } catch {}
+        }
+        return res;
+    } catch (_e1) {
+        // 2) 쿼리 파라미터 폴백 (?revisionId=)
+        try {
+            const q = new URLSearchParams({ revisionId: version });
+            const res = await fetcher<RevisionDetail>(`/api/v1/wiki/${encodeURIComponent(id)}/revision?${q.toString()}`);
+            if (res && typeof (res as unknown as { content?: unknown }).content === 'string') {
+                try {
+                    const parsed = JSON.parse((res as unknown as { content: string }).content);
+                    return { ...(res as any), content: parsed } as RevisionDetail;
+                } catch {}
+            }
+            return res;
+        } catch (_e2) {
+            // 3) 전역 경로 폴백 (/api/v1/wiki/revision/{revisionId})
+            const res = await fetcher<RevisionDetail>(`/api/v1/wiki/revision/${encodeURIComponent(version)}`);
+            if (res && typeof (res as unknown as { content?: unknown }).content === 'string') {
+                try {
+                    const parsed = JSON.parse((res as unknown as { content: string }).content);
+                    return { ...(res as any), content: parsed } as RevisionDetail;
+                } catch {}
+            }
+            return res;
+        }
+    }
 }
 
 
