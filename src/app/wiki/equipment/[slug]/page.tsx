@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useMemo, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import WikiLayout from "@/app/wiki/components/WikiLayout"
 import { Button } from "@/components/Button"
 import { Edit, History, MessageSquare, Star, Share2, Bookmark } from "lucide-react"
@@ -8,6 +8,7 @@ import BlocksWithToc from "@/app/wiki/components/BlocksWithToc"
 import type { WikiCategory, TextBlock, CategoryData } from "@/types/hierarchical.editor.types"
 import { fetcher } from "@/hooks/api/fetchers"
 import RevisionHistoryDialog from "@/app/wiki/components/RevisionHistoryDialog"
+import { getWikiRevision, type RevisionDetail } from "@/hooks/api/wiki.api"
 
 type WikiContent = { textBlocks: TextBlock[]; categoryData: { type: WikiCategory; data: unknown } }
 type WikiDetail = { wikiId: string; title: string; content: WikiContent; modifiedAt?: string | null }
@@ -17,6 +18,8 @@ export default function WikiEquipmentPage() {
   const wikiId = params?.slug
   const router = useRouter()
   const [showHistory, setShowHistory] = useState(false)
+  const searchParams = useSearchParams()
+  const rev = searchParams?.get("rev") || null
 
   const [data, setData] = useState<WikiDetail | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
@@ -28,8 +31,25 @@ export default function WikiEquipmentPage() {
       if (!wikiId) return
       try {
         setLoading(true)
-        const res = await fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`)
-        if (active) setData(res)
+        if (rev) {
+          const [base, revision] = await Promise.all([
+            fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`),
+            getWikiRevision(wikiId, rev)
+          ])
+          if (!active) return
+          setData({
+            wikiId: base.wikiId,
+            title: base.title,
+            content: revision.content as unknown as WikiContent,
+            modifiedAt: revision.createdAt
+          })
+          setRevision(revision)
+        } else {
+          const res = await fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`)
+          if (!active) return
+          setData(res)
+          setRevision(null)
+        }
       } catch {
         if (active) setError("문서를 불러오지 못했습니다.")
       } finally {
@@ -40,7 +60,7 @@ export default function WikiEquipmentPage() {
     return () => {
       active = false
     }
-  }, [wikiId])
+  }, [wikiId, rev])
 
   const category: WikiCategory = useMemo(() => {
     return (data?.content?.categoryData?.type ?? "equipment") as WikiCategory
@@ -49,6 +69,7 @@ export default function WikiEquipmentPage() {
   const title = data?.title ?? (loading ? "로딩 중..." : error ? "문서 로드 실패" : "")
   const categoryData = data?.content?.categoryData
   const textBlocks = data?.content?.textBlocks ?? []
+  const [revision, setRevision] = useState<RevisionDetail | null>(null)
 
   return (
     <WikiLayout
@@ -89,7 +110,19 @@ export default function WikiEquipmentPage() {
       )}
     >
       {wikiId && (
-        <RevisionHistoryDialog wikiId={wikiId} open={showHistory} onOpenChange={setShowHistory} />
+        <RevisionHistoryDialog wikiId={wikiId} open={showHistory} onOpenChange={setShowHistory} category="equipment" />
+      )}
+      {revision && (
+        <div className="mb-4 text-xs text-muted-foreground">
+          이 문서는 리비전 <span className="font-mono">{revision.revisionId}</span> 기준으로 표시 중입니다.{" "}
+          <button
+            type="button"
+            className="underline"
+            onClick={() => router.push(`/wiki/equipment/${encodeURIComponent(wikiId)}`)}
+          >
+            최신 보기
+          </button>
+        </div>
       )}
       {!error && !loading && categoryData && (
         <BlocksWithToc

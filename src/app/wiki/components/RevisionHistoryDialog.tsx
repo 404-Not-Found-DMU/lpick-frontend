@@ -1,16 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/Dialog';
 import { getWikiRevisions, type RevisionItem, type RevisionPage } from '@/hooks/api/wiki.api';
+import type { WikiCategory } from '@/types/hierarchical.editor.types';
 
 interface RevisionHistoryDialogProps {
   wikiId: string | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  category: WikiCategory;
 }
 
-export default function RevisionHistoryDialog({ wikiId, open, onOpenChange }: RevisionHistoryDialogProps) {
+export default function RevisionHistoryDialog({ wikiId, open, onOpenChange, category }: RevisionHistoryDialogProps) {
+  const router = useRouter();
   const [page, setPage] = useState(0);
   const [size] = useState(10);
   const [loading, setLoading] = useState(false);
@@ -56,7 +60,15 @@ export default function RevisionHistoryDialog({ wikiId, open, onOpenChange }: Re
               ) : (
                 <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                   {items.map((rev) => (
-                    <li key={rev.revisionId} className="py-3">
+                    <li
+                      key={rev.revisionId}
+                      className="py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/60 rounded px-2 -mx-2"
+                      onClick={() => {
+                        if (!wikiId) return;
+                        onOpenChange(false);
+                        router.push(`/wiki/${category}/${encodeURIComponent(wikiId)}?rev=${encodeURIComponent(rev.revisionId)}`);
+                      }}
+                    >
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="text-sm font-medium">

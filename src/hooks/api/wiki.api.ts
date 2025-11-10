@@ -88,4 +88,10 @@ export async function getWikiRevisions(
     return fetcher<RevisionPage>(path);
 }
 
+export type RevisionDetail = RevisionItem;
+
+export async function getWikiRevision(id: string, version: string): Promise<RevisionDetail> {
+    return fetcher<RevisionDetail>(`/api/v1/wiki/${encodeURIComponent(id)}/revision/${encodeURIComponent(version)}`);
+}
+
 
