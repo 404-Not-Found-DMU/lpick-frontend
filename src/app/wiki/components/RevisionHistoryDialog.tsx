@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/Dialog';
-import { getWikiRevisions, type RevisionItem, type RevisionPage } from '@/hooks/api/wiki.api';
+import { getWikiRevisions, getWikiRevision, type RevisionItem, type RevisionPage } from '@/hooks/api/wiki.api';
 import type { WikiCategory } from '@/types/hierarchical.editor.types';
 
 interface RevisionHistoryDialogProps {
@@ -20,6 +20,20 @@ export default function RevisionHistoryDialog({ wikiId, open, onOpenChange, cate
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<RevisionPage | null>(null);
+  const [selecting, setSelecting] = useState<string | null>(null);
+
+  const getVersionParam = (rev: RevisionItem): string => {
+    const anyRev = rev as unknown as Record<string, unknown>;
+    const candidates = [
+      anyRev.version,
+      anyRev.number,
+      anyRev.seq,
+      anyRev.revisionNumber,
+      rev.revisionId,
+    ];
+    const picked = candidates.find((v) => v !== undefined && v !== null && String(v).length > 0);
+    return String(picked ?? rev.revisionId);
+  };
 
   useEffect(() => {
     let active = true;
@@ -63,10 +77,31 @@ export default function RevisionHistoryDialog({ wikiId, open, onOpenChange, cate
                     <li
                       key={rev.revisionId}
                       className="py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/60 rounded px-2 -mx-2"
-                      onClick={() => {
+                      onClick={async () => {
                         if (!wikiId) return;
-                        onOpenChange(false);
-                        router.push(`/wiki/${category}/${encodeURIComponent(wikiId)}?rev=${encodeURIComponent(rev.revisionId)}`);
+                        const primary = getVersionParam(rev);
+                        const secondary = rev.revisionId !== primary ? rev.revisionId : undefined;
+                        try {
+                          setSelecting(rev.revisionId);
+                          // 사전 조회로 API 요청이 실제로 발생하도록 강제
+                          try {
+                            await getWikiRevision(wikiId, primary);
+                          } catch (e) {
+                            if (secondary) {
+                              await getWikiRevision(wikiId, secondary);
+                            } else {
+                              throw e;
+                            }
+                          }
+                          onOpenChange(false);
+                          const finalParam = secondary ? secondary : primary;
+                          router.push(`/wiki/${category}/${encodeURIComponent(wikiId)}?rev=${encodeURIComponent(finalParam)}`);
+                          router.refresh?.();
+                        } catch {
+                          alert('해당 리비전을 불러오지 못했습니다.');
+                        } finally {
+                          setSelecting(null);
+                        }
                       }}
                     >
                       <div className="flex items-start justify-between">
@@ -78,8 +113,17 @@ export default function RevisionHistoryDialog({ wikiId, open, onOpenChange, cate
                             {rev.createWho?.nickName ?? rev.createWho?.oauthId ?? '알 수 없음'}
                           </div>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          revId: {rev.revisionId}
+                        <div className="text-right text-xs text-muted-foreground">
+                          {selecting === rev.revisionId ? '로드 중...' : (
+                            <>
+                              <div>revId: {rev.revisionId}</div>
+                              {(() => {
+                                const anyRev = rev as unknown as Record<string, unknown>;
+                                const v = anyRev.version ?? anyRev.number ?? anyRev.seq ?? anyRev.revisionNumber;
+                                return v ? <div>version: {String(v)}</div> : null;
+                              })()}
+                            </>
+                          )}
                         </div>
                       </div>
                     </li>

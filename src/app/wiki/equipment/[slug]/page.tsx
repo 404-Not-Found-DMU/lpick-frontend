@@ -20,6 +20,8 @@ export default function WikiEquipmentPage() {
   const [showHistory, setShowHistory] = useState(false)
   const searchParams = useSearchParams()
   const rev = searchParams?.get("rev") || null
+  const [revision, setRevision] = useState<RevisionDetail | null>(null)
+  const [revError, setRevError] = useState<string | null>(null)
 
   const [data, setData] = useState<WikiDetail | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
@@ -29,25 +31,30 @@ export default function WikiEquipmentPage() {
     let active = true
     async function run() {
       if (!wikiId) return
+      setRevError(null)
       try {
         setLoading(true)
+        const base = await fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`)
+        if (!active) return
         if (rev) {
-          const [base, revision] = await Promise.all([
-            fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`),
-            getWikiRevision(wikiId, rev)
-          ])
-          if (!active) return
-          setData({
-            wikiId: base.wikiId,
-            title: base.title,
-            content: revision.content as unknown as WikiContent,
-            modifiedAt: revision.createdAt
-          })
-          setRevision(revision)
+          try {
+            const revisionRes = await getWikiRevision(wikiId, rev)
+            if (!active) return
+            setData({
+              wikiId: base.wikiId,
+              title: base.title,
+              content: revisionRes.content as unknown as WikiContent,
+              modifiedAt: revisionRes.createdAt
+            })
+            setRevision(revisionRes)
+          } catch {
+            if (!active) return
+            setData(base)
+            setRevision(null)
+            setRevError("해당 리비전을 불러오지 못해 최신 문서를 표시합니다.")
+          }
         } else {
-          const res = await fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`)
-          if (!active) return
-          setData(res)
+          setData(base)
           setRevision(null)
         }
       } catch {
@@ -69,7 +76,6 @@ export default function WikiEquipmentPage() {
   const title = data?.title ?? (loading ? "로딩 중..." : error ? "문서 로드 실패" : "")
   const categoryData = data?.content?.categoryData
   const textBlocks = data?.content?.textBlocks ?? []
-  const [revision, setRevision] = useState<RevisionDetail | null>(null)
 
   return (
     <WikiLayout
@@ -111,6 +117,11 @@ export default function WikiEquipmentPage() {
     >
       {wikiId && (
         <RevisionHistoryDialog wikiId={wikiId} open={showHistory} onOpenChange={setShowHistory} category="equipment" />
+      )}
+      {revError && (
+        <div className="mb-4 text-xs text-red-500">
+          {revError}
+        </div>
       )}
       {revision && (
         <div className="mb-4 text-xs text-muted-foreground">
