@@ -9,6 +9,7 @@ import type { WikiCategory, TextBlock, CategoryData } from "@/types/hierarchical
 import { fetcher } from "@/hooks/api/fetchers"
 import RevisionHistoryDialog from "@/app/wiki/components/RevisionHistoryDialog"
 import { getWikiRevision, type RevisionDetail } from "@/hooks/api/wiki.api"
+import ArtistLikeSection from "@/app/wiki/components/review/ArtistLikeSection"
 
 type WikiContent = { textBlocks: TextBlock[]; categoryData: { type: WikiCategory; data: unknown } }
 type WikiDetail = { wikiId: string; title: string; content: WikiContent; modifiedAt?: string | null }
@@ -169,6 +170,9 @@ export default function WikiArtistPage() {
       {error && (
         <div className="text-red-500 text-sm">{error}</div>
       )}
+      {!error && !loading && wikiId ? (
+        <ArtistLikeSection wikiId={wikiId} />
+      ) : null}
     </WikiLayout>
   )
 }
