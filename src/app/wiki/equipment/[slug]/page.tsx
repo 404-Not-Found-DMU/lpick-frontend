@@ -7,6 +7,7 @@ import { Edit, History, MessageSquare, Star, Share2, Bookmark } from "lucide-rea
 import BlocksWithToc from "@/app/wiki/components/BlocksWithToc"
 import type { WikiCategory, TextBlock, CategoryData } from "@/types/hierarchical.editor.types"
 import { fetcher } from "@/hooks/api/fetchers"
+import RevisionHistoryDialog from "@/app/wiki/components/RevisionHistoryDialog"
 
 type WikiContent = { textBlocks: TextBlock[]; categoryData: { type: WikiCategory; data: unknown } }
 type WikiDetail = { wikiId: string; title: string; content: WikiContent; modifiedAt?: string | null }
@@ -15,6 +16,7 @@ export default function WikiEquipmentPage() {
   const params = useParams() as { slug: string }
   const wikiId = params?.slug
   const router = useRouter()
+  const [showHistory, setShowHistory] = useState(false)
 
   const [data, setData] = useState<WikiDetail | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
@@ -63,7 +65,7 @@ export default function WikiEquipmentPage() {
             <Edit className="w-4 h-4 mr-2" />
             편집하기
           </Button>
-          <Button variant="outline" size="sm" className="h-8">
+          <Button variant="outline" size="sm" className="h-8" onClick={() => setShowHistory(true)}>
             <History className="w-4 h-4 mr-2" />
             역사
           </Button>
@@ -86,6 +88,9 @@ export default function WikiEquipmentPage() {
         </div>
       )}
     >
+      {wikiId && (
+        <RevisionHistoryDialog wikiId={wikiId} open={showHistory} onOpenChange={setShowHistory} />
+      )}
       {!error && !loading && categoryData && (
         <BlocksWithToc
           textBlocks={textBlocks}

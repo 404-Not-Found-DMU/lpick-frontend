@@ -52,4 +52,40 @@ export async function createWikiRevision(id: string, payload: CreateRevisionRequ
     });
 }
 
+// Revision list
+export interface RevisionItem {
+    revisionId: string;
+    content: unknown;
+    createdAt: string;
+    createWho: {
+        oauthId: string;
+        nickName: string;
+    };
+}
+
+export interface RevisionPage {
+    totalElements: number;
+    totalPages: number;
+    numberOfElements: number;
+    size: number;
+    content: RevisionItem[];
+    number: number;
+    first: boolean;
+    last: boolean;
+}
+
+export async function getWikiRevisions(
+    id: string,
+    params?: { page?: number; size?: number; sortParam?: string }
+): Promise<RevisionPage> {
+    const query = new URLSearchParams();
+    if (params?.page !== undefined) query.set('page', String(params.page));
+    if (params?.size !== undefined) query.set('size', String(params.size));
+    if (params?.sortParam) query.set('sortParam', params.sortParam);
+
+    const qs = query.toString();
+    const path = `/api/v1/wiki/${encodeURIComponent(id)}/revision${qs ? `?${qs}` : ''}`;
+    return fetcher<RevisionPage>(path);
+}
+
 
