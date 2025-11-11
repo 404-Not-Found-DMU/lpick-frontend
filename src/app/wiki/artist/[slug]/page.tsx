@@ -42,7 +42,7 @@ export default function WikiArtistPage() {
             const revContent = (revisionRes?.content ?? {}) as WikiContent
             // 리비전 기반으로 제목 산출
             let derivedTitle = '문서'
-            const cd = (revContent as any)?.categoryData
+            const cd = revContent?.categoryData
             switch (cd?.type) {
               case 'lp':
                 derivedTitle = cd?.data?.infobox?.title || '문서'

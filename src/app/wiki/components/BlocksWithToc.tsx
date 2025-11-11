@@ -21,7 +21,7 @@ export default function BlocksWithToc({
   showIndex = false,
   topInfo,
 }: BlocksWithTocProps) {
-  const [showTableOfContents, setShowTableOfContents] = useState(true)
+  const [showTableOfContents, setShowTableOfContents] = useState(showIndex)
 
   const numberingMap = (() => {
     const counters = [0, 0, 0] as number[] // depth 1,2,3

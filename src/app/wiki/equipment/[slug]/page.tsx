@@ -41,7 +41,7 @@ export default function WikiEquipmentPage() {
             if (!active) return
             const revContent = (revisionRes?.content ?? {}) as WikiContent
             let derivedTitle = '문서'
-            const cd = (revContent as any)?.categoryData
+            const cd = revContent?.categoryData
             switch (cd?.type) {
               case 'lp':
                 derivedTitle = cd?.data?.infobox?.title || '문서'

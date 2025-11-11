@@ -28,7 +28,6 @@ export default function RelatedPagesCard({ slug, initial }: { slug: string; init
   useEffect(() => {
     if (!initial || initial.length === 0) fetchData()
     else setLoading(false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData, initial])
 
   return (

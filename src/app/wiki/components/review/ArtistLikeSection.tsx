@@ -8,7 +8,7 @@ type ArtistLikeSectionProps = {
 	className?: string
 }
 
-export default function ArtistLikeSection({ wikiId, initialCount = 0, className = "" }: ArtistLikeSectionProps) {
+export default function ArtistLikeSection({ initialCount = 0, className = "" }: ArtistLikeSectionProps) {
 	const [liked, setLiked] = useState<boolean>(false)
 	const [count, setCount] = useState<number>(initialCount)
 

@@ -97,11 +97,11 @@ export async function getWikiRevision(id: string, version: string): Promise<Revi
         if (res && typeof (res as unknown as { content?: unknown }).content === 'string') {
             try {
                 const parsed = JSON.parse((res as unknown as { content: string }).content);
-                return { ...(res as any), content: parsed } as RevisionDetail;
+                return { ...res, content: parsed } as RevisionDetail;
             } catch {}
         }
         return res;
-    } catch (_e1) {
+    } catch {
         // 2) 쿼리 파라미터 폴백 (?revisionId=)
         try {
             const q = new URLSearchParams({ revisionId: version });
@@ -109,17 +109,17 @@ export async function getWikiRevision(id: string, version: string): Promise<Revi
             if (res && typeof (res as unknown as { content?: unknown }).content === 'string') {
                 try {
                     const parsed = JSON.parse((res as unknown as { content: string }).content);
-                    return { ...(res as any), content: parsed } as RevisionDetail;
+                    return { ...res, content: parsed } as RevisionDetail;
                 } catch {}
             }
             return res;
-        } catch (_e2) {
+        } catch {
             // 3) 전역 경로 폴백 (/api/v1/wiki/revision/{revisionId})
             const res = await fetcher<RevisionDetail>(`/api/v1/wiki/revision/${encodeURIComponent(version)}`);
             if (res && typeof (res as unknown as { content?: unknown }).content === 'string') {
                 try {
                     const parsed = JSON.parse((res as unknown as { content: string }).content);
-                    return { ...(res as any), content: parsed } as RevisionDetail;
+                    return { ...res, content: parsed } as RevisionDetail;
                 } catch {}
             }
             return res;

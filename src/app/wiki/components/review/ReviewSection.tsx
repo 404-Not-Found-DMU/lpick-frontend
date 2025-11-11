@@ -11,7 +11,7 @@ type ReviewSectionProps = {
 }
 
 // UI-only: 프론트 상태로 페이징/수정/삭제를 흉내냅니다.
-export default function ReviewSection({ wikiId, className = "", pageSize = 10 }: ReviewSectionProps) {
+export default function ReviewSection({ className = "", pageSize = 10 }: ReviewSectionProps) {
 	const userInfo = useUserStore((s) => s.userInfo)
 	const currentUserId = userInfo?.oauthId ?? null
 
