@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import Image from "next/image"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeSanitize from "rehype-sanitize"
@@ -30,8 +31,14 @@ export default function WikiRenderer({ content, components }: { content: string;
       )
     },
     img: ({ src, alt }) => (
-      // next/image는 마크다운 내 임의 사이즈 이미지 처리에 제약이 있어 기본 img 사용
-      <img src={String(src)} alt={String(alt ?? '')} className="mx-auto my-4 max-w-full rounded" />
+      <Image
+        src={String(src)}
+        alt={String(alt ?? '')}
+        width={1200}
+        height={800}
+        sizes="(min-width: 768px) 720px, 100vw"
+        className="mx-auto my-4 max-w-full h-auto rounded object-contain"
+      />
     ),
     pre: ({ children }) => (
       <pre className="overflow-x-auto rounded bg-gray-900 p-4 text-gray-100">
