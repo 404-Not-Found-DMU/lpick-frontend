@@ -8,10 +8,10 @@ import BlocksWithToc from "@/app/wiki/components/BlocksWithToc"
 import type { WikiCategory, TextBlock, CategoryData } from "@/types/hierarchical.editor.types"
 import { fetcher } from "@/hooks/api/fetchers"
 import RevisionHistoryDialog from "@/app/wiki/components/RevisionHistoryDialog"
-import { getWikiRevision, type RevisionDetail } from "@/hooks/api/wiki.api"
+import { getWikiRevision, type RevisionDetail, getWikiBookmarkStatus, addWikiBookmark, removeWikiBookmark } from "@/hooks/api/wiki.api"
 import ArtistLikeSection from "@/app/wiki/components/review/ArtistLikeSection"
 
-type WikiContent = { textBlocks: TextBlock[]; categoryData: { type: WikiCategory; data: unknown } }
+type WikiContent = { textBlocks: TextBlock[]; categoryData: CategoryData }
 type WikiDetail = { wikiId: string; title: string; content: WikiContent; modifiedAt?: string | null }
 
 export default function WikiArtistPage() {
@@ -27,6 +27,8 @@ export default function WikiArtistPage() {
   const [data, setData] = useState<WikiDetail | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
+  const [bookmarkId, setBookmarkId] = useState<string | null>(null)
+  const [bookmarkPending, setBookmarkPending] = useState<boolean>(false)
 
   useEffect(() => {
     let active = true
@@ -45,16 +47,16 @@ export default function WikiArtistPage() {
             const cd = revContent?.categoryData
             switch (cd?.type) {
               case 'lp':
-                derivedTitle = cd?.data?.infobox?.title || '문서'
+                derivedTitle = cd.data.infobox.title || '문서'
                 break
               case 'artist':
-                derivedTitle = cd?.data?.name || '문서'
+                derivedTitle = cd.data.name || '문서'
                 break
               case 'equipment':
-                derivedTitle = cd?.data?.name || '문서'
+                derivedTitle = cd.data.name || '문서'
                 break
               case 'other':
-                derivedTitle = cd?.data?.title || '문서'
+                derivedTitle = cd.data.title || '문서'
                 break
             }
             setData({
@@ -88,6 +90,44 @@ export default function WikiArtistPage() {
     run()
     return () => { active = false }
   }, [wikiId, rev])
+
+  // 북마크 상태 초기 로드
+  useEffect(() => {
+    let active = true
+    async function loadBookmark() {
+      if (!wikiId) return
+      try {
+        const id = await getWikiBookmarkStatus(wikiId)
+        if (!active) return
+        setBookmarkId(id)
+      } catch {
+        if (!active) return
+        setBookmarkId(null)
+      }
+    }
+    loadBookmark()
+    return () => { active = false }
+  }, [wikiId])
+
+  async function handleToggleBookmark() {
+    if (!wikiId || bookmarkPending) return
+    setBookmarkPending(true)
+    try {
+      if (bookmarkId) {
+        await removeWikiBookmark(bookmarkId)
+        setBookmarkId(null)
+      } else {
+        await addWikiBookmark(wikiId)
+        const newId = await getWikiBookmarkStatus(wikiId)
+        setBookmarkId(newId)
+      }
+    } catch (e) {
+      // noop: 필요 시 토스트 연결
+      console.warn('Bookmark toggle failed', e)
+    } finally {
+      setBookmarkPending(false)
+    }
+  }
 
   const category: WikiCategory = useMemo(() => {
     return (data?.content?.categoryData?.type ?? "artist") as WikiCategory
@@ -128,9 +168,9 @@ export default function WikiArtistPage() {
             <Share2 className="w-4 h-4 mr-2" />
             공유
           </Button>
-          <Button variant="outline" size="sm" className="h-8">
-            <Bookmark className="w-4 h-4 mr-2" />
-            북마크
+          <Button variant="outline" size="sm" className="h-8" onClick={handleToggleBookmark} disabled={bookmarkPending} aria-pressed={!!bookmarkId}>
+            <Bookmark className="w-4 h-4 mr-2" fill={bookmarkId ? "currentColor" : "none"} />
+            {bookmarkId ? "북마크 해제" : "북마크"}
           </Button>
         </div>
       )}

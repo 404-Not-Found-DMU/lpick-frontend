@@ -127,4 +127,45 @@ export async function getWikiRevision(id: string, version: string): Promise<Revi
     }
 }
 
+// ===== Bookmark APIs =====
+export interface WikiBookmarkStatusResponse {
+    wikiBookmarkId?: string;
+}
+
+// 북마크 여부/아이디 조회
+export async function getWikiBookmarkStatus(wikiId: string): Promise<string | null> {
+    try {
+        const res = await fetcher<WikiBookmarkStatusResponse>(`/api/v1/wiki/${encodeURIComponent(wikiId)}/bookmark`);
+        return res?.wikiBookmarkId ?? null;
+    } catch {
+        // 명세 외 응답(404 등)일 경우 북마크 없음으로 처리
+        return null;
+    }
+}
+
+// 북마크 추가
+export async function addWikiBookmark(wikiId: string): Promise<'SUCCESS' | unknown> {
+    // 서버 명세상 본문은 SUCCESS. 파싱 실패 가능성이 있어도 fetcher 사용(서버에서 JSON 문자열 반환 가정)
+    try {
+        const res = await fetcher<unknown>(`/wiki/${encodeURIComponent(wikiId)}/book-mark`, {
+            method: 'POST',
+        });
+        return (res as 'SUCCESS') ?? 'SUCCESS';
+    } catch (e) {
+        throw e;
+    }
+}
+
+// 북마크 해제
+export async function removeWikiBookmark(bookmarkId: string): Promise<'SUCCESS' | unknown> {
+    try {
+        const res = await fetcher<unknown>(`/wiki-bookmark/${encodeURIComponent(bookmarkId)}`, {
+            method: 'DELETE',
+        });
+        return (res as 'SUCCESS') ?? 'SUCCESS';
+    } catch (e) {
+        throw e;
+    }
+}
+
 
