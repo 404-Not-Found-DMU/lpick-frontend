@@ -142,8 +142,6 @@ export default function WikiArtistPage() {
       title={title}
       category={"아티스트"}
       lastUpdated={data?.modifiedAt ? new Date(data.modifiedAt).toLocaleString() : "2023년 5월 18일"}
-      views={892}
-      contributors={18}
       badgeClassName="bg-purple-500/10 text-purple-500"
       showDocInfo={false}
       headerActions={(
