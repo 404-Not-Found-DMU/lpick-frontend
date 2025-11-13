@@ -9,6 +9,7 @@ import { Badge } from "@/components/Badge"
 import { WelcomeModal, useWelcomeModal } from "@/modules/welcomeModal"
 import { fetcher } from "@/hooks/api/fetchers"
 import { getPopularWiki, type PopularWikiItem } from "@/hooks/api"
+import RecentUpdatedCard from "@/app/wiki/components/RecentUpdatedCard"
 
 type RecommendAlbum = {
   albumId: string
@@ -138,27 +139,7 @@ export default function HomePage() {
     return () => { active = false }
   }, [])
 
-  const recentDocs = {
-    음반: [
-      { title: "음반 관련 업데이트", time: "방금 전" },
-      { title: "The Beatles - Abbey Road", time: "5분 전" },
-      { title: "Radiohead - OK Computer", time: "10분 전" },
-      { title: "Miles Davis - Kind of Blue", time: "15분 전" },
-    ],
-    장비: [
-      { title: "Technics SL-1200MK7", time: "방금 전" },
-      { title: "Audio-Technica AT-LP120XUSB", time: "3분 전" },
-      { title: "Pro-Ject Debut Carbon EVO", time: "8분 전" },
-      { title: "Ortofon 2M Red 카트리지", time: "12분 전" },
-    ],
-    아티스트: [
-      { title: "Pink Floyd", time: "방금 전" },
-      { title: "아이유의 최근 음반 활동", time: "2분 전" },
-      { title: "The Beatles", time: "7분 전" },
-      { title: "Queen", time: "11분 전" },
-      { title: "David Bowie", time: "16분 전" },
-    ],
-  }
+  
 
   const hotPosts = [
     {
@@ -453,53 +434,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 최근 수정된 문서 */}
+      {/* 최근 수정된 문서 - 위키 메인 컴포넌트 사용 */}
       <section className="bg-white dark:bg-gray-800 py-16">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">최근 수정된 문서</h2>
-            <Link
-              href="/wiki"
-              className="text-violet-500 dark:text-violet-400 hover:text-violet-600 dark:hover:text-violet-300 font-medium"
-            >
-              전체보기 →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {Object.entries(recentDocs).map(([category, docs]) => (
-              <div key={category}>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                  {category === "음반" && "🎵"}
-                  {category === "장비" && "🎧"}
-                  {category === "아티스트" && "🎤"}
-                  <span className="ml-2">{category}</span>
-                  <Badge
-                    variant="secondary"
-                    className="ml-2 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                  >
-                    {docs.length}
-                  </Badge>
-                </h3>
-                <div className="space-y-3">
-                  {docs.map((doc, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
-                    >
-                      <Link
-                        href="#"
-                        className="text-gray-700 dark:text-gray-300 hover:text-violet-500 dark:hover:text-violet-400 font-medium flex-1 line-clamp-1"
-                      >
-                        {doc.title}
-                      </Link>
-                      <span className="text-xs text-gray-400 dark:text-gray-500 ml-2">{doc.time}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <RecentUpdatedCard />
         </div>
       </section>
 
