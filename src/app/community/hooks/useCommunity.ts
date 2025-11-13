@@ -3,14 +3,11 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SortOption, CommunityFilters, BoardType, TagType } from '../types/community.types';
 import { POSTS_PER_PAGE, FEATURED_POSTS_LIMIT } from '../constants';
-import { useArticles, usePublicArticles } from './useArticles';
+import { useArticles } from './useArticles';
 import { ArticleListItem } from '../types/api.types';
-import { useUserStore } from '@/store/userStore';
 
 export const useCommunity = () => {
   const searchParams = useSearchParams();
-  const { userInfo } = useUserStore();
-  const isAuthenticated = !!userInfo;
   
   const [filters, setFilters] = useState<CommunityFilters>({
     board: 'all',
@@ -32,9 +29,7 @@ export const useCommunity = () => {
     size: FEATURED_POSTS_LIMIT
   }), []); // 1-based for UI
 
-  // 로그인 상태에 따라 적절한 API 사용
-  const articlesHook = isAuthenticated ? useArticles : usePublicArticles;
-  
+  // 로그인 상태와 관계없이 public API 사용
   // API 호출을 통한 게시글 데이터 조회
   const {
     articles,
@@ -43,7 +38,7 @@ export const useCommunity = () => {
     error,
     loadPage,
     refresh
-  } = articlesHook(mainParams);
+  } = useArticles(mainParams);
 
   // API 데이터를 커뮤니티 포스트 형태로 변환
   const convertToPostFormat = useCallback((article: ArticleListItem) => {

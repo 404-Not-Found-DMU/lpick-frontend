@@ -2,10 +2,13 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast/ToastProvider';
 import { Post, Comment, convertApiCommentToUiComment } from '../../types/community.types';
-import { useArticle, usePublicArticle } from '../../hooks/useArticles';
+import { useArticle } from '../../hooks/useArticles';
 import { useArticleInteractions, useArticleManager } from '../../hooks/useArticleManager';
 import { useComments, useCommentManager, useCommentInteractions } from '../../hooks';
 import { useUserStore } from '@/store/userStore';
+
+// 안정된 빈 배열 참조
+const EMPTY_COMMENTS: any[] = [];
 
 export const usePostDetail = (articleId: string) => {
   const router = useRouter();
@@ -20,24 +23,29 @@ export const usePostDetail = (articleId: string) => {
   const [newComment, setNewComment] = useState('');
   const [isMounted, setIsMounted] = useState(false);
 
-  // 로그인 상태에 따라 적절한 API 사용
-  const articleHook = isAuthenticated ? useArticle : usePublicArticle;
-  
+  // 로그인 상태와 관계없이 public API 사용
   // API 훅 사용
   const {
     article,
     loading: articleLoading,
     error: articleError,
     refresh: refreshArticle
-  } = articleHook(articleId);
+  } = useArticle(articleId);
 
-  // 로그인된 사용자만 상호작용 기능 사용
+  // Hook들을 항상 호출 (조건부 호출 금지)
+  const articleInteractions = useArticleInteractions();
+  const articleManager = useArticleManager();
+  const commentsHook = useComments(articleId, { page: 1, size: 50 });
+  const commentManager = useCommentManager();
+  const commentInteractions = useCommentInteractions();
+
+  // 로그인 상태에 따라 기능 제한
   const {
     loading: interactionLoading,
     error: interactionError,
     toggleLike,
     toggleBookmark
-  } = isAuthenticated ? useArticleInteractions() : {
+  } = isAuthenticated ? articleInteractions : {
     loading: false,
     error: null,
     toggleLike: async () => false,
@@ -48,19 +56,19 @@ export const usePostDetail = (articleId: string) => {
     loading: managerLoading,
     error: managerError,
     deleteExistingArticle
-  } = isAuthenticated ? useArticleManager() : {
+  } = isAuthenticated ? articleManager : {
     loading: false,
     error: null,
     deleteExistingArticle: async () => false
   };
 
-  // 댓글 관련 훅들 (로그인된 사용자만)
+  // 댓글 관련 기능들
   const {
     comments: apiComments,
     fetchComments,
     refresh: refreshComments
-  } = isAuthenticated ? useComments(articleId, { page: 1, size: 50 }) : {
-    comments: [],
+  } = isAuthenticated ? commentsHook : {
+    comments: EMPTY_COMMENTS,
     fetchComments: async () => {},
     refresh: async () => {}
   };
@@ -68,17 +76,16 @@ export const usePostDetail = (articleId: string) => {
   const {
     createNewComment,
     createNewReply
-  } = isAuthenticated ? useCommentManager() : {
+  } = isAuthenticated ? commentManager : {
     createNewComment: async () => false,
     createNewReply: async () => false
   };
 
   const {
     handleCommentLike: apiHandleCommentLike
-  } = isAuthenticated ? useCommentInteractions() : {
+  } = isAuthenticated ? commentInteractions : {
     handleCommentLike: async () => ({ success: false, message: 'Login required' })
   };
-  } = useCommentInteractions();
 
   // 게시글 데이터를 Post 형태로 변환
   const post: Post | null = useMemo(() => {
@@ -136,7 +143,7 @@ export const usePostDetail = (articleId: string) => {
 
   // API 댓글을 UI 댓글로 변환
   const convertedComments = useMemo(() => {
-    if (!apiComments || !articleId) return [];
+    if (!apiComments || apiComments.length === 0 || !articleId) return [];
     
     const allComments: Comment[] = [];
     
@@ -165,21 +172,20 @@ export const usePostDetail = (articleId: string) => {
   }, []);
 
   useEffect(() => {
-    if (!isMounted || !articleId) return;
+    if (!isMounted || !articleId || !isAuthenticated) return;
     
-    // 댓글 데이터 로드
-    fetchComments();
-  }, [articleId, isMounted, fetchComments]);
+    // 댓글 데이터 로드 (로그인한 경우만)
+    if (fetchComments) {
+      fetchComments();
+    }
+  }, [articleId, isMounted, isAuthenticated]);
 
   // 변환된 댓글을 전체 댓글과 현재 댓글로 설정
   useEffect(() => {
-    console.log('API 댓글 데이터:', apiComments);
-    console.log('변환된 댓글 데이터:', convertedComments);
-    
     setAllComments(convertedComments);
     // 첫 페이지 댓글만 표시
     setComments(convertedComments.slice(0, commentsPerPage));
-  }, [convertedComments, commentsPerPage, apiComments]);
+  }, [convertedComments, commentsPerPage]);
 
   // 페이지 변경시 댓글 업데이트
   useEffect(() => {
