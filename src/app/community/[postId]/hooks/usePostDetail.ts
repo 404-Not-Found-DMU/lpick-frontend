@@ -2,13 +2,17 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast/ToastProvider';
 import { Post, Comment, convertApiCommentToUiComment } from '../../types/community.types';
-import { useArticle } from '../../hooks/useArticles';
+import { useArticle, usePublicArticle } from '../../hooks/useArticles';
 import { useArticleInteractions, useArticleManager } from '../../hooks/useArticleManager';
 import { useComments, useCommentManager, useCommentInteractions } from '../../hooks';
+import { useUserStore } from '@/store/userStore';
 
 export const usePostDetail = (articleId: string) => {
   const router = useRouter();
   const { push: toast } = useToast();
+  const { userInfo } = useUserStore();
+  const isAuthenticated = !!userInfo;
+  
   const [comments, setComments] = useState<Comment[]>([]);
   const [allComments, setAllComments] = useState<Comment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,41 +20,64 @@ export const usePostDetail = (articleId: string) => {
   const [newComment, setNewComment] = useState('');
   const [isMounted, setIsMounted] = useState(false);
 
+  // 로그인 상태에 따라 적절한 API 사용
+  const articleHook = isAuthenticated ? useArticle : usePublicArticle;
+  
   // API 훅 사용
   const {
     article,
     loading: articleLoading,
     error: articleError,
     refresh: refreshArticle
-  } = useArticle(articleId);
+  } = articleHook(articleId);
 
+  // 로그인된 사용자만 상호작용 기능 사용
   const {
     loading: interactionLoading,
     error: interactionError,
     toggleLike,
     toggleBookmark
-  } = useArticleInteractions();
+  } = isAuthenticated ? useArticleInteractions() : {
+    loading: false,
+    error: null,
+    toggleLike: async () => false,
+    toggleBookmark: async () => false
+  };
 
   const {
     loading: managerLoading,
     error: managerError,
     deleteExistingArticle
-  } = useArticleManager();
+  } = isAuthenticated ? useArticleManager() : {
+    loading: false,
+    error: null,
+    deleteExistingArticle: async () => false
+  };
 
-  // 댓글 관련 훅들
+  // 댓글 관련 훅들 (로그인된 사용자만)
   const {
     comments: apiComments,
     fetchComments,
     refresh: refreshComments
-  } = useComments(articleId, { page: 1, size: 50 }); // 충분한 크기로 설정
+  } = isAuthenticated ? useComments(articleId, { page: 1, size: 50 }) : {
+    comments: [],
+    fetchComments: async () => {},
+    refresh: async () => {}
+  };
 
   const {
     createNewComment,
     createNewReply
-  } = useCommentManager();
+  } = isAuthenticated ? useCommentManager() : {
+    createNewComment: async () => false,
+    createNewReply: async () => false
+  };
 
   const {
     handleCommentLike: apiHandleCommentLike
+  } = isAuthenticated ? useCommentInteractions() : {
+    handleCommentLike: async () => ({ success: false, message: 'Login required' })
+  };
   } = useCommentInteractions();
 
   // 게시글 데이터를 Post 형태로 변환
