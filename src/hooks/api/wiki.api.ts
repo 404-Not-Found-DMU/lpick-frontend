@@ -145,27 +145,20 @@ export async function getWikiBookmarkStatus(wikiId: string): Promise<string | nu
 
 // 북마크 추가
 export async function addWikiBookmark(wikiId: string): Promise<'SUCCESS' | unknown> {
-    // 서버 명세상 본문은 SUCCESS. 파싱 실패 가능성이 있어도 fetcher 사용(서버에서 JSON 문자열 반환 가정)
-    try {
-        const res = await fetcher<unknown>(`/wiki/${encodeURIComponent(wikiId)}/book-mark`, {
-            method: 'POST',
-        });
-        return (res as 'SUCCESS') ?? 'SUCCESS';
-    } catch (e) {
-        throw e;
-    }
+    // 서버 명세: POST /api/v1/wiki/{wikiId}/bookmark -> 'SUCCESS'
+    const res = await fetcher<unknown>(`/api/v1/wiki/${encodeURIComponent(wikiId)}/bookmark`, {
+        method: 'POST',
+    });
+    return (res as 'SUCCESS') ?? 'SUCCESS';
 }
 
 // 북마크 해제
-export async function removeWikiBookmark(bookmarkId: string): Promise<'SUCCESS' | unknown> {
-    try {
-        const res = await fetcher<unknown>(`/wiki-bookmark/${encodeURIComponent(bookmarkId)}`, {
-            method: 'DELETE',
-        });
-        return (res as 'SUCCESS') ?? 'SUCCESS';
-    } catch (e) {
-        throw e;
-    }
+export async function removeWikiBookmark(wikiId: string): Promise<'SUCCESS' | unknown> {
+    // 서버 명세: DELETE /api/v1/wiki/{wikiId}/bookmark -> 'SUCCESS'
+    const res = await fetcher<unknown>(`/api/v1/wiki/${encodeURIComponent(wikiId)}/bookmark`, {
+        method: 'DELETE',
+    });
+    return (res as 'SUCCESS') ?? 'SUCCESS';
 }
 
 

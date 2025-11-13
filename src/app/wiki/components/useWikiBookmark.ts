@@ -28,7 +28,7 @@ export function useWikiBookmark(wikiId?: string | null) {
     setPending(true)
     try {
       if (bookmarkId) {
-        await removeWikiBookmark(bookmarkId)
+        await removeWikiBookmark(wikiId)
         setBookmarkId(null)
       } else {
         await addWikiBookmark(wikiId)
