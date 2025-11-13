@@ -28,13 +28,28 @@ export function useWikiBookmark(wikiId?: string | null) {
     setPending(true)
     try {
       if (bookmarkId) {
-        await removeWikiBookmark(wikiId)
-        setBookmarkId(null)
+        // 항상 최신 ID로 삭제 시도 (서버/캐시 불일치 방지)
+        const latestId = await getWikiBookmarkStatus(wikiId)
+        if (latestId) {
+          await removeWikiBookmark(latestId)
+        }
+        // 삭제 후 실제 상태 재확인
+        const confirm = await getWikiBookmarkStatus(wikiId)
+        setBookmarkId(confirm)
       } else {
         await addWikiBookmark(wikiId)
-        const newId = await getWikiBookmarkStatus(wikiId)
+        // 생성 직후 반영 지연을 고려해 한 번 더 확인
+        let newId = await getWikiBookmarkStatus(wikiId)
+        if (!newId) {
+          await new Promise((r) => setTimeout(r, 200))
+          newId = await getWikiBookmarkStatus(wikiId)
+        }
         setBookmarkId(newId)
       }
+    } catch (e) {
+      // 서버 오류(500), 인증 문제 등은 UI를 깨뜨리지 않도록 삼킨다.
+      // TODO: 토스트 등 사용자 공지 연결
+      console.warn('Bookmark toggle failed', e)
     } finally {
       setPending(false)
     }

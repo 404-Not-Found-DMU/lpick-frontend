@@ -145,20 +145,29 @@ export async function getWikiBookmarkStatus(wikiId: string): Promise<string | nu
 
 // 북마크 추가
 export async function addWikiBookmark(wikiId: string): Promise<'SUCCESS' | unknown> {
-    // 서버 명세: POST /api/v1/wiki/{wikiId}/bookmark -> 'SUCCESS'
-    const res = await fetcher<unknown>(`/api/v1/wiki/${encodeURIComponent(wikiId)}/bookmark`, {
+    // 서버 명세상 v1에는 생성/삭제가 없으므로 레거시 엔드포인트를 사용
+    const legacy = await fetcher<unknown>(`/wiki/${encodeURIComponent(wikiId)}/book-mark`, {
         method: 'POST',
     });
-    return (res as 'SUCCESS') ?? 'SUCCESS';
+    return (legacy as 'SUCCESS') ?? 'SUCCESS';
 }
 
 // 북마크 해제
-export async function removeWikiBookmark(wikiId: string): Promise<'SUCCESS' | unknown> {
-    // 서버 명세: DELETE /api/v1/wiki/{wikiId}/bookmark -> 'SUCCESS'
-    const res = await fetcher<unknown>(`/api/v1/wiki/${encodeURIComponent(wikiId)}/bookmark`, {
-        method: 'DELETE',
-    });
-    return (res as 'SUCCESS') ?? 'SUCCESS';
+export async function removeWikiBookmark(bookmarkId: string): Promise<'SUCCESS' | unknown> {
+    // 서버 명세상 v1에는 삭제가 없으므로 레거시 엔드포인트를 사용
+    try {
+        const legacy = await fetcher<unknown>(`/wiki-bookmark/${encodeURIComponent(bookmarkId)}`, {
+            method: 'DELETE',
+        });
+        return (legacy as 'SUCCESS') ?? 'SUCCESS';
+    } catch (e) {
+        // 이미 삭제된 경우(404 Not Found)는 멱등 처리
+        const msg = (e as Error)?.message ?? ''
+        if (msg.includes('404')) {
+            return 'SUCCESS'
+        }
+        throw e
+    }
 }
 
 

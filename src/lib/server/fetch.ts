@@ -9,15 +9,17 @@ export function getBaseUrlFromHeaders(): string {
 
 export async function fetchWithTimeout(
   url: string,
-  opts: RequestInit & { timeoutMs?: number; retries?: number } = {}
+  opts: RequestInit & { timeoutMs?: number; retries?: number; next?: { revalidate?: number } } = {}
 ) {
   const { timeoutMs = 5000, retries = 1, ...rest } = opts
   for (let attempt = 0; attempt <= retries; attempt++) {
     const ac = new AbortController()
     const id = setTimeout(() => ac.abort(), timeoutMs)
     try {
-      const nextOption = (opts as any)?.next ?? { revalidate: 60 }
-      const res = await fetch(url, { ...(rest as any), signal: ac.signal, next: nextOption } as any)
+      type NextOptions = { next?: { revalidate?: number } }
+      const nextOptions: NextOptions = opts.next ? { next: opts.next } : { next: { revalidate: 60 } }
+      const init: RequestInit & NextOptions = { ...(rest as RequestInit), signal: ac.signal, ...nextOptions }
+      const res = await fetch(url, init as unknown as RequestInit)
       clearTimeout(id)
       if (!res.ok) throw new Error('bad status')
       return res
