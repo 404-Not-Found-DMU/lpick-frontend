@@ -2,6 +2,26 @@ import { fetcher } from './fetchers';
 
 export type WikiPageClass = 'ARTIST' | 'GEAR' | 'ALBUM' | 'OTHER';
 
+export interface PopularWikiItem {
+    id: string;
+    name: string;
+    viewCount: number;
+}
+
+/**
+ * 인기 위키 항목 조회 (최근 1시간 기준 조회수)
+ * GET /api/v1/public/popular/wiki?type={ARTIST|GEAR|ALBUM|OTHER}&size={n}
+ */
+export async function getPopularWiki(params: { type: WikiPageClass; size?: number }): Promise<PopularWikiItem[]> {
+    const q = new URLSearchParams();
+    q.set('type', params.type);
+    if (params.size !== undefined) {
+        q.set('size', String(params.size));
+    }
+    const path = `/api/v1/public/popular/wiki?${q.toString()}`;
+    return fetcher<PopularWikiItem[]>(path, { method: 'GET' });
+}
+
 export interface CreateWikiRequest {
     title: string;
     wikiPageClass: WikiPageClass;

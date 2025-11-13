@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/Card"
 import { Badge } from "@/components/Badge"
 import { WelcomeModal, useWelcomeModal } from "@/modules/welcomeModal"
 import { fetcher } from "@/hooks/api/fetchers"
+import { getPopularWiki, type PopularWikiItem } from "@/hooks/api"
 
 type RecommendAlbum = {
   albumId: string
@@ -43,6 +44,16 @@ export default function HomePage() {
   const [featuredAlbums, setFeaturedAlbums] = useState<UIAlbum[]>([])
   const [loadingAlbums, setLoadingAlbums] = useState<boolean>(true)
   const [albumError, setAlbumError] = useState<string | null>(null)
+  const [loadingChart, setLoadingChart] = useState<boolean>(true)
+  const [chartError, setChartError] = useState<string | null>(null)
+
+  type ChartRow = { id: string; rank: number; title: string; subtitle: string }
+  type ChartState = { ALBUM: ChartRow[]; GEAR: ChartRow[]; ARTIST: ChartRow[] }
+  const [chartData, setChartData] = useState<ChartState>({
+    ALBUM: [],
+    GEAR: [],
+    ARTIST: [],
+  })
   
   // 환영 모달 훅
   const { isModalOpen, closeModal, handleTakeLPTI, userInfo } = useWelcomeModal()
@@ -93,29 +104,39 @@ export default function HomePage() {
     return () => clearTimeout(timer)
   }, [currentSlide])
 
-  const chartData = {
-    음반: [
-      { rank: 1, title: "Pink Floyd - The Dark Side of the Moon", subtitle: "프로그 록 · 1973" },
-      { rank: 2, title: "The Beatles - Abbey Road", subtitle: "팝 록 · 1969" },
-      { rank: 3, title: "Miles Davis - Kind of Blue", subtitle: "재즈 · 1959" },
-      { rank: 4, title: "Radiohead - OK Computer", subtitle: "얼터너티브 록 · 1997" },
-      { rank: 5, title: "Nirvana - Nevermind", subtitle: "그런지 · 1991" },
-    ],
-    장비: [
-      { rank: 1, title: "Technics SL-1200MK7", subtitle: "턴테이블 · 테크닉스" },
-      { rank: 2, title: "Ortofon 2M Red 카트리지", subtitle: "카트리지 · 오르토폰" },
-      { rank: 3, title: "Pro-Ject Debut Carbon EVO", subtitle: "턴테이블 · 프로젝트" },
-      { rank: 4, title: "Audio-Technica AT-LP120XUSB", subtitle: "턴테이블 · 오디오테크니카" },
-      { rank: 5, title: "Rega Planar 1", subtitle: "턴테이블 · 레가" },
-    ],
-    아티스트: [
-      { rank: 1, title: "Pink Floyd", subtitle: "프로그레시브 록" },
-      { rank: 2, title: "The Beatles", subtitle: "팝 록 · 비트" },
-      { rank: 3, title: "Miles Davis", subtitle: "재즈 · 퓨전" },
-      { rank: 4, title: "아이유", subtitle: "K-Pop · 발라드" },
-      { rank: 5, title: "Queen", subtitle: "록 · 글램 록" },
-    ],
-  }
+  useEffect(() => {
+    let active = true
+    async function loadChart() {
+      try {
+        setLoadingChart(true)
+        setChartError(null)
+        const [album, gear, artist] = await Promise.all<PopularWikiItem[]>([
+          getPopularWiki({ type: 'ALBUM', size: 5 }),
+          getPopularWiki({ type: 'GEAR', size: 5 }),
+          getPopularWiki({ type: 'ARTIST', size: 5 }),
+        ])
+        if (!active) return
+        const toRows = (list: PopularWikiItem[]): ChartRow[] =>
+          (list || []).map((it, idx) => ({
+            id: it.id,
+            rank: idx + 1,
+            title: it.name,
+            subtitle: `조회수 ${Number(it.viewCount ?? 0).toLocaleString()}`,
+          }))
+        setChartData({
+          ALBUM: toRows(album),
+          GEAR: toRows(gear),
+          ARTIST: toRows(artist),
+        })
+      } catch {
+        if (active) setChartError("인기 위키를 불러오지 못했습니다.")
+      } finally {
+        if (active) setLoadingChart(false)
+      }
+    }
+    loadChart()
+    return () => { active = false }
+  }, [])
 
   const recentDocs = {
     음반: [
@@ -374,47 +395,57 @@ export default function HomePage() {
             </Link>
           </div>
 
+          {chartError && (
+            <p className="text-sm text-red-500 mb-4">{chartError}</p>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {Object.entries(chartData).map(([category, items]) => (
-              <div key={category} className="space-y-4">
+            {[
+              { key: 'ALBUM' as const, label: '음반', icon: '🎵' },
+              { key: 'GEAR' as const, label: '장비', icon: '🎧' },
+              { key: 'ARTIST' as const, label: '아티스트', icon: '🎤' },
+            ].map(({ key, label, icon }) => (
+              <div key={key} className="space-y-4">
                 <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-4 flex items-center justify-center">
-                  {category === "음반" && "🎵 "}
-                  {category === "장비" && "🎧 "}
-                  {category === "아티스트" && "🎤 "}
-                  {category}
+                  {icon} {label}
                 </h3>
 
                 <div className="space-y-3">
-                  {items.map((item) => (
-                    <Card
-                      key={item.rank}
-                      className="hover:shadow-md transition-shadow border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-center space-x-3">
-                          <div
-                            className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                              item.rank === 1
-                                ? "bg-yellow-500 dark:bg-yellow-600"
-                                : item.rank === 2
-                                  ? "bg-gray-400 dark:bg-gray-500"
-                                  : item.rank === 3
-                                    ? "bg-orange-500 dark:bg-orange-600"
-                                    : "bg-violet-400 dark:bg-violet-500"
-                            }`}
-                          >
-                            {item.rank}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm line-clamp-1">
-                              {item.title}
-                            </h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{item.subtitle}</p>
-                          </div>
+                  {loadingChart
+                    ? Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="animate-pulse">
+                          <div className="h-[46px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md" />
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                      ))
+                    : chartData[key].map((item) => (
+                        <Link key={item.id} href={`/wiki/${encodeURIComponent(item.id)}`}>
+                          <Card className="hover:shadow-md transition-shadow border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-violet-300 dark:hover:border-violet-600">
+                            <CardContent className="p-3">
+                              <div className="flex items-center justify-center space-x-3">
+                                <div
+                                  className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-sm ${
+                                    item.rank === 1
+                                      ? "bg-yellow-500 dark:bg-yellow-600"
+                                      : item.rank === 2
+                                        ? "bg-gray-400 dark:bg-gray-500"
+                                        : item.rank === 3
+                                          ? "bg-orange-500 dark:bg-orange-600"
+                                          : "bg-violet-400 dark:bg-violet-500"
+                                  }`}
+                                >
+                                  {item.rank}
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm line-clamp-1 hover:text-violet-600 dark:hover:text-violet-400">
+                                    {item.title}
+                                  </h4>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">{item.subtitle}</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))}
                 </div>
               </div>
             ))}
