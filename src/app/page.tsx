@@ -401,10 +401,10 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { key: 'ALBUM' as const, label: '음반', icon: '🎵' },
-              { key: 'GEAR' as const, label: '장비', icon: '🎧' },
-              { key: 'ARTIST' as const, label: '아티스트', icon: '🎤' },
-            ].map(({ key, label, icon }) => (
+              { key: 'ALBUM' as const, label: '음반', icon: '🎵', segment: 'lp' },
+              { key: 'GEAR' as const, label: '장비', icon: '🎧', segment: 'equipment' },
+              { key: 'ARTIST' as const, label: '아티스트', icon: '🎤', segment: 'artist' },
+            ].map(({ key, label, icon, segment }) => (
               <div key={key} className="space-y-4">
                 <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-4 flex items-center justify-center">
                   {icon} {label}
@@ -418,7 +418,7 @@ export default function HomePage() {
                         </div>
                       ))
                     : chartData[key].map((item) => (
-                        <Link key={item.id} href={`/wiki/${encodeURIComponent(item.id)}`}>
+                        <Link key={item.id} href={`/wiki/${segment}/${encodeURIComponent(item.id)}`}>
                           <Card className="hover:shadow-md transition-shadow border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-violet-300 dark:hover:border-violet-600">
                             <CardContent className="p-3">
                               <div className="flex items-center justify-center space-x-3">
