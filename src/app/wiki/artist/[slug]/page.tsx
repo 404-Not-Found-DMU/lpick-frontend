@@ -1,18 +1,16 @@
 "use client"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import WikiLayout from "@/app/wiki/components/WikiLayout"
 import { Button } from "@/components/Button"
 import { Edit, History, MessageSquare, Star, Share2, Bookmark } from "lucide-react"
 import BlocksWithToc from "@/app/wiki/components/BlocksWithToc"
-import type { WikiCategory, TextBlock, CategoryData } from "@/types/hierarchical.editor.types"
-import { fetcher } from "@/hooks/api/fetchers"
+import type { WikiCategory, CategoryData } from "@/types/hierarchical.editor.types"
 import RevisionHistoryDialog from "@/app/wiki/components/RevisionHistoryDialog"
-import { getWikiRevision, type RevisionDetail, getWikiBookmarkStatus, addWikiBookmark, removeWikiBookmark } from "@/hooks/api/wiki.api"
+import { useWikiDocument } from "@/app/wiki/components/useWikiDocument"
+import { useWikiBookmark } from "@/app/wiki/components/useWikiBookmark"
+import { CATEGORY_META } from "@/app/wiki/components/categoryMeta"
 import ArtistLikeSection from "@/app/wiki/components/review/ArtistLikeSection"
-
-type WikiContent = { textBlocks: TextBlock[]; categoryData: CategoryData }
-type WikiDetail = { wikiId: string; title: string; content: WikiContent; modifiedAt?: string | null }
 
 export default function WikiArtistPage() {
   const params = useParams() as { slug: string }
@@ -21,117 +19,13 @@ export default function WikiArtistPage() {
   const [showHistory, setShowHistory] = useState(false)
   const searchParams = useSearchParams()
   const rev = searchParams?.get("rev") || null
-  const [revision, setRevision] = useState<RevisionDetail | null>(null)
-  const [revError, setRevError] = useState<string | null>(null)
-
-  const [data, setData] = useState<WikiDetail | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-  const [bookmarkId, setBookmarkId] = useState<string | null>(null)
-  const [bookmarkPending, setBookmarkPending] = useState<boolean>(false)
-
-  useEffect(() => {
-    let active = true
-    async function run() {
-      if (!wikiId) return
-      setRevError(null)
-      try {
-        setLoading(true)
-        if (rev) {
-          try {
-            const revisionRes = await getWikiRevision(wikiId, rev)
-            if (!active) return
-            const revContent = (revisionRes?.content ?? {}) as WikiContent
-            // 리비전 기반으로 제목 산출
-            let derivedTitle = '문서'
-            const cd = revContent?.categoryData
-            switch (cd?.type) {
-              case 'lp':
-                derivedTitle = cd.data.infobox.title || '문서'
-                break
-              case 'artist':
-                derivedTitle = cd.data.name || '문서'
-                break
-              case 'equipment':
-                derivedTitle = cd.data.name || '문서'
-                break
-              case 'other':
-                derivedTitle = cd.data.title || '문서'
-                break
-            }
-            setData({
-              wikiId: wikiId,
-              title: derivedTitle,
-              content: revContent,
-              modifiedAt: revisionRes.createdAt
-            })
-            setRevision(revisionRes)
-          } catch {
-            if (!active) return
-            // 리비전 실패 시에만 기본 문서 폴백
-            const base = await fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`)
-            if (!active) return
-            setData(base)
-            setRevision(null)
-            setRevError("해당 리비전을 불러오지 못해 최신 문서를 표시합니다.")
-          }
-        } else {
-          const base = await fetcher<WikiDetail>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`)
-          if (!active) return
-          setData(base)
-          setRevision(null)
-        }
-      } catch {
-        if (active) setError("문서를 불러오지 못했습니다.")
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
-    run()
-    return () => { active = false }
-  }, [wikiId, rev])
-
-  // 북마크 상태 초기 로드
-  useEffect(() => {
-    let active = true
-    async function loadBookmark() {
-      if (!wikiId) return
-      try {
-        const id = await getWikiBookmarkStatus(wikiId)
-        if (!active) return
-        setBookmarkId(id)
-      } catch {
-        if (!active) return
-        setBookmarkId(null)
-      }
-    }
-    loadBookmark()
-    return () => { active = false }
-  }, [wikiId])
-
-  async function handleToggleBookmark() {
-    if (!wikiId || bookmarkPending) return
-    setBookmarkPending(true)
-    try {
-      if (bookmarkId) {
-        await removeWikiBookmark(bookmarkId)
-        setBookmarkId(null)
-      } else {
-        await addWikiBookmark(wikiId)
-        const newId = await getWikiBookmarkStatus(wikiId)
-        setBookmarkId(newId)
-      }
-    } catch (e) {
-      // noop: 필요 시 토스트 연결
-      console.warn('Bookmark toggle failed', e)
-    } finally {
-      setBookmarkPending(false)
-    }
-  }
+  const { data, revision, revError, loading, error } = useWikiDocument(wikiId, rev)
+  const { bookmarkId, pending: bookmarkPending, toggle: handleToggleBookmark } = useWikiBookmark(wikiId)
 
   const category: WikiCategory = useMemo(() => {
     return (data?.content?.categoryData?.type ?? "artist") as WikiCategory
   }, [data])
+  const meta = CATEGORY_META[category]
 
   const title = data?.title ?? (loading ? "로딩 중..." : error ? "문서 로드 실패" : "")
   const categoryData = data?.content?.categoryData
@@ -140,13 +34,13 @@ export default function WikiArtistPage() {
   return (
     <WikiLayout
       title={title}
-      category={"아티스트"}
+      category={meta.label}
       lastUpdated={data?.modifiedAt ? new Date(data.modifiedAt).toLocaleString() : "2023년 5월 18일"}
-      badgeClassName="bg-purple-500/10 text-purple-500"
+      badgeClassName={meta.badgeClassName}
       showDocInfo={false}
       headerActions={(
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" size="sm" className="h-8" onClick={() => router.push(`/wiki/edit/artist/${encodeURIComponent(wikiId)}`)}>
+          <Button variant="outline" size="sm" className="h-8" onClick={() => router.push(`/wiki/edit/${meta.editPath}/${encodeURIComponent(wikiId)}`)}>
             <Edit className="w-4 h-4 mr-2" />
             편집하기
           </Button>
@@ -198,7 +92,7 @@ export default function WikiArtistPage() {
           textBlocks={textBlocks}
           category={category}
           categoryData={categoryData as CategoryData}
-          linkColorClass="text-purple-500"
+          linkColorClass={meta.linkColorClass}
           showIndex={false}
         />
       )}
