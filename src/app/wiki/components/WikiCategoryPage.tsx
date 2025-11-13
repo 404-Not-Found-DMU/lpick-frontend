@@ -31,12 +31,13 @@ export function WikiCategoryPage({ defaultCategory }: { defaultCategory: WikiCat
   const title = data?.title ?? (loading ? "로딩 중..." : error ? "문서 로드 실패" : "")
   const categoryData = data?.content?.categoryData
   const textBlocks = data?.content?.textBlocks ?? []
+  const lastUpdatedValue: string = data?.modifiedAt ? new Date(data.modifiedAt).toLocaleString() : "-"
 
   return (
     <WikiLayout
       title={title}
       category={meta.label}
-      lastUpdated={data?.modifiedAt ? new Date(data.modifiedAt).toLocaleString() : undefined}
+      lastUpdated={lastUpdatedValue}
       badgeClassName={meta.badgeClassName}
       showDocInfo={false}
       headerActions={(

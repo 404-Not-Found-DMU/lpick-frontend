@@ -61,5 +61,4 @@ export function useWikiDocument(wikiId?: string | null, rev?: string | null) {
 
   return { data, revision, revError, loading, error }
 }
-*** End Patch ***!
 

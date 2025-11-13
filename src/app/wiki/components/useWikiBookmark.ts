@@ -42,5 +42,4 @@ export function useWikiBookmark(wikiId?: string | null) {
 
   return { bookmarkId, pending, toggle }
 }
-*** End Patch
 
