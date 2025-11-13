@@ -2,7 +2,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SortOption, CommunityFilters, BoardType, TagType } from '../types/community.types';
-import { POSTS_PER_PAGE, FEATURED_POSTS_LIMIT } from '../constants';
+import { POSTS_PER_PAGE } from '../constants';
 import { useArticles } from './useArticles';
 import { usePopularArticles } from './usePopularArticles';
 import { ArticleListItem } from '../types/api.types';
