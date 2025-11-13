@@ -2,13 +2,14 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast/ToastProvider';
 import { Post, Comment, convertApiCommentToUiComment } from '../../types/community.types';
+import { ChildComment, CommentListItem } from '../../types/api.types';
 import { useArticle } from '../../hooks/useArticles';
 import { useArticleInteractions, useArticleManager } from '../../hooks/useArticleManager';
 import { useComments, useCommentManager, useCommentInteractions } from '../../hooks';
 import { useUserStore } from '@/store/userStore';
 
 // 안정된 빈 배열 참조
-const EMPTY_COMMENTS: any[] = [];
+const EMPTY_COMMENTS: CommentListItem[] = [];
 
 export const usePostDetail = (articleId: string) => {
   const router = useRouter();
@@ -157,7 +158,7 @@ export const usePostDetail = (articleId: string) => {
       
       // 자식 댓글들도 변환
       if (apiComment.childsCommentList && apiComment.childsCommentList.length > 0) {
-        apiComment.childsCommentList.forEach(childApiComment => {
+        apiComment.childsCommentList.forEach((childApiComment: ChildComment) => {
           const childComment = convertApiCommentToUiComment(childApiComment, articleId);
           allComments.push(childComment);
         });
@@ -178,6 +179,7 @@ export const usePostDetail = (articleId: string) => {
     if (fetchComments) {
       fetchComments();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [articleId, isMounted, isAuthenticated]);
 
   // 변환된 댓글을 전체 댓글과 현재 댓글로 설정
@@ -248,7 +250,7 @@ export const usePostDetail = (articleId: string) => {
       }
       
       // 자식 댓글들 확인
-      comment.childsCommentList?.forEach(child => {
+      comment.childsCommentList?.forEach((child: ChildComment) => {
         const childMatch = child.commentId.match(/\d+/g);
         const childUiId = childMatch && childMatch.length > 0 ? parseInt(childMatch[childMatch.length - 1]) : 0;
         
@@ -262,7 +264,7 @@ export const usePostDetail = (articleId: string) => {
       console.error('실제 댓글 ID를 찾을 수 없습니다:', commentId);
       console.log('사용 가능한 댓글들:', apiComments?.map(c => ({
         commentId: c.commentId,
-        children: c.childsCommentList?.map(child => child.commentId)
+        children: c.childsCommentList?.map((child: ChildComment) => child.commentId)
       })));
       toast('댓글을 찾을 수 없습니다.', 'error');
       return false;
