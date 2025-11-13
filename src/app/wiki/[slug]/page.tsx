@@ -4,7 +4,7 @@ import InfoboxLP from "@/app/wiki/components/InfoboxLP"
 import ContentWithToc from "@/app/wiki/components/ContentWithToc"
 import ScrollTopButton from "@/app/wiki/components/ScrollTopButton"
 import WikiLayout from "@/app/wiki/components/WikiLayout"
-import { getDummyWikiBySlug } from "@/app/wiki/edit/data/dummyData"
+import { getDummyWikiBySlug } from "@/lib/dummy/wiki"
 import { fetchWithTimeout, getBaseUrlFromHeaders } from "@/lib/server/fetch"
 export default async function WikiViewPage({ params }: { params: { slug: string } }) {
   const { slug } = params
