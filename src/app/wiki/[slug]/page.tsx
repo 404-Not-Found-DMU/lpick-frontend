@@ -6,8 +6,8 @@ import ContentWithToc from "@/app/wiki/components/ContentWithToc"
 import ScrollTopButton from "@/app/wiki/components/ScrollTopButton"
 import WikiLayout from "@/app/wiki/components/WikiLayout"
 import { getDummyWikiBySlug } from "@/app/wiki/edit/data/dummyData"
-export default async function WikiViewPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
+export default async function WikiViewPage({ params }: { params: { slug: string } }) {
+  const { slug } = params
 
   // 서버에서 문서 데이터 fetch (timeout + retry)
   async function fetchWithTimeout(url: string, opts: RequestInit & { timeoutMs?: number; retries?: number } = {}) {
@@ -117,8 +117,8 @@ export default async function WikiViewPage({ params }: { params: Promise<{ slug:
   )
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const { slug } = params
   try {
     const hdrs = await headers()
     const proto = hdrs.get('x-forwarded-proto') ?? 'http'
