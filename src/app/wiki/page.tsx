@@ -94,37 +94,6 @@ const WikiRootPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Quick Links */}
-                <Card className="mt-6">
-                  <CardHeader>
-                    <CardTitle>빠른 링크</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Link
-                        href="#"
-                        className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      >
-                        <div className="font-medium text-sm">편집 가이드</div>
-                        <div className="text-xs text-gray-500">위키 편집 방법 알아보기</div>
-                      </Link>
-                      <Link
-                        href="#"
-                        className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      >
-                        <div className="font-medium text-sm">커뮤니티 규칙</div>
-                        <div className="text-xs text-gray-500">위키 작성 규칙과 가이드라인</div>
-                      </Link>
-                      <Link
-                        href="#"
-                        className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      >
-                        <div className="font-medium text-sm">도움말</div>
-                        <div className="text-xs text-gray-500">자주 묻는 질문과 답변</div>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             </div>
           </div>
