@@ -2,12 +2,14 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SortOption, CommunityFilters, BoardType, TagType } from '../types/community.types';
-import { POSTS_PER_PAGE, FEATURED_POSTS_LIMIT } from '../constants';
+import { POSTS_PER_PAGE } from '../constants';
 import { useArticles } from './useArticles';
+import { usePopularArticles } from './usePopularArticles';
 import { ArticleListItem } from '../types/api.types';
 
 export const useCommunity = () => {
   const searchParams = useSearchParams();
+  
   const [filters, setFilters] = useState<CommunityFilters>({
     board: 'all',
     sortBy: 'latest',
@@ -22,12 +24,7 @@ export const useCommunity = () => {
     size: POSTS_PER_PAGE
   }), [currentPage]);
 
-  // 추천 게시글 파라미터를 useMemo로 안정화
-  const featuredParams = useMemo(() => ({
-    page: 1,
-    size: FEATURED_POSTS_LIMIT
-  }), []); // 1-based for UI
-
+  // 로그인 상태와 관계없이 public API 사용
   // API 호출을 통한 게시글 데이터 조회
   const {
     articles,
@@ -85,15 +82,15 @@ export const useCommunity = () => {
     return articles.map(convertToPostFormat);
   }, [articles, convertToPostFormat]);
 
-  // 추천 게시물 (인기순으로 정렬된 상위 게시물)
+  // 인기 게시글 (인기 게시글 API 사용)
   const {
-    articles: featuredArticles,
-    loading: featuredLoading
-  } = useArticles(featuredParams);
+    articles: popularArticles,
+    loading: popularLoading
+  } = usePopularArticles();
 
   const featuredPosts = useMemo(() => {
-    return featuredArticles.map(convertToPostFormat);
-  }, [featuredArticles, convertToPostFormat]);
+    return popularArticles.map(convertToPostFormat);
+  }, [popularArticles, convertToPostFormat]);
 
   const totalPages = apiTotalPages;
 
@@ -145,7 +142,7 @@ export const useCommunity = () => {
     filters,
     currentPage,
     totalPages,
-    loading: loading || featuredLoading,
+    loading: loading || popularLoading,
     error,
     setSearchQuery,
     setBoardFilter,
