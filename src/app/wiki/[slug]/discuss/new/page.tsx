@@ -4,36 +4,37 @@ import { Suspense, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from "@/components";
 import { Textarea } from "@/components/textarea";
-import { useDiscussions } from "../../../discuss/hooks/useDiscussions";
-import type { DiscussionCategory, DiscussionStance } from "../../../discuss/types";
+import { createDebate, type DebateSubject } from "@/hooks/api/debate.api";
 
-const categories: DiscussionCategory[] = ["내용", "표기", "분류", "문서관리", "기타"];
-const stances: { label: string; value: DiscussionStance }[] = [
-  { label: "찬성", value: "agree" },
-  { label: "반대", value: "disagree" },
-  { label: "중립", value: "neutral" },
+const subjects: { label: string; value: DebateSubject }[] = [
+  { label: "내용", value: "DETAIL" },
+  { label: "표기", value: "REPRESENTATION" },
 ];
 
 function NewDiscussionInnerForDoc() {
   const router = useRouter();
   const { slug } = useParams<{ slug: string }>();
-  const { createThread, isReady } = useDiscussions();
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<DiscussionCategory>("내용");
-  const [stance, setStance] = useState<DiscussionStance>("neutral");
-  const [content, setContent] = useState("");
-  const [author] = useState("현재사용자");
+  const [subject, setSubject] = useState<DebateSubject>("DETAIL");
+  const [revisionId, setRevisionId] = useState<string>("");
+  const [content, setContent] = useState(""); // 서버 스펙 상 본문은 요구하지 않지만, 기획에 따라 메모용 보관 가능. 현재 전송 안 함.
   const [submitting, setSubmitting] = useState(false);
 
-  const canSubmit = title.trim().length > 0 && content.trim().length > 0 && isReady && !submitting;
+  const canSubmit = title.trim().length > 0 && revisionId.trim().length > 0 && !submitting;
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
     setSubmitting(true);
-    const thread = createThread({ title, category, content, author, docId: slug, stance });
-    router.push(`/wiki/${encodeURIComponent(slug)}/discuss/${thread.id}`);
+    createDebate(slug, { debateName: title, debateSubject: subject, revisionId })
+      .then((res) => {
+        router.push(`/wiki/${encodeURIComponent(slug)}/discuss/${res.id}`);
+      })
+      .catch(() => {
+        alert("토론 생성에 실패했습니다.");
+      })
+      .finally(() => setSubmitting(false));
   };
 
   return (
@@ -56,33 +57,23 @@ function NewDiscussionInnerForDoc() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-medium">분류</label>
+                <label className="mb-1 block text-sm font-medium">주제</label>
                 <select
                   className="w-full rounded-md border px-3 py-2"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as DiscussionCategory)}
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value as DebateSubject)}
                 >
-                  {categories.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
+                  {subjects.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium">입장</label>
-                <select
-                  className="w-full rounded-md border px-3 py-2"
-                  value={stance}
-                  onChange={(e) => setStance(e.target.value as DiscussionStance)}
-                >
-                  {stances.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </select>
+                <label className="mb-1 block text-sm font-medium">리비전 ID</label>
+                <Input value={revisionId} onChange={(e) => setRevisionId(e.target.value)} placeholder="리비전 ID를 입력하세요" />
               </div>
             </div>
 
@@ -96,7 +87,7 @@ function NewDiscussionInnerForDoc() {
                 취소
               </Button>
               <Button type="submit" disabled={!canSubmit}>
-                개설하기
+                {submitting ? '처리 중...' : '개설하기'}
               </Button>
             </div>
           </form>

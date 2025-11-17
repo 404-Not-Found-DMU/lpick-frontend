@@ -1,40 +1,81 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Input, Badge } from "@/components";
-import { useDiscussions } from "../../discuss/hooks/useDiscussions";
-import type { DiscussionCategory, DiscussionStatus } from "../../discuss/types";
+import { getDebatesByWiki, type DebateListItem, type DebateStatus, type DebateSubject } from "@/hooks/api/debate.api";
 
-const categoryOptions: { label: string; value: DiscussionCategory | "all" }[] = [
+const categoryOptions: { label: string; value: DebateSubject | "all" }[] = [
   { label: "전체", value: "all" },
-  { label: "내용", value: "내용" },
-  { label: "표기", value: "표기" },
-  { label: "분류", value: "분류" },
-  { label: "문서관리", value: "문서관리" },
-  { label: "기타", value: "기타" },
+  { label: "내용", value: "DETAIL" },
+  { label: "표기", value: "REPRESENTATION" },
 ];
 
-const statusOptions: { label: string; value: DiscussionStatus | "all" }[] = [
+const statusOptions: { label: string; value: DebateStatus | "all" }[] = [
   { label: "전체", value: "all" },
-  { label: "진행중", value: "open" },
-  { label: "종료됨", value: "closed" },
+  { label: "진행중", value: "OPEN" },
+  { label: "투표중", value: "VOTE" },
+  { label: "종료됨", value: "CLOSE" },
 ];
 
 function WikiDiscussListForDoc({ slug }: { slug: string }) {
   const router = useRouter();
-  const { isReady, listThreads } = useDiscussions();
 
   const [q, setQ] = useState("");
-  const [category, setCategory] = useState<DiscussionCategory | "all">("all");
-  const [status, setStatus] = useState<DiscussionStatus | "all">("all");
-  const [sortBy, setSortBy] = useState<"updated" | "opinions">("updated");
+  const [category, setCategory] = useState<DebateSubject | "all">("all");
+  const [status, setStatus] = useState<DebateStatus | "all">("all");
+  const [sortBy, setSortBy] = useState<"updated" | "opinions">("updated"); // opinions = chatCount
+  const [items, setItems] = useState<DebateListItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const threads = useMemo(
-    () => (isReady ? listThreads({ q, category, status, docId: slug, sortBy }) : []),
-    [isReady, listThreads, q, category, status, slug, sortBy],
-  );
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    getDebatesByWiki(slug)
+      .then((list) => {
+        if (!active) return;
+        // 서버가 이미 정렬해 주더라도, 안전하게 OPEN -> VOTE -> CLOSE, updateAt 내림차순으로 보정
+        const order: DebateStatus[] = ["OPEN", "VOTE", "CLOSE"];
+        const sorted = [...list].sort((a, b) => {
+          const sdiff = order.indexOf(a.status) - order.indexOf(b.status);
+          if (sdiff !== 0) return sdiff;
+          const at = new Date(a.updateAt).getTime();
+          const bt = new Date(b.updateAt).getTime();
+          return bt - at;
+        });
+        setItems(sorted);
+      })
+      .catch((e) => {
+        if (active) setError(e instanceof Error ? e.message : "목록을 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [slug]);
+
+  const filtered = useMemo(() => {
+    let data = items;
+    if (q.trim()) {
+      const qq = q.trim().toLowerCase();
+      data = data.filter((it) => it.debateName.toLowerCase().includes(qq));
+    }
+    if (category !== "all") {
+      data = data.filter((it) => it.debateSubject === category);
+    }
+    if (status !== "all") {
+      data = data.filter((it) => it.status === status);
+    }
+    if (sortBy === "opinions") {
+      data = [...data].sort((a, b) => b.chatCount - a.chatCount);
+    } else {
+      data = [...data].sort((a, b) => new Date(b.updateAt).getTime() - new Date(a.updateAt).getTime());
+    }
+    return data;
+  }, [items, q, category, status, sortBy]);
 
   const docTitle = useMemo(() => {
     try {
@@ -81,7 +122,7 @@ function WikiDiscussListForDoc({ slug }: { slug: string }) {
           <select
             className="rounded-md border px-3 py-2"
             value={category}
-            onChange={(e) => setCategory(e.target.value as DiscussionCategory | 'all')}
+            onChange={(e) => setCategory(e.target.value as DebateSubject | 'all')}
           >
             {categoryOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -90,7 +131,7 @@ function WikiDiscussListForDoc({ slug }: { slug: string }) {
           <select
             className="rounded-md border px-3 py-2"
             value={status}
-            onChange={(e) => setStatus(e.target.value as DiscussionStatus | 'all')}
+            onChange={(e) => setStatus(e.target.value as DebateStatus | 'all')}
           >
             {statusOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -106,34 +147,35 @@ function WikiDiscussListForDoc({ slug }: { slug: string }) {
       </div>
 
       <div className="mt-6 space-y-3">
-        {threads.map((t) => (
-          <div key={t.id} className="block rounded-lg border p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+        {error && <div className="rounded-lg border p-8 text-center text-red-500">{error}</div>}
+        {loading && <div className="rounded-lg border p-8 text-center text-gray-500">불러오는 중...</div>}
+        {!loading && filtered.map((t) => (
+          <div key={t.debateId} className="block rounded-lg border p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
             <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0 cursor-pointer" onClick={() => router.push(`/wiki/${encodeURIComponent(slug)}/discuss/${t.id}`)}>
+              <div className="min-w-0 cursor-pointer" onClick={() => router.push(`/wiki/${encodeURIComponent(slug)}/discuss/${t.debateId}`)}>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="truncate text-lg font-semibold">{t.title}</span>
-                  <Badge>{t.category}</Badge>
-                  <Badge className={t.status === "open" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-700"}>
-                    {t.status === "open" ? "진행중" : "종료됨"}
+                  <span className="truncate text-lg font-semibold">{t.debateName}</span>
+                  <Badge>{t.debateSubject === 'DETAIL' ? '내용' : '표기'}</Badge>
+                  <Badge className={
+                    t.status === "OPEN"
+                      ? "bg-green-100 text-green-700"
+                      : t.status === "VOTE"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-gray-200 text-gray-700"
+                  }>
+                    {t.status === "OPEN" ? "진행중" : t.status === "VOTE" ? "투표중" : "종료됨"}
                   </Badge>
                 </div>
                 <div className="mt-1 text-sm text-gray-500">
-                  개설자 {t.createdBy} · 의견 {t.opinionsCount} · 최근 업데이트 {new Date(t.lastUpdatedAt).toLocaleString()}
+                  개설자 {t.debateWriter} · 의견 {t.chatCount} · 최근 업데이트 {new Date(t.updateAt).toLocaleString()}
                 </div>
               </div>
-              {t.docId && (
-                <Link
-                  href={`/wiki/${t.docId}`}
-                  className="shrink-0 rounded-full p-2 text-violet-600 hover:bg-violet-50"
-                  aria-label="문서로 이동"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  ↗
-                </Link>
-              )}
             </div>
           </div>
         ))}
+        {!loading && filtered.length === 0 && !error && (
+          <div className="rounded-lg border p-8 text-center text-gray-500">조건에 맞는 토론이 없습니다.</div>
+        )}
       </div>
     </div>
   );

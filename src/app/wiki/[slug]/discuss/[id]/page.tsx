@@ -4,217 +4,185 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button, Badge, Card, CardHeader, CardTitle, CardContent } from "@/components";
 import { Textarea } from "@/components/textarea";
-import { useDiscussions } from "../../../discuss/hooks/useDiscussions";
+import {
+  getDebatesByWiki,
+  getDebateBallot,
+  getDebateChatList,
+  postDebateBallot,
+  updateDebateStatus,
+  type DebateBallotResult,
+  type DebateListItem,
+} from "@/hooks/api/debate.api";
 
 export default function DiscussionDetailPageForDoc() {
   const router = useRouter();
   const params = useParams<{ slug: string; id: string }>();
   const { slug, id } = params;
-  const { isReady, getThread, listOpinions, addOpinion, likeOpinion, closeThread, getVote, openVote, castVote, closeVote, cancelVoteStart } = useDiscussions();
 
-  const thread = useMemo(() => (isReady ? getThread(id) : undefined), [isReady, getThread, id]);
-  const opinions = useMemo(() => (isReady ? listOpinions(id) : []), [isReady, listOpinions, id]);
-  const vote = useMemo(() => (isReady ? getVote(id) : undefined), [isReady, getVote, id]);
-
-  const [content, setContent] = useState("");
-  const [closing, setClosing] = useState(false);
-  const [closeSummary, setCloseSummary] = useState("");
-  const [selectedOption, setSelectedOption] = useState<string>("");
-
-  const totalVotes = vote ? vote.options.reduce((sum, o) => sum + o.count, 0) : 0;
-  const hasVoted = (() => {
-    if (!vote) return false;
-    const userId = "현재사용자"; // TODO: 인증 연동 시 실제 사용자 ID 사용
-    return Boolean(vote.userChoices[userId]);
-  })();
+  const [thread, setThread] = useState<DebateListItem | null>(null);
+  const [chats, setChats] = useState<{ chatId: string; userNickname: string; content: string; createdAt: string; isBlind: boolean }[]>([]);
+  const [ballot, setBallot] = useState<DebateBallotResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = useState<"AGREE" | "DISAGREE" | "ABSTAIN" | "">("");
 
   useEffect(() => {
-    if (!isReady || !thread) return;
-    if (thread.status !== "open" || (thread.voteStatus && thread.voteStatus !== "none")) return;
-    const now = new Date();
-    const createdAt = new Date(thread.createdAt);
-    const sevenDaysPassed = now.getTime() - createdAt.getTime() >= 7 * 24 * 60 * 60 * 1000;
-    const lastOpinionAt = opinions.length > 0 ? new Date(opinions[opinions.length - 1].createdAt) : undefined;
-    const twentyFourHoursSinceLast = lastOpinionAt
-      ? now.getTime() - lastOpinionAt.getTime() >= 24 * 60 * 60 * 1000
-      : false;
-    if (sevenDaysPassed || twentyFourHoursSinceLast) {
-      closeThread(id, "자동 종료 및 투표 개시 기준 충족");
-      openVote(id, ["찬성", "반대", "중립"], false);
+    let active = true;
+    async function run() {
+      try {
+        setLoading(true);
+        setError(null);
+        const [list, chatList] = await Promise.all([
+          getDebatesByWiki(slug),
+          getDebateChatList(id),
+        ]);
+        if (!active) return;
+        const found = list.find((d) => d.debateId === id) ?? null;
+        setThread(found);
+        setChats(chatList);
+        if (found && found.status !== 'OPEN') {
+          try {
+            const res = await getDebateBallot(id);
+            if (!active) return;
+            setBallot(res);
+          } catch {
+            setBallot(null);
+          }
+        } else {
+          setBallot(null);
+        }
+      } catch (e) {
+        if (active) setError(e instanceof Error ? e.message : "불러오기에 실패했습니다.");
+      } finally {
+        if (active) setLoading(false);
+      }
     }
-  }, [isReady, thread, opinions, id, closeThread, openVote]);
+    run();
+    return () => { active = false; };
+  }, [slug, id]);
 
-  if (!isReady) return null;
-  if (!thread) return <div className="container mx-auto px-4 py-8">존재하지 않는 토론입니다.</div>;
-
-  const canAdd = thread.status === "open" && content.trim().length > 0;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canAdd) return;
-    addOpinion({ threadId: id, author: "현재사용자", stance: "neutral", content });
-    setContent("");
-  };
-
-  const handleClose = () => {
-    if (!closeSummary.trim()) return;
-    closeThread(id, closeSummary);
-    setClosing(false);
-  };
-
-  const submitVote = () => {
-    if (!vote || !selectedOption) return;
-    const userId = "현재사용자"; // TODO: 인증 연동 시 실제 사용자 ID 사용
-    castVote(id, userId, selectedOption);
-  };
-
-  const startVoteNow = () => {
-    if (!confirm('토론을 종료하고 바로 투표를 시작할까요?')) return;
-    closeThread(id, "수동 종료 및 투표 개시");
-    openVote(id, ["찬성", "반대", "중립"], false);
-  };
-
-  const cancelVote = () => {
-    if (!vote || vote.status !== 'open') return;
-    const total = vote.options.reduce((s, o) => s + o.count, 0);
-    if (total > 0) {
-      alert('이미 투표가 진행되어 취소할 수 없습니다.');
-      return;
-    }
-    if (!confirm('투표 시작을 취소하고 토론을 다시 진행 상태로 되돌릴까요?')) return;
-    cancelVoteStart(id);
-  };
+  const totalVotes = ballot ? ballot.total : 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {error && <div className="mb-6 rounded-lg border p-4 text-red-500">{error}</div>}
+      {loading && <div className="mb-6 rounded-lg border p-4 text-gray-500">불러오는 중...</div>}
+      {!loading && !thread && (
+        <div className="mb-6 rounded-lg border p-4 text-gray-500">존재하지 않는 토론입니다.</div>
+      )}
       <div className="mb-6 flex items-center justify-between">
         <div className="min-w-0">
-          <h1 className="truncate text-2xl font-bold">{thread.title}</h1>
+          <h1 className="truncate text-2xl font-bold">{thread?.debateName ?? "-"}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-            <Badge>{thread.category}</Badge>
-            <Badge className={thread.status === "open" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-700"}>
-              {thread.status === "open" ? "진행중" : "종료됨"}
-            </Badge>
-            <span>개설자 {thread.createdBy}</span>
-            <span>개설 {new Date(thread.createdAt).toLocaleString()}</span>
-            {thread.closedAt && <span>종료 {new Date(thread.closedAt).toLocaleString()}</span>}
+            {thread && <Badge>{thread.debateSubject === 'DETAIL' ? '내용' : '표기'}</Badge>}
+            {thread && (
+              <Badge className={
+                thread.status === "OPEN"
+                  ? "bg-green-100 text-green-700"
+                  : thread.status === "VOTE"
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-gray-200 text-gray-700"
+              }>
+                {thread.status === "OPEN" ? "진행중" : thread.status === "VOTE" ? "투표중" : "종료됨"}
+              </Badge>
+            )}
+            {thread && <span>개설자 {thread.debateWriter}</span>}
+            {thread && <span>개설 {new Date(thread.createdAt).toLocaleString()}</span>}
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => router.push(`/wiki/${encodeURIComponent(slug)}/discuss`)}>목록</Button>
-          {thread.status === "open" && (
-            <Button variant="danger" onClick={() => setClosing((s) => !s)}>
-              {closing ? "종료 취소" : "토론 종료"}
-            </Button>
+          {thread && thread.status === "OPEN" && (
+            <Button variant="violet" onClick={async () => {
+              try {
+                await updateDebateStatus(id, "VOTE");
+                router.refresh();
+              } catch {
+                alert("투표 시작에 실패했습니다.");
+              }
+            }}>투표 시작</Button>
           )}
-          {thread.status === "open" && (!thread.voteStatus || thread.voteStatus === "none") && (
-            <Button variant="violet" onClick={startVoteNow}>지금 투표 시작</Button>
+          {thread && thread.status !== "CLOSE" && (
+            <Button variant="danger" onClick={async () => {
+              if (!confirm('토론을 종료할까요?')) return;
+              try {
+                await updateDebateStatus(id, "CLOSE");
+                router.refresh();
+              } catch {
+                alert("토론 종료에 실패했습니다.");
+              }
+            }}>토론 종료</Button>
           )}
         </div>
       </div>
 
-      {closing && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>종료 사유/합의 요약</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <Textarea
-                placeholder="종료 이유와 합의 내용을 요약해 주세요"
-                value={closeSummary}
-                onChange={(e) => setCloseSummary(e.target.value)}
-              />
-              <div className="flex justify-end">
-                <Button onClick={handleClose}>종료하기</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {(thread.voteStatus && thread.voteStatus !== "none") && (
+      {thread && thread.status !== "OPEN" && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>투표</CardTitle>
           </CardHeader>
           <CardContent>
-            {vote && (
+            {thread.status === "VOTE" && (
               <div className="space-y-4">
-                {vote.status === "open" && (
-                  <>
-                    <div className="flex items-center justify-end gap-2">
-                      <Button size="sm" variant="outline" onClick={cancelVote}>투표 취소</Button>
-                      <Button size="sm" variant="outline" onClick={() => closeVote(id)}>투표 마감</Button>
-                    </div>
-                    {!hasVoted && (
-                      <div className="space-y-3">
-                        {vote.options.map((opt) => (
-                          <label key={opt.id} className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <input
-                              type="radio"
-                              name="discussion-vote"
-                              className="h-4 w-4"
-                              checked={selectedOption === opt.id}
-                              onChange={() => setSelectedOption(opt.id)}
-                            />
-                            <span className="text-sm">{opt.text}</span>
-                          </label>
-                        ))}
-                        <div className="flex justify-end">
-                          <Button size="sm" onClick={submitVote} disabled={!selectedOption}>
-                            투표하기
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {hasVoted && (
-                      <div className="space-y-3">
-                        {vote.options.map((opt) => {
-                          const percent = totalVotes === 0 ? 0 : Math.round((opt.count / totalVotes) * 100);
-                          return (
-                            <div key={opt.id} className="space-y-1">
-                              <div className="flex items-center justify-between text-sm">
-                                <span>{opt.text}</span>
-                                <span className="text-gray-500">{percent}% ({opt.count})</span>
-                              </div>
-                              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-                                <div className="h-2 bg-violet-500" style={{ width: `${percent}%` }} />
-                              </div>
-                            </div>
-                          );
-                        })}
-                        <div className="text-right text-xs text-gray-500">총 {totalVotes}표</div>
-                        <div className="flex justify-end">
-                          <Button size="sm" variant="outline" onClick={() => closeVote(id)}>
-                            투표 마감
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {vote.status === "closed" && (
-                  <div className="space-y-3">
-                    {vote.options.map((opt) => {
-                      const percent = totalVotes === 0 ? 0 : Math.round((opt.count / totalVotes) * 100);
-                      return (
-                        <div key={opt.id} className="space-y-1">
-                          <div className="flex items-center justify-between text-sm">
-                            <span>{opt.text}</span>
-                            <span className="text-gray-500">{percent}% ({opt.count})</span>
-                          </div>
-                          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-                            <div className="h-2 bg-violet-500" style={{ width: `${percent}%` }} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                    <div className="text-right text-xs text-gray-500">총 {totalVotes}표 · 마감됨</div>
+                <div className="space-y-3">
+                  {["AGREE", "DISAGREE", "ABSTAIN"].map((opt) => (
+                    <label key={opt} className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <input
+                        type="radio"
+                        name="discussion-vote"
+                        className="h-4 w-4"
+                        checked={selectedOption === opt}
+                        onChange={() => setSelectedOption(opt as typeof selectedOption)}
+                      />
+                      <span className="text-sm">
+                        {opt === "AGREE" ? "찬성" : opt === "DISAGREE" ? "반대" : "기권"}
+                      </span>
+                    </label>
+                  ))}
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        if (!selectedOption) return;
+                        try {
+                          await postDebateBallot(id, selectedOption);
+                          router.refresh();
+                        } catch {
+                          alert("투표에 실패했습니다.");
+                        }
+                      }}
+                      disabled={!selectedOption}
+                    >
+                      투표하기
+                    </Button>
                   </div>
-                )}
+                </div>
+              </div>
+            )}
+            {thread.status === "CLOSE" && ballot && (
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span>찬성</span>
+                  <span className="text-gray-500">{ballot.agreePct}% ({ballot.agree})</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                  <div className="h-2 bg-violet-500" style={{ width: `${ballot.agreePct}%` }} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>반대</span>
+                  <span className="text-gray-500">{ballot.disagreePct}% ({ballot.disagree})</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                  <div className="h-2 bg-violet-500" style={{ width: `${ballot.disagreePct}%` }} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>기권</span>
+                  <span className="text-gray-500">{ballot.abstainPct}% ({ballot.abstain})</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                  <div className="h-2 bg-violet-500" style={{ width: `${ballot.abstainPct}%` }} />
+                </div>
+                <div className="text-right text-xs text-gray-500">총 {totalVotes}표 · 마감됨</div>
               </div>
             )}
           </CardContent>
@@ -223,14 +191,14 @@ export default function DiscussionDetailPageForDoc() {
 
       <Card>
         <CardHeader>
-          <CardTitle>의견 {opinions.length}</CardTitle>
+          <CardTitle>채팅 {chats.length}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {opinions.map((op) => {
-              const isMine = op.author === "현재사용자";
+            {chats.map((op) => {
+              const isMine = false;
               return (
-                <div key={op.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                <div key={op.chatId} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                   <div className="max-w-[80%]">
                     <div
                       className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
@@ -239,45 +207,20 @@ export default function DiscussionDetailPageForDoc() {
                           : "bg-gray-100 text-gray-900 rounded-bl-md dark:bg-gray-800 dark:text-gray-100"
                       }`}
                     >
-                      {op.content}
+                      {op.isBlind ? "블라인드 처리된 메시지입니다." : op.content}
                     </div>
                     <div className={`mt-1 flex items-center gap-2 text-xs ${isMine ? "justify-end text-violet-600/80" : "justify-start text-gray-500"}`}>
-                      <span>{op.author}</span>
+                      <span>{op.userNickname}</span>
                       <span>{new Date(op.createdAt).toLocaleTimeString()}</span>
-                      <button
-                        className="hover:opacity-80"
-                        onClick={() => likeOpinion(op.id)}
-                        aria-label="like opinion"
-                      >
-                        👍 {op.likes}
-                      </button>
                     </div>
                   </div>
                 </div>
               );
             })}
 
-            {thread.status === "open" ? (
-              <form onSubmit={handleSubmit} className="rounded-lg border p-4">
-                <Textarea
-                  placeholder="메시지를 입력하세요"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                />
-                <div className="mt-3 flex justify-end">
-                  <Button type="submit" disabled={!canAdd}>
-                    보내기
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              thread.closedSummary && (
-                <div className="rounded-lg border bg-gray-50 p-4 text-sm text-gray-700">
-                  <div className="mb-2 font-semibold">종료 요약</div>
-                  <div className="whitespace-pre-wrap">{thread.closedSummary}</div>
-                </div>
-              )
-            )}
+            <div className="rounded-lg border p-4 text-sm text-gray-600">
+              채팅 전송은 추후 WebSocket/전송 API 연동 시 제공됩니다.
+            </div>
           </div>
         </CardContent>
       </Card>
