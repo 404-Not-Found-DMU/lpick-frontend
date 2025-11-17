@@ -10,6 +10,7 @@ export interface InquiryAnswerInfo {
 }
 
 export interface InquirySummary {
+  [key: string]: unknown
   no?: number
   questionId: string
   title: string

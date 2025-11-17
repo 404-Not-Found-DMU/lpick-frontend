@@ -17,14 +17,12 @@ export default function InquiryAdminClient() {
   const [pageSize, setPageSize] = useState(10)
   const [items, setItems] = useState<InquirySummary[]>([])
   const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirm, setConfirm] = useState<{ open: boolean; id?: string }>({ open: false })
 
   useEffect(() => {
     let active = true
     const load = async () => {
-      setLoading(true)
       setError(null)
       try {
         const res = await fetchInquiryList({ keyword: q, page, size: pageSize })
@@ -37,7 +35,6 @@ export default function InquiryAdminClient() {
         setItems([])
         setTotal(0)
       } finally {
-        if (active) setLoading(false)
       }
     }
     load()
@@ -104,11 +101,13 @@ export default function InquiryAdminClient() {
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
       ) : null}
-      <DataTable
+      <DataTable<InquirySummary & { rowNumber: number; statusLabel: string }>
         columns={[
-          { key: 'rowNumber', header: '번호', className: 'text-center text-gray-500', headerClassName: 'text-center', span: 1 },
-          { key: 'statusLabel', header: '상태', className: 'text-center', headerClassName: 'text-center', span: 1, render: (v) => (
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${v === '완료' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}`}>{v}</span>
+          { key: 'rowNumber', header: '번호', className: 'text-center text-gray-500', headerClassName: 'text-center', span: 1, render: (_, r) => String(r.rowNumber ?? '-') },
+          { key: 'statusLabel', header: '상태', className: 'text-center', headerClassName: 'text-center', span: 1, render: (_, r) => (
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${(r.statusLabel as string) === '완료' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}`}>
+              {r.statusLabel as string}
+            </span>
           ) },
           { key: 'title', header: '제목', headerClassName: 'text-center', span: 7, render: (_, r) => (
             <Link className="text-violet-600 hover:underline block truncate" href={`/admin/inquiry/${r.questionId}`}>
@@ -116,7 +115,7 @@ export default function InquiryAdminClient() {
             </Link>
           ) },
           { key: 'author', header: '작성자', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1 },
-          { key: 'createdAt', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1, render: (v) => formatDate(v as string) },
+          { key: 'createdAt', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1, render: (_, r) => formatDate(r.createdAt as string) },
           { key: 'questionId', header: '작업', className: 'text-right', headerClassName: 'text-center', span: 1, truncate: false, render: (_, r) => (
             <div className="flex justify-end gap-1">
               <Link href={`/admin/inquiry/${r.questionId}`} className="rounded-md border px-2 py-1 text-xs">보기</Link>

@@ -1,4 +1,4 @@
-type Column<T> = {
+type Column<T extends Record<string, unknown>> = {
   key: keyof T
   header: string
   className?: string
@@ -13,12 +13,12 @@ type Column<T> = {
   truncate?: boolean
 }
 
-export default function DataTable<T extends { id?: string | number }>({
-  columns,
-  rows,
+export default function DataTable<T extends Record<string, unknown>>({
+  columns = [],
+  rows = [],
 }: {
-  columns: Column<T>[]
-  rows: T[]
+  columns?: Column<T>[]
+  rows?: T[]
 }) {
   return (
     <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
