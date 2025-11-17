@@ -4,11 +4,13 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import TextEditor from '@/components/TextEditor/TextEditor'
+import { createInquiryQuestion } from '../api'
 
 export default function InquiryNewClient() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [isSecret, setIsSecret] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   const handleSubmit = async () => {
     if (!title.trim()) {
@@ -20,10 +22,17 @@ export default function InquiryNewClient() {
       return
     }
 
-    // TODO: API 연동
-    console.log('문의 등록', { title, content, isSecret })
-    alert('임시 저장: 콘솔을 확인해 주세요.')
-    window.location.href = '/support/inquiry'
+    try {
+      setSubmitting(true)
+      await createInquiryQuestion({ title: title.trim(), content, secret: isSecret })
+      alert('문의가 등록되었습니다.')
+      window.location.href = '/support/inquiry'
+    } catch (error) {
+      console.error('문의 등록 실패:', error)
+      alert(error instanceof Error ? error.message : '문의 등록 중 오류가 발생했습니다.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -80,7 +89,13 @@ export default function InquiryNewClient() {
 
                 <div className="flex items-center gap-2">
                   <Link href="/support/inquiry" className="rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">취소</Link>
-                  <button onClick={handleSubmit} className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700">등록</button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+                  >
+                    {submitting ? '등록 중...' : '등록'}
+                  </button>
                 </div>
               </div>
             </div>
