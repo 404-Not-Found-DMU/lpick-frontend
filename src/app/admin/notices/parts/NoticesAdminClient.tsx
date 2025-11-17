@@ -131,16 +131,11 @@ export default function NoticesAdminClient({ initialQuery = '', initialPage = 1,
               key: 'title',
               header: '제목',
               headerClassName: 'text-left',
-              span: 6,
+              span: 5,
               render: (_, row) => (
-                <div>
-                  <Link className="text-violet-600 hover:underline font-medium" href={`/admin/notices/${row.id}`}>
-                    {row.title || '(제목 없음)'}
-                  </Link>
-                  {row.summary ? (
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{row.summary}</p>
-                  ) : null}
-                </div>
+                <Link className="text-violet-600 hover:underline block truncate font-medium" href={`/admin/notices/${row.id}`}>
+                  {row.title || '(제목 없음)'}
+                </Link>
               ),
             },
             { key: 'author', header: '작성자', className: 'text-center text-gray-700 dark:text-gray-300', headerClassName: 'text-center', span: 2, render: (value) => value || '-' },
@@ -148,15 +143,22 @@ export default function NoticesAdminClient({ initialQuery = '', initialPage = 1,
             {
               key: 'id',
               header: '작업',
-              className: 'text-right',
+              className: 'text-right whitespace-nowrap overflow-visible',
               headerClassName: 'text-right',
-              span: 3,
+              span: 2,
+              truncate: false,
               render: (_, r) => (
-                <div className="flex justify-end gap-1">
-                  <Link href={`/admin/notices/${r.id}/edit`} className="rounded-md border px-2 py-1 text-xs">
+                <div className="inline-flex justify-end gap-2">
+                  <Link
+                    href={`/admin/notices/${r.id}/edit`}
+                    className="inline-flex items-center rounded-md border px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200"
+                  >
                     수정
                   </Link>
-                  <button onClick={() => setConfirm({ open: true, id: r.id })} className="rounded-md border px-2 py-1 text-xs text-red-600">
+                  <button
+                    onClick={() => setConfirm({ open: true, id: r.id })}
+                    className="inline-flex items-center rounded-md border px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+                  >
                     삭제
                   </button>
                 </div>

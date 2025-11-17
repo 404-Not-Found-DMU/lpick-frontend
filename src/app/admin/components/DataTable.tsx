@@ -10,6 +10,7 @@ type Column<T> = {
   sortDir?: 'asc' | 'desc'
   onSort?: () => void
   stickyLeft?: boolean
+  truncate?: boolean
 }
 
 export default function DataTable<T extends { id?: string | number }>({
@@ -67,11 +68,11 @@ export default function DataTable<T extends { id?: string | number }>({
             const value = row[c.key]
             const span = c.span ?? 12 / columns.length
             return (
-              <div
-                key={`${String(c.key)}-${colIdx}`}
-                style={{ gridColumn: `span ${span} / span ${span}` }}
-                className={`min-w-0 truncate ${c.className ?? ''}`.trim()}
-              >
+            <div
+              key={`${String(c.key)}-${colIdx}`}
+              style={{ gridColumn: `span ${span} / span ${span}` }}
+              className={`min-w-0 ${c.truncate === false ? '' : 'truncate'} ${c.className ?? ''}`.trim()}
+            >
                 {c.render ? c.render(value, row) : (value as React.ReactNode)}
               </div>
             )
