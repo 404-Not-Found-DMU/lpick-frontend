@@ -64,7 +64,7 @@ function SearchResultContent() {
     isLoading: isImageSearchLoading, 
     isError: isImageSearchError 
   } = useCustomQuery<ImageSearchResult[]>(
-    ['imageSearch', searchedImageUrl],
+    ['imageSearch', searchedImageUrl ?? ''],
     () => {
       if (!imageFile) {
         throw new Error('이미지 파일이 없습니다.')
