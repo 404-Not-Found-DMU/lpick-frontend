@@ -385,16 +385,7 @@ export default function HomePage() {
                               }}
                             />
 
-                            {isCenter ? (
-                              <div
-                                className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 text-white"
-                                style={{ textShadow: "0 8px 25px rgba(0,0,0,0.45)" }}
-                              >
-                                <p className="text-sm font-medium mb-1">{album.artist}</p>
-                                <h4 className="text-lg font-bold">{album.title}</h4>
-                                <p className="text-xs mt-2 opacity-90">{album.year}</p>
-                              </div>
-                            ) : (
+                            {!isCenter && (
                               <div
                                 className="absolute inset-0 flex flex-col items-center justify-center text-center px-3 text-white opacity-0 transition-opacity duration-300 hover:opacity-100"
                                 style={{ textShadow: "0 6px 18px rgba(0,0,0,0.4)" }}
