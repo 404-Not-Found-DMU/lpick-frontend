@@ -154,3 +154,36 @@ export interface UpdateCommentRequest {
 export type CommentListResponse = PagedResponse<CommentListItem>;
 export type LikedParentCommentsResponse = PagedResponse<CommentListItem>;
 export type LikedChildCommentsResponse = PagedResponse<CommentListItem>;
+
+// 북마크 관련 타입
+export interface BookmarkItem {
+  articleId: string;
+  title: string;
+  content: string;
+  boardType: BoardType;
+  viewCount: number;
+  likeCount: number;
+  bookmarkCount: number;
+  commentCount: number;
+  authorName: string;
+  authorProfileImage: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WikiBookmarkItem {
+  wikiId: string;
+  title: string;
+  content: string;
+  category: string;
+  viewCount: number;
+  bookmarkCount: number;
+  authorName: string;
+  authorProfileImage: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 북마크 응답 타입
+export type BookmarkedArticlesResponse = PagedResponse<BookmarkItem>;
+export type BookmarkedWikisResponse = PagedResponse<WikiBookmarkItem>;

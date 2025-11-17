@@ -5,10 +5,8 @@ import React from 'react';
 // 기능별로 그룹화된 컴포넌트 import
 import { TabNavigation } from './components/common';
 import {
-  ActivitySections,
   AlbumCollection,
   EquipmentSection,
-  RecentDocuments,
   StatsGrid,
 } from './components/overview';
 import { PostsTab } from './components/post';
@@ -33,8 +31,6 @@ const MyPage = () => {
             <StatsGrid />
             <AlbumCollection />
             <EquipmentSection />
-            <RecentDocuments />
-            <ActivitySections />
           </div>
         );
       case '게시글':

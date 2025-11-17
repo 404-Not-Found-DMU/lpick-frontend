@@ -1,6 +1,6 @@
 'use client';
 import { Heart, MessageSquare } from 'lucide-react';
-import { Post } from '../../types/community.types';
+import { Post } from '../../community.types';
 import { usePopularArticles } from '../../hooks/usePopularArticles';
 import Link from 'next/link';
 

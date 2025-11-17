@@ -6,6 +6,7 @@ import {
   UpdateArticleRequest,
   MyArticlesResponse,
   LikedArticlesResponse,
+  BookmarkedArticlesResponse,
   PaginationParams
 } from '../types/api.types';
 
@@ -152,6 +153,21 @@ export const unbookmarkArticle = async (articleId: string): Promise<void> => {
   }
 };
 
+// 게시글 북마크 토글
+export const toggleArticleBookmark = async (articleId: string, isBookmarked: boolean): Promise<boolean> => {
+  try {
+    if (isBookmarked) {
+      await unbookmarkArticle(articleId);
+    } else {
+      await bookmarkArticle(articleId);
+    }
+    return !isBookmarked;
+  } catch (error) {
+    console.error(`Failed to toggle bookmark for article ${articleId}:`, error);
+    return isBookmarked;
+  }
+};
+
 // 내 게시글 목록 조회
 export const getMyArticles = async (params?: PaginationParams): Promise<MyArticlesResponse> => {
   try {
@@ -192,6 +208,28 @@ export const getLikedArticles = async (params?: PaginationParams): Promise<Liked
     return await fetcher<LikedArticlesResponse>(url);
   } catch (error) {
     console.error('Failed to fetch liked articles:', error);
+    throw error;
+  }
+};
+
+// 북마크한 게시글 목록 조회
+export const getBookmarkedArticles = async (params?: PaginationParams): Promise<BookmarkedArticlesResponse> => {
+  try {
+    const searchParams = new URLSearchParams();
+    
+    // 파라미터 검증 및 기본값 설정
+    const page = Math.max(1, params?.page || 1); // 1-based 페이징
+    const size = Math.max(1, Math.min(100, params?.size || 10));
+    
+    searchParams.append('page', page.toString());
+    searchParams.append('size', size.toString());
+
+    const queryString = searchParams.toString();
+    const url = `/api/v1/community/article/bookmark/me?${queryString}`;
+    
+    return await fetcher<BookmarkedArticlesResponse>(url);
+  } catch (error) {
+    console.error('Failed to fetch bookmarked articles:', error);
     throw error;
   }
 };

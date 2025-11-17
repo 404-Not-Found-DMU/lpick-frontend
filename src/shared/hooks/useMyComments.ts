@@ -1,16 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getLikedParentComments, getLikedChildComments } from '../../community/api/comment.api';
+import { getLikedParentComments } from '../api/comment.api';
 import { 
   CommentListItem, 
   ChildComment, 
-  PaginationParams, 
-  LikedParentCommentsResponse,
-  LikedChildCommentsResponse 
-} from '../../community/types/api.types';
+  PaginationParams
+} from '../types/api.types';
 
-interface UseMyCommentsParams extends PaginationParams {}
+type UseMyCommentsParams = PaginationParams;
 
 interface UseMyCommentsReturn {
   comments: (CommentListItem | ChildComment)[];
@@ -41,8 +39,8 @@ export const useMyComments = (params: UseMyCommentsParams = {}): UseMyCommentsRe
     setError(null);
 
     try {
-      // 우선 부모 댓글만 조회하고, 자식 댓글 API가 문제가 있을 경우 대비
-      let allComments: (CommentListItem | ChildComment)[] = [];
+      // 부모 댓글만 조회 (자식 댓글 API가 아직 구현되지 않음)
+      const allComments: (CommentListItem | ChildComment)[] = [];
       let totalCount = 0;
 
       try {
@@ -53,14 +51,14 @@ export const useMyComments = (params: UseMyCommentsParams = {}): UseMyCommentsRe
         console.warn('Failed to fetch liked parent comments:', parentError);
       }
 
-      try {
-        const childCommentsResponse = await getLikedChildComments(stableParams);
-        allComments.push(...childCommentsResponse.content);
-        totalCount += childCommentsResponse.totalElements;
-      } catch (childError) {
-        console.warn('Failed to fetch liked child comments:', childError);
-        // 자식 댓글 API가 실패해도 부모 댓글은 보여줌
-      }
+      // TODO: 자식 댓글 API가 구현되면 추가
+      // try {
+      //   const childCommentsResponse = await getLikedChildComments(stableParams);
+      //   allComments.push(...childCommentsResponse.content);
+      //   totalCount += childCommentsResponse.totalElements;
+      // } catch (childError) {
+      //   console.warn('Failed to fetch liked child comments:', childError);
+      // }
 
       // 날짜순으로 정렬
       allComments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

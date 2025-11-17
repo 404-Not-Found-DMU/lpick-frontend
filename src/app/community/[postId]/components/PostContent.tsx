@@ -5,7 +5,7 @@ import { Clock, Edit3, Trash2, Eye, Heart, Bookmark, MessageSquare } from 'lucid
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
-import { Post } from '../../types/community.types';
+import { Post } from '../../community.types';
 
 interface PostContentProps {
   post: Post;

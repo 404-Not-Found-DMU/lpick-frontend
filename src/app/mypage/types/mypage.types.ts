@@ -82,30 +82,6 @@ export interface Playlist {
   likes: number;
 }
 
-// 활동 관련 타입
-export interface Activity {
-  id: number;
-  type: 'listen' | 'comment' | 'like' | 'share' | 'post' | 'follow' | 'wiki';
-  title: string;
-  subtitle?: string;
-  description?: string;
-  time: string;
-  likes?: number;
-  comments?: number;
-  status?: 'completed' | null;
-}
-
-// 문서 관련 타입
-export interface RecentDocument {
-  id: number;
-  title: string;
-  type: string;
-  category: 'review' | 'guide' | 'playlist' | 'tip';
-  status: '작성중' | '완료' | '공개';
-  lastModified: string;
-  views: number;
-}
-
 // 팔로우 관련 타입
 export interface FollowingUser {
   id: number;

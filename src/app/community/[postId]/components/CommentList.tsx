@@ -1,5 +1,5 @@
 import { MessageSquare } from 'lucide-react';
-import { Comment } from '../../types/community.types';
+import { Comment } from '../../community.types';
 import { CommentItem } from './CommentItem';
 
 interface CommentListProps {

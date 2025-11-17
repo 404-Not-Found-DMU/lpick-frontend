@@ -6,7 +6,6 @@ import { fetcher } from '@/hooks/api/fetchers';
 import {
   CommentListResponse,
   LikedParentCommentsResponse,
-  LikedChildCommentsResponse,
   CreateCommentRequest,
   UpdateCommentRequest,
   PaginationParams
@@ -74,30 +73,31 @@ export const getLikedParentComments = async (
 
 /**
  * 좋아요한 자식 댓글 목록 조회
+ * TODO: 백엔드 API 구현 후 활성화
  * @param params 페이지네이션 파라미터
  */
-export const getLikedChildComments = async (
-  params?: PaginationParams
-): Promise<LikedChildCommentsResponse> => {
-  try {
-    const queryParams = new URLSearchParams();
+// export const getLikedChildComments = async (
+//   params?: PaginationParams
+// ): Promise<LikedChildCommentsResponse> => {
+//   try {
+//     const queryParams = new URLSearchParams();
     
-    if (params?.page !== undefined) {
-      queryParams.append('page', params.page.toString());
-    }
-    if (params?.size !== undefined) {
-      queryParams.append('size', params.size.toString());
-    }
+//     if (params?.page !== undefined) {
+//       queryParams.append('page', params.page.toString());
+//     }
+//     if (params?.size !== undefined) {
+//       queryParams.append('size', params.size.toString());
+//     }
 
-    const queryString = queryParams.toString();
-    const url = `${COMMENT_API_BASE}/child/like${queryString ? `?${queryString}` : ''}`;
+//     const queryString = queryParams.toString();
+//     const url = `${COMMENT_API_BASE}/child/like${queryString ? `?${queryString}` : ''}`;
     
-    return await fetcher<LikedChildCommentsResponse>(url);
-  } catch (error) {
-    console.error('Failed to fetch liked child comments:', error);
-    throw error;
-  }
-};
+//     return await fetcher<LikedChildCommentsResponse>(url);
+//   } catch (error) {
+//     console.error('Failed to fetch liked child comments:', error);
+//     throw error;
+//   }
+// };
 
 /**
  * 댓글 좋아요/취소

@@ -2,7 +2,7 @@
 import { Search, PenSquare, Users, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { Input } from '@/components/Input/Input';
-import { BoardType, TagType } from '../../types/community.types';
+import { BoardType, TagType } from '../../community.types';
 import { BOARD_OPTIONS, TAG_OPTIONS } from '../../constants';
 import { usePostNavigation } from '../../hooks/usePostNavigation';
 

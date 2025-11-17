@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getLikedArticles } from '../../community/api/article.api';
+import { getLikedArticles } from '../api/article.api';
 import { 
   ArticleListItem, 
-  PaginationParams, 
-  LikedArticlesResponse 
-} from '../../community/types/api.types';
+  PaginationParams
+} from '../types/api.types';
 
-interface UseLikedArticlesParams extends PaginationParams {}
+type UseLikedArticlesParams = PaginationParams;
 
 interface UseLikedArticlesReturn {
   articles: ArticleListItem[];

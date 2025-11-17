@@ -5,7 +5,7 @@ import { SortOption, CommunityFilters, BoardType, TagType } from '../types/commu
 import { POSTS_PER_PAGE } from '../constants';
 import { useArticles } from './useArticles';
 import { usePopularArticles } from './usePopularArticles';
-import { ArticleListItem } from '../types/api.types';
+import { ArticleListItem } from '@/shared/types';
 
 export const useCommunity = () => {
   const searchParams = useSearchParams();

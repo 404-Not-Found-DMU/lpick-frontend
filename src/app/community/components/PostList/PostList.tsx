@@ -1,6 +1,6 @@
 'use client';
 import { TrendingUp } from 'lucide-react';
-import { Post, SortOption } from '../../types/community.types';
+import { Post, SortOption } from '../../community.types';
 import { CommunitySortDropdown } from '../SortDropdown';
 import { PostCard } from '../PostCard';
 import { EmptyState } from '../EmptyState';

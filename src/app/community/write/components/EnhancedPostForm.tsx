@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { Input } from '@/components/Input/Input';
 import { Button } from '@/components/Button/Button';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { PostFormData, BoardType, TagType } from '../../types/community.types';
+import { PostFormData, BoardType, TagType } from '../../community.types';
 import { Send, AlertCircle, Hash, FileText, Tag, Save } from 'lucide-react';
 
 interface EnhancedPostFormProps {

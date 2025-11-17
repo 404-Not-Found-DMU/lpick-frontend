@@ -3,11 +3,11 @@
 import React from 'react';
 import { Heart, MessageCircle, User, FileText, Calendar, Eye, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useLikedArticles } from '../../hooks/useLikedArticles';
-import { ArticleListItem, BoardType } from '../../../community/types/api.types';
+import { useLikedArticles } from '@/shared/hooks';
+import { BoardType } from '@/shared/types';
 
 const LikesTab = () => {
-  const { articles, loading, error, totalElements } = useLikedArticles({ page: 1, size: 20 });
+  const { articles, loading, error } = useLikedArticles({ page: 1, size: 20 });
 
   // 날짜 포맷팅 함수
   const formatDate = (dateString: string) => {

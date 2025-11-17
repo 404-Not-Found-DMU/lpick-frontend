@@ -3,8 +3,6 @@ import type {
   StatCard,
   Album,
   Playlist,
-  RecentDocument,
-  Activity,
   FollowingUser,
   Post,
   Comment,
@@ -184,88 +182,6 @@ export const tempPlaylists: Playlist[] = [
     trackCount: 42,
     isPublic: true,
     likes: 156,
-  },
-];
-
-export const tempRecentDocuments: RecentDocument[] = [
-  {
-    id: 1,
-    title: 'Pink Floyd - The Wall 앨범 리뷰 작성 중',
-    type: '앨범 리뷰',
-    category: 'review',
-    status: '작성중',
-    lastModified: '2시간 전',
-    views: 324,
-  },
-  {
-    id: 2,
-    title: '재즈 입문자를 위한 가이드',
-    type: '음악 가이드',
-    category: 'guide',
-    status: '완료',
-    lastModified: '1일 전',
-    views: 567,
-  },
-  {
-    id: 3,
-    title: '새벽 감성 플레이리스트',
-    type: '플레이리스트',
-    category: 'playlist',
-    status: '공개',
-    lastModified: '3일 전',
-    views: 892,
-  },
-  {
-    id: 4,
-    title: 'LP 관리 팁 정리',
-    type: '팁 & 노하우',
-    category: 'tip',
-    status: '작성중',
-    lastModified: '5일 전',
-    views: 156,
-  },
-];
-
-export const tempActivities: Activity[] = [
-  {
-    id: 1,
-    type: 'listen',
-    title: 'Led Zeppelin IV 앨범을 들었습니다',
-    subtitle: 'Stairway to Heaven 포함 8곡 재생',
-    time: '2시간 전',
-    status: 'completed',
-  },
-  {
-    id: 2,
-    type: 'comment',
-    title: '재즈 명반 추천 글에 댓글을 남겼습니다',
-    subtitle: 'Kind of Blue는 정말 명반이죠...',
-    time: '6시간 전',
-    status: null,
-  },
-  {
-    id: 3,
-    type: 'like',
-    title: 'Pink Floyd - The Wall 리뷰를 좋아요했습니다',
-    subtitle: 'MusicCritic님의 리뷰',
-    time: '1일 전',
-    status: null,
-  },
-  {
-    id: 4,
-    type: 'share',
-    title: '새벽 감성 플레이리스트를 공유했습니다',
-    subtitle: '23곡의 감성적인 트랙 모음',
-    time: '2일 전',
-    status: 'completed',
-  },
-  {
-    id: 5,
-    type: 'listen',
-    title: 'Abbey Road 앨범 청취 완료',
-    subtitle: 'The Beatles의 대표작',
-    time: '3일 전',
-    status: 'completed',
   },
 ];
 

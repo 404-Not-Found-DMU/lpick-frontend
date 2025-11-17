@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getMyArticles } from '../../community/api/article.api';
-import { ArticleListItem, PaginationParams } from '../../community/types/api.types';
+import { getMyArticles } from '../api/article.api';
+import { ArticleListItem, PaginationParams } from '../types/api.types';
 
 export const useMyArticles = (initialParams?: PaginationParams) => {
   const [articles, setArticles] = useState<ArticleListItem[]>([]);

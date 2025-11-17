@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMyArticles } from '../../hooks/useMyArticles';
-import { ArticleListItem, BoardType } from '../../../community/types/api.types';
+import { useMyArticles } from '@/shared/hooks';
+import { ArticleListItem, BoardType } from '@/shared/types';
 
 interface FilterItem {
   name: string;
@@ -361,7 +361,7 @@ const PostsTab = () => {
                   해당 카테고리에 게시글이 없습니다
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  "{selectedFilter}" 카테고리에는 작성한 게시글이 없습니다.
+                  &quot;{selectedFilter}&quot; 카테고리에는 작성한 게시글이 없습니다.
                 </p>
               </div>
             )}

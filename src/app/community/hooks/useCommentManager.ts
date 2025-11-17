@@ -11,8 +11,8 @@ import {
   toggleCommentLike,
   likeComment,
   unlikeComment,
-} from '../api/comment.api';
-import { CreateCommentRequest, UpdateCommentRequest } from '../types/api.types';
+} from '@/shared/api';
+import { CreateCommentRequest, UpdateCommentRequest } from '@/shared/types';
 
 /**
  * 에러 객체에서 사용자 친화적인 메시지 추출

@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import { Eye, Heart, MessageSquare, Clock, Bookmark } from 'lucide-react';
 import { Card } from '@/components/Card/Card';
-import { Post } from '../../types/community.types';
+import { Post } from '../../community.types';
 import { getCategoryColor, formatViews } from '../../utils';
 import { usePostNavigation } from '../../hooks/usePostNavigation';
 

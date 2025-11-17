@@ -1,6 +1,6 @@
 'use client';
 import { Heart } from 'lucide-react';
-import { Post } from '../../types/community.types';
+import { Post } from '../../community.types';
 import { FeaturedCard } from '../FeaturedCard';
 
 interface FeaturedSectionProps {

@@ -4,12 +4,12 @@ import {
   getArticle,
   getMyArticles,
   getLikedArticles
-} from '../api/article.api';
+} from '@/shared/api';
 import {
   ArticleDetail,
   ArticleListItem,
   PaginationParams
-} from '../types/api.types';
+} from '@/shared/types';
 
 /**
  * 게시글 목록 조회 훅

@@ -4,7 +4,5 @@ export * from './useUserAlbums';
 // 사용자 장비 관련 훅들 export
 export * from './useUserGear';
 
-// 마이페이지 관련 훅들 export
-export * from './useMyArticles';
-export * from './useMyComments';
-export * from './useLikedArticles';
+// 공통 훅들은 이제 @/shared/hooks에서 import
+// export * from '@/shared/hooks';

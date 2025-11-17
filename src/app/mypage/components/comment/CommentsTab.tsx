@@ -3,11 +3,11 @@
 import React from 'react';
 import { MessageCircle, Heart, Reply, Calendar, User, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useMyComments } from '../../hooks/useMyComments';
-import { CommentListItem, ChildComment } from '../../../community/types/api.types';
+import { useMyComments } from '@/shared/hooks';
+import { CommentListItem, ChildComment } from '@/shared/types';
 
 const CommentsTab = () => {
-  const { comments, loading, error, totalElements } = useMyComments({ page: 1, size: 20 });
+  const { comments, loading, error } = useMyComments({ page: 1, size: 20 });
 
   // 날짜 포맧팅 함수
   const formatDate = (dateString: string) => {
