@@ -14,8 +14,9 @@ import {
   Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMyArticles } from '../../hooks/useMyArticles';
-import { ArticleListItem } from '../../../community/types/api.types';
+import { ArticleListItem, BoardType } from '../../../community/types/api.types';
 
 interface FilterItem {
   name: string;
@@ -25,20 +26,36 @@ interface FilterItem {
 const PostsTab = () => {
   const [selectedFilter, setSelectedFilter] = useState('전체');
   const { articles, loading, error, totalElements } = useMyArticles({ page: 1, size: 20 });
+  const router = useRouter();
 
   // 카테고리별 게시글 개수 계산
   const categoryStats = useMemo(() => {
     const stats: { [key: string]: number } = {
       '전체': totalElements,
-      '앨범 리뷰': 0,
-      '장비 리뷰': 0,
-      '기타': 0,
+      '자유게시판': 0,
+      '장비': 0,
+      '음반': 0,
+      '아티스트': 0,
     };
 
-    articles.forEach(article => {
-      // 여기서는 카테고리 정보가 없으므로 임시로 '기타'로 분류
-      // 실제로는 게시판 타입이나 카테고리 정보가 있어야 함
-      stats['기타']++;
+    articles.forEach((article) => {
+      switch (article.articleType) {
+        case BoardType.FREE:
+          stats['자유게시판']++;
+          break;
+        case BoardType.GEAR:
+          stats['장비']++;
+          break;
+        case BoardType.ALBUM:
+          stats['음반']++;
+          break;
+        case BoardType.ARTIST:
+          stats['아티스트']++;
+          break;
+        default:
+          // 예상치 못한 타입의 경우 자유게시판으로 분류
+          stats['자유게시판']++;
+      }
     });
 
     return stats;
@@ -46,9 +63,10 @@ const PostsTab = () => {
 
   const filters: FilterItem[] = [
     { name: '전체', count: categoryStats['전체'] },
-    { name: '앨범 리뷰', count: categoryStats['앨범 리뷰'] },
-    { name: '장비 리뷰', count: categoryStats['장비 리뷰'] },
-    { name: '기타', count: categoryStats['기타'] },
+    { name: '자유게시판', count: categoryStats['자유게시판'] },
+    { name: '장비', count: categoryStats['장비'] },
+    { name: '음반', count: categoryStats['음반'] },
+    { name: '아티스트', count: categoryStats['아티스트'] },
   ];
 
   // 날짜 포맷팅 함수
@@ -60,36 +78,71 @@ const PostsTab = () => {
     }
   };
 
+  // BoardType을 한글 카테고리명으로 변환
+  const getBoardTypeLabel = (boardType: BoardType): string => {
+    switch (boardType) {
+      case BoardType.FREE:
+        return '자유게시판';
+      case BoardType.GEAR:
+        return '장비';
+      case BoardType.ALBUM:
+        return '음반';
+      case BoardType.ARTIST:
+        return '아티스트';
+      default:
+        return '자유게시판';
+    }
+  };
+
   // 게시글을 Post 형태로 변환
   const convertArticleToPost = (article: ArticleListItem) => ({
     id: parseInt(article.articleId.replace(/\D/g, '')) || 0,
     articleId: article.articleId,
     title: article.title,
-    content: article.content || '',
-    category: '기타', // 실제로는 게시판 정보에서 가져와야 함
+    content: '', // API에서 목록에는 content가 제공되지 않음
+    category: getBoardTypeLabel(article.articleType),
     likes: article.likeCount,
     comments: article.commentCount,
-    views: article.viewCount?.toString() || '0',
+    views: article.viewCount.toString(),
     date: formatDate(article.createdAt),
   });
 
   const displayedArticles = articles.map(convertArticleToPost);
 
+  // 카테고리 필터링 적용
+  const filteredArticles = useMemo(() => {
+    if (selectedFilter === '전체') {
+      return displayedArticles;
+    }
+    return displayedArticles.filter(post => post.category === selectedFilter);
+  }, [displayedArticles, selectedFilter]);
+
+  // 편집 버튼 처리
+  const handleEditClick = (articleId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/community/write?edit=${articleId}`);
+  };
+
   const categoryConfig = {
-    '앨범 리뷰': {
+    '자유게시판': {
+      icon: MessageCircle,
+      color: 'text-green-600 dark:text-green-400',
+      bg: 'bg-green-100 dark:bg-green-900/20',
+    },
+    '장비': {
+      icon: Heart,
+      color: 'text-pink-600 dark:text-pink-400',
+      bg: 'bg-pink-100 dark:bg-pink-900/20',
+    },
+    '음반': {
       icon: FileText,
       color: 'text-purple-600 dark:text-purple-400',
       bg: 'bg-purple-100 dark:bg-purple-900/20',
     },
-    '음악 가이드': {
+    '아티스트': {
       icon: User,
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-100 dark:bg-blue-900/20',
-    },
-    '개인 일기': {
-      icon: Heart,
-      color: 'text-pink-600 dark:text-pink-400',
-      bg: 'bg-pink-100 dark:bg-pink-900/20',
     },
   };
 
@@ -203,7 +256,7 @@ const PostsTab = () => {
         {/* 게시글 목록 */}
         {!loading && !error && (
           <div className="space-y-4">
-            {displayedArticles.map((post) => (
+            {filteredArticles.map((post) => (
               <Link
                 key={post.articleId}
                 href={`/community/${post.articleId}`}
@@ -256,15 +309,15 @@ const PostsTab = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-3">
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <Link
-                        href={`/community/write?edit=${post.articleId}`}
+                      <button
+                        onClick={(e) => handleEditClick(post.articleId, e)}
                         className="flex items-center justify-center rounded-2xl border border-gray-200 px-3 py-2 text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                       >
                         <Edit className="h-4 w-4" />
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -274,25 +327,45 @@ const PostsTab = () => {
         )}
 
         {/* 빈 상태 */}
-        {!loading && !error && displayedArticles.length === 0 && (
-          <div className="py-12 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-              <FileText className="h-8 w-8 text-gray-400" />
-            </div>
-            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              작성한 게시글이 없습니다
-            </h3>
-            <p className="mb-4 text-gray-600 dark:text-gray-400">
-              첫 번째 게시글을 작성해보세요!
-            </p>
-            <Link
-              href="/community/write"
-              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 px-6 py-3 font-semibold text-white transition-all hover:from-indigo-600 hover:to-violet-700"
-            >
-              <Plus className="h-4 w-4" />
-              새 게시글 작성
-            </Link>
-          </div>
+        {!loading && !error && (
+          <>
+            {/* 전체 게시글이 없는 경우 */}
+            {displayedArticles.length === 0 && (
+              <div className="py-12 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                  <FileText className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  작성한 게시글이 없습니다
+                </h3>
+                <p className="mb-4 text-gray-600 dark:text-gray-400">
+                  첫 번째 게시글을 작성해보세요!
+                </p>
+                <Link
+                  href="/community/write"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 px-6 py-3 font-semibold text-white transition-all hover:from-indigo-600 hover:to-violet-700"
+                >
+                  <Plus className="h-4 w-4" />
+                  새 게시글 작성
+                </Link>
+              </div>
+            )}
+            
+            {/* 필터링된 결과가 없는 경우 */}
+            {displayedArticles.length > 0 && filteredArticles.length === 0 && (
+              <div className="py-12 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                  <FileText className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  해당 카테고리에 게시글이 없습니다
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  "{selectedFilter}" 카테고리에는 작성한 게시글이 없습니다.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

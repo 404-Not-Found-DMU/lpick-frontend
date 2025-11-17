@@ -38,6 +38,7 @@ export interface PagedResponse<T> {
 export interface ArticleListItem {
   articleId: string;
   title: string;
+  articleType: BoardType;
   createdAt: string;
   modifiedAt: string;
   likeCount: number;
@@ -45,6 +46,7 @@ export interface ArticleListItem {
   bookmarkCount: number;
   oauthId: string;
   author: string;
+  viewCount: number;
 }
 
 // 게시글 상세 정보

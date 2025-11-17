@@ -14,9 +14,10 @@ import {
 
 // 기본 댓글 API URL
 const COMMENT_API_BASE = '/api/v1/community/comment';
+const PUBLIC_COMMENT_API_BASE = '/api/v1/public/community/comment';
 
 /**
- * 특정 게시글의 댓글 목록 조회
+ * 특정 게시글의 댓글 목록 조회 (public API)
  * @param articleId 게시글 ID
  * @param params 페이지네이션 파라미터
  */
@@ -35,7 +36,7 @@ export const getComments = async (
     }
 
     const queryString = queryParams.toString();
-    const url = `${COMMENT_API_BASE}/${articleId}${queryString ? `?${queryString}` : ''}`;
+    const url = `${PUBLIC_COMMENT_API_BASE}/${articleId}${queryString ? `?${queryString}` : ''}`;
     
     return await fetcher<CommentListResponse>(url);
   } catch (error) {
