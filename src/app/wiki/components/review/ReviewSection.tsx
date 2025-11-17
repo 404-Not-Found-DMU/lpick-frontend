@@ -1,8 +1,9 @@
 "use client"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import ReviewForm from "./ReviewForm"
 import ReviewList, { type ReviewItem } from "./ReviewList"
 import { useUserStore } from "@/store/userStore"
+import { createWikiReview, deleteWikiReview, getWikiReviews, updateWikiReview, type WikiReviewsPage } from "@/hooks/api/review.api"
 
 type ReviewSectionProps = {
 	wikiId: string
@@ -10,59 +11,120 @@ type ReviewSectionProps = {
 	pageSize?: number
 }
 
-// UI-only: 프론트 상태로 페이징/수정/삭제를 흉내냅니다.
-export default function ReviewSection({ className = "", pageSize = 10 }: ReviewSectionProps) {
+export default function ReviewSection({ wikiId, className = "", pageSize = 10 }: ReviewSectionProps) {
 	const userInfo = useUserStore((s) => s.userInfo)
 	const currentUserId = userInfo?.oauthId ?? null
 
-	const [allItems, setAllItems] = useState<ReviewItem[]>(() => {
-		const now = Date.now()
-		return [
-			{ id: "1", userId: "u_1", userName: "Alice", rating: 5, text: "마스터피스입니다.", createdAt: new Date(now - 86400000).toISOString() },
-			{ id: "2", userId: "u_2", userName: "Bob", rating: 4, text: "좋아요. 몇 트랙은 아쉬움.", createdAt: new Date(now - 43200000).toISOString() },
-			{ id: "3", userId: "u_3", userName: "Charlie", rating: 3, text: "취향은 갈릴 듯.", createdAt: new Date(now - 3600000).toISOString() },
-		]
-	})
+	const [serverPage, setServerPage] = useState<WikiReviewsPage | null>(null)
+	const [allItems, setAllItems] = useState<ReviewItem[]>([])
 	const [page, setPage] = useState<number>(1)
+	const [loading, setLoading] = useState<boolean>(false)
 
-	const total = allItems.length
-	const pageItems = useMemo(() => {
-		const start = (page - 1) * pageSize
-		return allItems.slice(start, start + pageSize)
-	}, [page, pageSize, allItems])
+	useEffect(() => {
+		let active = true
+		if (!wikiId) return
+		async function load() {
+			setLoading(true)
+			try {
+				const res = await getWikiReviews(wikiId, { page: Math.max(0, page - 1), size: pageSize })
+				if (!active) return
+				setServerPage(res)
+				const mapped: ReviewItem[] = (res.content ?? []).map((it) => ({
+					id: it.reviewId,
+					userId: "unknown",
+					userName: "익명",
+					rating: it.starScore,
+					text: it.content,
+					createdAt: it.createdAt,
+				}))
+				setAllItems(mapped)
+			} catch (e) {
+				if (!active) return
+				setServerPage(null)
+				setAllItems([])
+			} finally {
+				if (active) setLoading(false)
+			}
+		}
+		load()
+		return () => { active = false }
+	}, [wikiId, page, pageSize])
+
+	const total = serverPage?.totalElements ?? 0
+	const pageItems = allItems
 
 	const myItem = useMemo(() => {
 		if (!currentUserId) return null
 		return allItems.find((i) => i.userId === currentUserId) ?? null
 	}, [allItems, currentUserId])
 
-	const handleCreate = (rating: number, text: string) => {
-		const id = Math.random().toString(36).slice(2)
-		const me: ReviewItem = {
-			id,
-			userId: currentUserId || "me",
-			userName: userInfo?.nickname || "나",
-			rating,
-			text,
-			createdAt: new Date().toISOString(),
+	const handleCreate = async (rating: number, text: string) => {
+		if (!wikiId) return
+		try {
+			await createWikiReview(wikiId, { starScore: rating, content: text })
+			// 등록 후 첫 페이지부터 재조회
+			setPage(1)
+			const res = await getWikiReviews(wikiId, { page: 0, size: pageSize })
+			setServerPage(res)
+			const mapped: ReviewItem[] = (res.content ?? []).map((it) => ({
+				id: it.reviewId,
+				userId: "unknown",
+				userName: "익명",
+				rating: it.starScore,
+				text: it.content,
+				createdAt: it.createdAt,
+			}))
+			setAllItems(mapped)
+		} catch (e) {
+			// TODO: 토스트 연결
+			console.warn("리뷰 등록 실패", e)
 		}
-		setAllItems((prev) => [me, ...prev])
-		setPage(1)
 	}
 
-	const handleEdit = (target: ReviewItem) => {
+	const handleEdit = async (target: ReviewItem) => {
 		// 간단히 프롬프트로 UI-only 수정 처리
 		const newText = window.prompt("한줄평 수정", target.text) ?? target.text
 		const newRatingStr = window.prompt("별점(1~5) 수정", String(target.rating)) ?? String(target.rating)
 		const newRating = Math.min(5, Math.max(1, Number(newRatingStr)))
-		setAllItems((prev) =>
-			prev.map((i) => (i.id === target.id ? { ...i, text: newText, rating: newRating, updatedAt: new Date().toISOString() } : i)),
-		)
+		try {
+			await updateWikiReview(target.id, { content: newText, starScore: newRating })
+			// 현재 페이지 재조회
+			const res = await getWikiReviews(wikiId, { page: Math.max(0, page - 1), size: pageSize })
+			setServerPage(res)
+			const mapped: ReviewItem[] = (res.content ?? []).map((it) => ({
+				id: it.reviewId,
+				userId: "unknown",
+				userName: "익명",
+				rating: it.starScore,
+				text: it.content,
+				createdAt: it.createdAt,
+			}))
+			setAllItems(mapped)
+		} catch (e) {
+			console.warn("리뷰 수정 실패", e)
+		}
 	}
 
-	const handleDelete = (target: ReviewItem) => {
+	const handleDelete = async (target: ReviewItem) => {
 		if (!window.confirm("이 리뷰를 삭제할까요?")) return
-		setAllItems((prev) => prev.filter((i) => i.id !== target.id))
+		try {
+			await deleteWikiReview(target.id)
+			// 삭제 후 현재 페이지 재조회 (필요 시 이전 페이지로 이동)
+			const nextPage = page
+			const res = await getWikiReviews(wikiId, { page: Math.max(0, nextPage - 1), size: pageSize })
+			setServerPage(res)
+			const mapped: ReviewItem[] = (res.content ?? []).map((it) => ({
+				id: it.reviewId,
+				userId: "unknown",
+				userName: "익명",
+				rating: it.starScore,
+				text: it.content,
+				createdAt: it.createdAt,
+			}))
+			setAllItems(mapped)
+		} catch (e) {
+			console.warn("리뷰 삭제 실패", e)
+		}
 	}
 
 	return (
