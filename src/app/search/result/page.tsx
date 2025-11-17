@@ -64,6 +64,7 @@ function SearchResultContent() {
     isLoading: isImageSearchLoading, 
     isError: isImageSearchError 
   } = useCustomQuery<ImageSearchResult[]>(
+
     ['imageSearch', searchedImageUrl ?? ''],
     () => {
       if (!imageFile) {
