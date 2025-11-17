@@ -40,7 +40,7 @@ const Header = () => {
   const NAV_ITEMS = [
     { href: '/wiki', label: '위키' },
     { href: '/community', label: '커뮤니티' },
-    { href: '/lplayer', label: 'LPlayer' },
+    { href: '/support', label: '고객센터' },
   ];
 
   const pathname = usePathname();
