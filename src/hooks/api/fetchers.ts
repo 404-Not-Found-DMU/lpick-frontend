@@ -24,8 +24,20 @@ export async function fetcher<T>(
         cache: 'no-store',      // 브라우저 캐시 사용 안 함
     });
 
-    // 302 리다이렉트는 바로 인증 실패로 처리 (로그아웃 후 카카오 로그인으로 리다이렉트)
+    // 302 리다이렉트 처리
     if (res.status === 302) {
+        // public API 경로인 경우는 인증 오류로 처리하지 않음
+        if (path.includes('/public/')) {
+            console.warn('Public API에서 302 응답:', path);
+            // 302 응답의 실제 데이터를 반환하거나 빈 응답 처리
+            try {
+                return res.json();
+            } catch {
+                return {} as T;
+            }
+        }
+        
+        // 일반 API의 경우 기존 로직 유지
         if (typeof window !== 'undefined') {
             window.location.href = '/login';
         }

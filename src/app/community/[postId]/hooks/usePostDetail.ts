@@ -2,13 +2,21 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast/ToastProvider';
 import { Post, Comment, convertApiCommentToUiComment } from '../../types/community.types';
+import { ChildComment, CommentListItem } from '../../types/api.types';
 import { useArticle } from '../../hooks/useArticles';
 import { useArticleInteractions, useArticleManager } from '../../hooks/useArticleManager';
 import { useComments, useCommentManager, useCommentInteractions } from '../../hooks';
+import { useUserStore } from '@/store/userStore';
+
+// 안정된 빈 배열 참조
+const EMPTY_COMMENTS: CommentListItem[] = [];
 
 export const usePostDetail = (articleId: string) => {
   const router = useRouter();
   const { push: toast } = useToast();
+  const { userInfo } = useUserStore();
+  const isAuthenticated = !!userInfo;
+  
   const [comments, setComments] = useState<Comment[]>([]);
   const [allComments, setAllComments] = useState<Comment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,6 +24,7 @@ export const usePostDetail = (articleId: string) => {
   const [newComment, setNewComment] = useState('');
   const [isMounted, setIsMounted] = useState(false);
 
+  // 로그인 상태와 관계없이 public API 사용
   // API 훅 사용
   const {
     article,
@@ -24,34 +33,60 @@ export const usePostDetail = (articleId: string) => {
     refresh: refreshArticle
   } = useArticle(articleId);
 
+  // Hook들을 항상 호출 (조건부 호출 금지)
+  const articleInteractions = useArticleInteractions();
+  const articleManager = useArticleManager();
+  const commentsHook = useComments(articleId, { page: 1, size: 50 });
+  const commentManager = useCommentManager();
+  const commentInteractions = useCommentInteractions();
+
+  // 로그인 상태에 따라 기능 제한
   const {
     loading: interactionLoading,
     error: interactionError,
     toggleLike,
     toggleBookmark
-  } = useArticleInteractions();
+  } = isAuthenticated ? articleInteractions : {
+    loading: false,
+    error: null,
+    toggleLike: async () => false,
+    toggleBookmark: async () => false
+  };
 
   const {
     loading: managerLoading,
     error: managerError,
     deleteExistingArticle
-  } = useArticleManager();
+  } = isAuthenticated ? articleManager : {
+    loading: false,
+    error: null,
+    deleteExistingArticle: async () => false
+  };
 
-  // 댓글 관련 훅들
+  // 댓글 관련 기능들
   const {
     comments: apiComments,
     fetchComments,
     refresh: refreshComments
-  } = useComments(articleId, { page: 1, size: 50 }); // 충분한 크기로 설정
+  } = isAuthenticated ? commentsHook : {
+    comments: EMPTY_COMMENTS,
+    fetchComments: async () => {},
+    refresh: async () => {}
+  };
 
   const {
     createNewComment,
     createNewReply
-  } = useCommentManager();
+  } = isAuthenticated ? commentManager : {
+    createNewComment: async () => false,
+    createNewReply: async () => false
+  };
 
   const {
     handleCommentLike: apiHandleCommentLike
-  } = useCommentInteractions();
+  } = isAuthenticated ? commentInteractions : {
+    handleCommentLike: async () => ({ success: false, message: 'Login required' })
+  };
 
   // 게시글 데이터를 Post 형태로 변환
   const post: Post | null = useMemo(() => {
@@ -109,7 +144,7 @@ export const usePostDetail = (articleId: string) => {
 
   // API 댓글을 UI 댓글로 변환
   const convertedComments = useMemo(() => {
-    if (!apiComments || !articleId) return [];
+    if (!apiComments || apiComments.length === 0 || !articleId) return [];
     
     const allComments: Comment[] = [];
     
@@ -123,7 +158,7 @@ export const usePostDetail = (articleId: string) => {
       
       // 자식 댓글들도 변환
       if (apiComment.childsCommentList && apiComment.childsCommentList.length > 0) {
-        apiComment.childsCommentList.forEach(childApiComment => {
+        apiComment.childsCommentList.forEach((childApiComment: ChildComment) => {
           const childComment = convertApiCommentToUiComment(childApiComment, articleId);
           allComments.push(childComment);
         });
@@ -138,21 +173,21 @@ export const usePostDetail = (articleId: string) => {
   }, []);
 
   useEffect(() => {
-    if (!isMounted || !articleId) return;
+    if (!isMounted || !articleId || !isAuthenticated) return;
     
-    // 댓글 데이터 로드
-    fetchComments();
-  }, [articleId, isMounted, fetchComments]);
+    // 댓글 데이터 로드 (로그인한 경우만)
+    if (fetchComments) {
+      fetchComments();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [articleId, isMounted, isAuthenticated]);
 
   // 변환된 댓글을 전체 댓글과 현재 댓글로 설정
   useEffect(() => {
-    console.log('API 댓글 데이터:', apiComments);
-    console.log('변환된 댓글 데이터:', convertedComments);
-    
     setAllComments(convertedComments);
     // 첫 페이지 댓글만 표시
     setComments(convertedComments.slice(0, commentsPerPage));
-  }, [convertedComments, commentsPerPage, apiComments]);
+  }, [convertedComments, commentsPerPage]);
 
   // 페이지 변경시 댓글 업데이트
   useEffect(() => {
@@ -215,7 +250,7 @@ export const usePostDetail = (articleId: string) => {
       }
       
       // 자식 댓글들 확인
-      comment.childsCommentList?.forEach(child => {
+      comment.childsCommentList?.forEach((child: ChildComment) => {
         const childMatch = child.commentId.match(/\d+/g);
         const childUiId = childMatch && childMatch.length > 0 ? parseInt(childMatch[childMatch.length - 1]) : 0;
         
@@ -229,7 +264,7 @@ export const usePostDetail = (articleId: string) => {
       console.error('실제 댓글 ID를 찾을 수 없습니다:', commentId);
       console.log('사용 가능한 댓글들:', apiComments?.map(c => ({
         commentId: c.commentId,
-        children: c.childsCommentList?.map(child => child.commentId)
+        children: c.childsCommentList?.map((child: ChildComment) => child.commentId)
       })));
       toast('댓글을 찾을 수 없습니다.', 'error');
       return false;
