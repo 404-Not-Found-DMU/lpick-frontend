@@ -35,6 +35,7 @@ export interface SupportNoticeDetail {
   author: string
   createdAt: string
   views?: number
+  type?: string
 }
 
 export async function fetchSupportNoticeList(params: SupportNoticeListParams = {}): Promise<SupportNoticeListResponse> {
