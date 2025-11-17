@@ -28,11 +28,8 @@ export function useWikiBookmark(wikiId?: string | null) {
     setPending(true)
     try {
       if (bookmarkId) {
-        // 항상 최신 ID로 삭제 시도 (서버/캐시 불일치 방지)
-        const latestId = await getWikiBookmarkStatus(wikiId)
-        if (latestId) {
-          await removeWikiBookmark(latestId)
-        }
+        // 위키 ID로 북마크 해제
+        await removeWikiBookmark(wikiId)
         // 삭제 후 실제 상태 재확인
         const confirm = await getWikiBookmarkStatus(wikiId)
         setBookmarkId(confirm)

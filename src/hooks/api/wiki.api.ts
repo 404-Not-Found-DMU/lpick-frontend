@@ -173,10 +173,10 @@ export async function addWikiBookmark(wikiId: string): Promise<'SUCCESS' | unkno
 }
 
 // 북마크 해제
-export async function removeWikiBookmark(bookmarkId: string): Promise<'SUCCESS' | unknown> {
-    // 서버 명세상 v1에는 삭제가 없으므로 레거시 엔드포인트를 사용
+export async function removeWikiBookmark(wikiId: string): Promise<'SUCCESS' | unknown> {
+    // 서버 명세상 v1에는 삭제가 없으므로 레거시 엔드포인트(위키ID 기반)를 사용
     try {
-        const legacy = await fetcher<unknown>(`/wiki-bookmark/${encodeURIComponent(bookmarkId)}`, {
+        const legacy = await fetcher<unknown>(`/wiki/${encodeURIComponent(wikiId)}/book-mark`, {
             method: 'DELETE',
         });
         return (legacy as 'SUCCESS') ?? 'SUCCESS';
