@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   FileText,
   Eye,
@@ -11,18 +11,11 @@ import {
   Calendar,
   Filter,
   User,
+  Loader2,
 } from 'lucide-react';
-
-interface Post {
-  id: number;
-  title: string;
-  content: string;
-  category: string;
-  likes: number;
-  comments: number;
-  views: string;
-  date: string;
-}
+import Link from 'next/link';
+import { useMyArticles } from '../../hooks/useMyArticles';
+import { ArticleListItem } from '../../../community/types/api.types';
 
 interface FilterItem {
   name: string;
@@ -31,56 +24,56 @@ interface FilterItem {
 
 const PostsTab = () => {
   const [selectedFilter, setSelectedFilter] = useState('전체');
+  const { articles, loading, error, totalElements } = useMyArticles({ page: 1, size: 20 });
+
+  // 카테고리별 게시글 개수 계산
+  const categoryStats = useMemo(() => {
+    const stats: { [key: string]: number } = {
+      '전체': totalElements,
+      '앨범 리뷰': 0,
+      '장비 리뷰': 0,
+      '기타': 0,
+    };
+
+    articles.forEach(article => {
+      // 여기서는 카테고리 정보가 없으므로 임시로 '기타'로 분류
+      // 실제로는 게시판 타입이나 카테고리 정보가 있어야 함
+      stats['기타']++;
+    });
+
+    return stats;
+  }, [articles, totalElements]);
 
   const filters: FilterItem[] = [
-    { name: '전체', count: 47 },
-    { name: '앨범 리뷰', count: 18 },
-    { name: '장비 리뷰', count: 12 },
-    { name: '기타', count: 9 },
+    { name: '전체', count: categoryStats['전체'] },
+    { name: '앨범 리뷰', count: categoryStats['앨범 리뷰'] },
+    { name: '장비 리뷰', count: categoryStats['장비 리뷰'] },
+    { name: '기타', count: categoryStats['기타'] },
   ];
 
-  const posts: Post[] = [
-    {
-      id: 1,
-      title: 'Pink Floyd - The Wall 완벽 분석',
-      content: '이 앨범의 숨겨진 의미와 음악적 구조를 분석해보겠습니다...',
-      category: '앨범 리뷰',
-      likes: 234,
-      comments: 45,
-      views: '1.2k',
-      date: '2024-01-15',
-    },
-    {
-      id: 2,
-      title: '재즈 입문자를 위한 추천 앨범 50선',
-      content: '재즈를 처음 듣는 분들을 위한 필수 장비들을 소개합니다...',
-      category: '장비 리뷰',
-      likes: 167,
-      comments: 32,
-      views: '2.3k',
-      date: '2024-01-12',
-    },
-    {
-      id: 3,
-      title: '개인적인 음악 취향 정리',
-      content: '최근에 들었던 앨범들 중에서 인상깊었던 것들을 정리해봤습니다...',
-      category: '기타',
-      likes: 45,
-      comments: 12,
-      views: '456',
-      date: '2024-01-10',
-    },
-    {
-      id: 4,
-      title: 'Led Zeppelin IV 리마스터 버전 후기',
-      content: '새로 출시된 리마스터 버전을 들어본 솔직한 후기입니다...',
-      category: '앨범 리뷰',
-      likes: 89,
-      comments: 23,
-      views: '890',
-      date: '2024-01-08',
-    },
-  ];
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toISOString().split('T')[0];
+    } catch {
+      return dateString;
+    }
+  };
+
+  // 게시글을 Post 형태로 변환
+  const convertArticleToPost = (article: ArticleListItem) => ({
+    id: parseInt(article.articleId.replace(/\D/g, '')) || 0,
+    articleId: article.articleId,
+    title: article.title,
+    content: article.content || '',
+    category: '기타', // 실제로는 게시판 정보에서 가져와야 함
+    likes: article.likeCount,
+    comments: article.commentCount,
+    views: article.viewCount?.toString() || '0',
+    date: formatDate(article.createdAt),
+  });
+
+  const displayedArticles = articles.map(convertArticleToPost);
 
   const categoryConfig = {
     '앨범 리뷰': {
@@ -184,82 +177,121 @@ const PostsTab = () => {
         </div>
 
         {/* Posts List */}
-        <div className="space-y-4">
-          {posts.map((post) => (
-            <div
-              key={post.id}
-              className="group rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:border-indigo-200 hover:bg-gradient-to-br hover:from-indigo-50/50 hover:to-violet-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-indigo-700"
-            >
-              <div className="flex justify-between">
-                <div className="flex flex-1 items-start gap-4">
-                  <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-xl ${getCategoryBg(
-                      post.category,
-                    )} shadow-sm`}
-                  >
-                    {getCategoryIcon(post.category)}
-                  </div>
+        {/* 로딩 상태 */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <span className="ml-2 text-gray-600 dark:text-gray-400">게시글을 불러오는 중...</span>
+          </div>
+        )}
 
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="text-xs font-medium uppercase text-indigo-600 dark:text-indigo-400">
-                        {post.category}
-                      </span>
-                      <span className="text-xs text-gray-400">•</span>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <Calendar className="h-3 w-3" />
-                        {post.date}
-                      </div>
-                    </div>
-
-                    <h4 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">
-                      {post.title}
-                    </h4>
-
-                    <p className="mb-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
-                      {post.content}
-                    </p>
-
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1 text-red-500">
-                        <Heart className="h-4 w-4 fill-current" />
-                        <span className="text-sm font-medium">{post.likes}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-blue-500">
-                        <MessageCircle className="h-4 w-4" />
-                        <span className="text-sm font-medium">{post.comments}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <Eye className="h-4 w-4" />
-                        <span className="text-sm font-medium">{post.views}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <button className="rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:from-indigo-600 hover:to-violet-700">
-                      보기
-                    </button>
-                    <button className="flex items-center justify-center rounded-2xl border border-gray-200 px-3 py-2 text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-                      <Edit className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {posts.length === 0 && (
+        {/* 에러 상태 */}
+        {error && !loading && (
           <div className="py-12 text-center">
-            <FileText className="mx-auto mb-4 h-16 w-16 text-gray-400 opacity-50" />
-            <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-              아직 작성한 게시글이 없습니다
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+              <FileText className="h-8 w-8 text-red-600 dark:text-red-400" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              게시글을 불러올 수 없습니다
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">첫 번째 게시글을 작성해보세요</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* 게시글 목록 */}
+        {!loading && !error && (
+          <div className="space-y-4">
+            {displayedArticles.map((post) => (
+              <Link
+                key={post.articleId}
+                href={`/community/${post.articleId}`}
+                className="group block rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:border-indigo-200 hover:bg-gradient-to-br hover:from-indigo-50/50 hover:to-violet-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-indigo-700 cursor-pointer"
+              >
+                <div className="flex justify-between">
+                  <div className="flex flex-1 items-start gap-4">
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-xl ${getCategoryBg(
+                        post.category,
+                      )} shadow-sm`}
+                    >
+                      {getCategoryIcon(post.category)}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className="text-xs font-medium uppercase text-indigo-600 dark:text-indigo-400">
+                          {post.category}
+                        </span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <Calendar className="h-3 w-3" />
+                          {post.date}
+                        </div>
+                      </div>
+
+                      <h4 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">
+                        {post.title}
+                      </h4>
+
+                      <p className="mb-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                        {post.content}
+                      </p>
+
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1 text-red-500">
+                          <Heart className="h-4 w-4 fill-current" />
+                          <span className="text-sm font-medium">{post.likes}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-blue-500">
+                          <MessageCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">{post.comments}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-500">
+                          <Eye className="h-4 w-4" />
+                          <span className="text-sm font-medium">{post.views}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/community/write?edit=${post.articleId}`}
+                        className="flex items-center justify-center rounded-2xl border border-gray-200 px-3 py-2 text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* 빈 상태 */}
+        {!loading && !error && displayedArticles.length === 0 && (
+          <div className="py-12 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+              <FileText className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              작성한 게시글이 없습니다
+            </h3>
+            <p className="mb-4 text-gray-600 dark:text-gray-400">
+              첫 번째 게시글을 작성해보세요!
+            </p>
+            <Link
+              href="/community/write"
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 px-6 py-3 font-semibold text-white transition-all hover:from-indigo-600 hover:to-violet-700"
+            >
+              <Plus className="h-4 w-4" />
+              새 게시글 작성
+            </Link>
           </div>
         )}
       </div>
