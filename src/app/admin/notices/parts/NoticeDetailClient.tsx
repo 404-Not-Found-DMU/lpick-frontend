@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { fetchAdminNoticeDetail, type AdminNoticeRecord } from '../api/notice.api'
 
 export default function NoticeDetailClient({ noticeId }: { noticeId: string }) {
@@ -76,9 +77,11 @@ export default function NoticeDetailClient({ noticeId }: { noticeId: string }) {
                 </div>
               </div>
               {notice.imageUrl ? (
-                <img
+                <Image
                   src={notice.imageUrl}
                   alt="notice"
+                  width={80}
+                  height={80}
                   className="h-20 w-20 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
                 />
               ) : null}

@@ -76,6 +76,8 @@ export async function deleteAdminNotice(noticeId: string | number) {
   })
 }
 
+type LooseRecord = Record<string, unknown>
+
 function normalizeListResponse(payload: unknown, fallback: { page: number; size: number }): AdminNoticeListResult {
   if (!payload) {
     return { items: [], total: 0, page: fallback.page, size: fallback.size }
@@ -90,38 +92,39 @@ function normalizeListResponse(payload: unknown, fallback: { page: number; size:
   }
 
   if (typeof payload === 'object') {
-    const obj = payload as Record<string, any>
+    const obj = payload as LooseRecord
     const collection =
-      obj.content ??
-      obj.items ??
-      obj.data ??
-      obj.results ??
-      obj.list ??
+      obj['content'] ??
+      obj['items'] ??
+      obj['data'] ??
+      obj['results'] ??
+      obj['list'] ??
       []
+    const collectionArray = Array.isArray(collection) ? collection : []
     const total =
-      obj.totalElements ??
-      obj.total ??
-      obj.totalCount ??
-      collection.length ??
+      obj['totalElements'] ??
+      obj['total'] ??
+      obj['totalCount'] ??
+      collectionArray.length ??
       0
     const page =
-      obj.page ??
-      obj.pageNumber ??
-      obj.currentPage ??
-      obj.pageIndex ??
+      obj['page'] ??
+      obj['pageNumber'] ??
+      obj['currentPage'] ??
+      obj['pageIndex'] ??
       fallback.page
     const size =
-      obj.size ??
-      obj.pageSize ??
-      obj.limit ??
-      obj.perPage ??
+      obj['size'] ??
+      obj['pageSize'] ??
+      obj['limit'] ??
+      obj['perPage'] ??
       fallback.size
 
     return {
-      items: Array.isArray(collection) ? collection.map((item) => normalizeNotice(item)) : [],
-      total: Number.isFinite(total) ? total : collection.length ?? 0,
-      page: Number.isFinite(page) ? Number(page) : fallback.page,
-      size: Number.isFinite(size) ? Number(size) : fallback.size,
+      items: collectionArray.map((item) => normalizeNotice(item)),
+      total: isFiniteNumber(total) ? Number(total) : collectionArray.length,
+      page: isFiniteNumber(page) ? Number(page) : fallback.page,
+      size: isFiniteNumber(size) ? Number(size) : fallback.size,
     }
   }
 
@@ -129,41 +132,40 @@ function normalizeListResponse(payload: unknown, fallback: { page: number; size:
 }
 
 function normalizeNotice(payload: unknown): AdminNoticeRecord {
-  const item = (payload ?? {}) as Record<string, any>
+  const item = (payload ?? {}) as LooseRecord
   const rawId =
-    item.id ??
-    item.noticeId ??
-    item.noticeID ??
-    item.notice_id ??
-    item.uuid ??
-    item.uid ??
-    item._id
+    item['id'] ??
+    item['noticeId'] ??
+    item['noticeID'] ??
+    item['notice_id'] ??
+    item['uuid'] ??
+    item['uid'] ??
+    item['_id']
   const id = rawId != null ? String(rawId) : generateFallbackId()
   const created =
-    item.createdAt ??
-    item.created_at ??
-    item.createdDate ??
-    item.created_date ??
-    item.date ??
-    item.registeredAt
+    item['createdAt'] ??
+    item['created_at'] ??
+    item['createdDate'] ??
+    item['created_date'] ??
+    item['date'] ??
+    item['registeredAt']
   const updated =
-    item.updatedAt ??
-    item.updated_at ??
-    item.modifiedAt ??
-    item.modified_at ??
-    item.lastModifiedAt
+    item['updatedAt'] ??
+    item['updated_at'] ??
+    item['modifiedAt'] ??
+    item['modified_at'] ??
+    item['lastModifiedAt']
+  const viewsLike = item['views'] ?? item['viewCount'] ?? item['hit'] ?? item['readCnt']
 
   return {
     id,
-    title: item.title ?? item.subject ?? '',
-    content: item.content ?? item.body ?? item.description ?? '',
-    author: item.author ?? item.writer ?? item.createdBy ?? item.registrant ?? '',
+    title: (item['title'] ?? item['subject'] ?? '') as string,
+    content: (item['content'] ?? item['body'] ?? item['description'] ?? '') as string,
+    author: (item['author'] ?? item['writer'] ?? item['createdBy'] ?? item['registrant'] ?? '') as string,
     createdAt: created ? String(created) : undefined,
     updatedAt: updated ? String(updated) : undefined,
-    views: Number.isFinite(item.views ?? item.viewCount ?? item.hit ?? item.readCnt)
-      ? Number(item.views ?? item.viewCount ?? item.hit ?? item.readCnt)
-      : undefined,
-    imageUrl: item.imageUrl ?? item.thumbnailUrl ?? item.coverImageUrl ?? item.photoUrl,
+    views: isFiniteNumber(viewsLike) ? Number(viewsLike) : undefined,
+    imageUrl: (item['imageUrl'] ?? item['thumbnailUrl'] ?? item['coverImageUrl'] ?? item['photoUrl']) as string | undefined,
   }
 }
 
@@ -172,5 +174,13 @@ function generateFallbackId() {
     return crypto.randomUUID()
   }
   return Math.random().toString(36).slice(2)
+}
+
+function isFiniteNumber(value: unknown): value is number | `${number}` {
+  if (typeof value === 'number') return Number.isFinite(value)
+  if (typeof value === 'string' && value.trim() !== '') {
+    return Number.isFinite(Number(value))
+  }
+  return false
 }
 
