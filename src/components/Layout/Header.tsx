@@ -12,7 +12,7 @@ import { fetcher } from '@/hooks/api/fetchers';
 
 // API 경로
 const API_PREFIX = '/api/v1/public/data';
-
+  
 // 반환 타입
 interface SearchResult {
   id: string;
