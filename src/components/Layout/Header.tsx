@@ -2,7 +2,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, Image as ImageIcon, Music, Disc, Loader2, ExternalLink } from 'lucide-react';
+import { Search, Image as ImageIcon, Music, Disc, Loader2, ExternalLink, ChevronDown, ChevronUp, Maximize2 } from 'lucide-react';
 import { LPickLogo } from '@/assets/images/LPickLogo';
 import { ThemeSelector } from '@/modules';
 import { UserAvatarWithAuth } from '@/components/Layout/UserAvatar';
@@ -54,6 +54,7 @@ const Header = () => {
   const [isImageSearching, setIsImageSearching] = useState(false);
   const [imageSearchError, setImageSearchError] = useState<string | null>(null);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [isImageResultsExpanded, setIsImageResultsExpanded] = useState(false); // 기본값: 리스트 형식(축소된 상태)
   const searchRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -242,11 +243,11 @@ const Header = () => {
 
             {/* 이미지 검색 결과 드롭다운 */}
             {showImageResults && (
-              <div className="absolute top-full left-0 mt-2 w-full rounded-lg bg-white shadow-xl dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-h-[600px] overflow-y-auto z-10">
-                <div className="p-4">
-                  {/* 업로드한 이미지 미리보기 */}
+              <div className="absolute top-full left-0 mt-2 w-full rounded-lg bg-white shadow-xl dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-10" style={{ maxHeight: isImageResultsExpanded ? '80vh' : '600px' }}>
+                <div className={isImageResultsExpanded ? 'p-0' : 'p-4'}>
+                  {/* 헤더 (업로드한 이미지 + 토글 버튼) */}
                   {selectedImageUrl && (
-                    <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <div className={clsx('flex items-center gap-3', isImageResultsExpanded ? 'p-4 border-b border-gray-200 dark:border-gray-700' : 'mb-4 pb-4 border-b border-gray-200 dark:border-gray-700')}>
                       <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
                         <Image
                           src={selectedImageUrl}
@@ -261,19 +262,48 @@ const Header = () => {
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">업로드한 이미지</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">유사한 앨범 검색 결과</p>
                       </div>
-                      <button
-                        onClick={() => {
-                          setSelectedImageUrl(null);
-                          setImageSearchResults([]);
-                          setIsFocused(false);
-                          if (imageInputRef.current) {
-                            imageInputRef.current.value = '';
-                          }
-                        }}
-                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                      >
-                        ✕
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {/* 리스트 상태일 때만 전체 결과 보기 버튼 표시 */}
+                        {!isImageResultsExpanded && (
+                          <Link
+                            href={`/search/result?imageUrl=${encodeURIComponent(selectedImageUrl)}`}
+                            onClick={() => {
+                              setIsFocused(false);
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 rounded-lg transition-colors"
+                          >
+                            <Maximize2 className="w-3.5 h-3.5" />
+                            전체 결과 보기
+                          </Link>
+                        )}
+                        {/* 확장/축소 토글 버튼 */}
+                        <button
+                          onClick={() => setIsImageResultsExpanded(!isImageResultsExpanded)}
+                          className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                          title={isImageResultsExpanded ? '축소' : '펼치기'}
+                        >
+                          {isImageResultsExpanded ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </button>
+                        {/* 닫기 버튼 */}
+                        <button
+                          onClick={() => {
+                            setSelectedImageUrl(null);
+                            setImageSearchResults([]);
+                            setIsImageResultsExpanded(false); // 기본값(리스트 형식)으로 리셋
+                            setIsFocused(false);
+                            if (imageInputRef.current) {
+                              imageInputRef.current.value = '';
+                            }
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -294,71 +324,126 @@ const Header = () => {
 
                   {/* 검색 결과 */}
                   {!isImageSearching && !imageSearchError && imageSearchResults.length > 0 && (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center">
-                          <Music className="w-4 h-4 mr-2 text-violet-500 dark:text-violet-400" />
-                          검색된 앨범
-                        </h3>
-                        <Badge variant="secondary" className="text-xs">
-                          {imageSearchResults.length}개
-                        </Badge>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        {imageSearchResults.map((result, index) => (
-                          <Link
-                            key={`${result.albumId}-${index}`}
-                            href={`/wiki/${result.wikiId}`}
-                            onClick={() => {
-                              setIsFocused(false);
-                              setSelectedImageUrl(null);
-                              setImageSearchResults([]);
-                            }}
-                            className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
-                          >
-                            {/* 앨범 이미지 */}
-                            <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
-                              {result.imageUrl ? (
-                                <Image
-                                  src={result.imageUrl}
-                                  alt={result.name}
-                                  width={64}
-                                  height={64}
-                                  className="w-full h-full object-cover"
-                                  unoptimized
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                                  이미지 없음
+                    <div className={clsx('overflow-y-auto', isImageResultsExpanded ? 'max-h-[calc(80vh-120px)]' : 'max-h-[500px]')}>
+                      <div className={isImageResultsExpanded ? 'p-4' : 'space-y-3'}>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+                            <Music className="w-4 h-4 mr-2 text-violet-500 dark:text-violet-400" />
+                            검색된 앨범
+                          </h3>
+                          <Badge variant="secondary" className="text-xs">
+                            {imageSearchResults.length}개
+                          </Badge>
+                        </div>
+                        
+                        {/* 펼쳐진 상태: 그리드 레이아웃 (전체 페이지 스타일) */}
+                        {isImageResultsExpanded ? (
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {imageSearchResults.map((result, index) => (
+                              <Link
+                                key={`${result.albumId}-${index}`}
+                                href={`/wiki/${result.wikiId}`}
+                                onClick={() => {
+                                  setIsFocused(false);
+                                }}
+                                className="flex flex-col gap-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-md transition-all group"
+                              >
+                                {/* 앨범 이미지 */}
+                                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+                                  {result.imageUrl ? (
+                                    <Image
+                                      src={result.imageUrl}
+                                      alt={result.name}
+                                      fill
+                                      className="object-cover"
+                                      unoptimized
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                                      이미지 없음
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
 
-                            {/* 앨범 정보 */}
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1 group-hover:text-violet-500 dark:group-hover:text-violet-400">
-                                {result.name}
-                              </h4>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge className="bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 text-xs">
-                                  <Disc className="w-3 h-3 mr-1" />
-                                  유사도: {Math.round(result.similarity * 100)}%
-                                </Badge>
-                              </div>
-                            </div>
+                                {/* 앨범 정보 */}
+                                <div className="space-y-1.5">
+                                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-violet-500 dark:group-hover:text-violet-400">
+                                    {result.name}
+                                  </h4>
+                                  <Badge className="bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 text-xs w-fit">
+                                    <Disc className="w-3 h-3 mr-1" />
+                                    유사도: {Math.round(result.similarity * 100)}%
+                                  </Badge>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        ) : (
+                          /* 축소된 상태: 리스트 레이아웃 (드롭다운 스타일) */
+                          <div className="space-y-2">
+                            {imageSearchResults.map((result, index) => (
+                              <Link
+                                key={`${result.albumId}-${index}`}
+                                href={`/wiki/${result.wikiId}`}
+                                onClick={() => {
+                                  setIsFocused(false);
+                                }}
+                                className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
+                              >
+                                {/* 앨범 이미지 */}
+                                <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+                                  {result.imageUrl ? (
+                                    <Image
+                                      src={result.imageUrl}
+                                      alt={result.name}
+                                      width={64}
+                                      height={64}
+                                      className="w-full h-full object-cover"
+                                      unoptimized
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                                      이미지 없음
+                                    </div>
+                                  )}
+                                </div>
 
-                            {/* 외부 링크 아이콘 */}
-                            <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-violet-500 dark:group-hover:text-violet-400 flex-shrink-0" />
-                          </Link>
-                        ))}
+                                {/* 앨범 정보 */}
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1 group-hover:text-violet-500 dark:group-hover:text-violet-400">
+                                    {result.name}
+                                  </h4>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge className="bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 text-xs">
+                                      <Disc className="w-3 h-3 mr-1" />
+                                      유사도: {Math.round(result.similarity * 100)}%
+                                    </Badge>
+                                  </div>
+                                </div>
+
+                                {/* 외부 링크 아이콘 */}
+                                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-violet-500 dark:group-hover:text-violet-400 flex-shrink-0" />
+                              </Link>
+                            ))}
+                            {/* 더 보기 링크 */}
+                            <Link
+                              href={`/search/result?imageUrl=${encodeURIComponent(selectedImageUrl || '')}`}
+                              onClick={() => {
+                                setIsFocused(false);
+                              }}
+                              className="flex items-center justify-center py-2 text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
+                            >
+                              더 보기
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
 
                   {/* 검색 결과 없음 */}
                   {!isImageSearching && !imageSearchError && imageSearchResults.length === 0 && (
-                    <div className="py-8 text-center">
+                    <div className={clsx('text-center', isImageResultsExpanded ? 'py-12' : 'py-8')}>
                       <p className="text-sm text-gray-500 dark:text-gray-400">검색 결과가 없습니다.</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">다른 이미지로 다시 시도해 보세요.</p>
                     </div>
