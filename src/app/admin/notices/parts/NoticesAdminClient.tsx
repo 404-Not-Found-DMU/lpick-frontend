@@ -1,106 +1,190 @@
 "use client"
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import DataTable from '../../components/DataTable'
 import FilterBar from '../../components/FilterBar'
 import Paginator from '../../components/Paginator'
 import ConfirmModal from '../../components/ConfirmModal'
-import type { NoticeItem } from '@/app/support/types'
-import { ChevronDown } from 'lucide-react'
+import { fetchAdminNoticeList, deleteAdminNotice, type AdminNoticeRecord } from '../api/notice.api'
 
-export default function NoticesAdminClient({ items, q: initialQ = '', page: initialPage = 1, total, pageSize, sortBy: initialSortBy = 'date', sortDir: initialSortDir = 'desc' }: { items: NoticeItem[]; q?: string; page?: number; total: number; pageSize: number; sortBy?: 'date' | 'views'; sortDir?: 'asc' | 'desc' }) {
+type NoticeTableRow = {
+  id: string
+  order: number
+  title: string
+  author?: string
+  date?: string
+  summary?: string
+}
+
+export default function NoticesAdminClient({ initialQuery = '', initialPage = 1, initialPageSize = 10 }: { initialQuery?: string; initialPage?: number; initialPageSize?: number }) {
   const router = useRouter()
-  const [q, setQ] = useState(initialQ)
+  const [searchInput, setSearchInput] = useState(initialQuery)
+  const [q, setQ] = useState(initialQuery)
   const [page, setPage] = useState(initialPage)
-  const [sortBy, setSortBy] = useState<'date' | 'views'>(initialSortBy)
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>(initialSortDir)
-  const [confirm, setConfirm] = useState<{ open: boolean; id?: number }>({ open: false })
-  const [_pageSize, _setPageSize] = useState(pageSize)
-
-  const filtered = items // 서버에서 필터/페이지 처리됨
-  const current = filtered
+  const [pageSize, setPageSize] = useState(initialPageSize)
+  const [rows, setRows] = useState<NoticeTableRow[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [confirm, setConfirm] = useState<{ open: boolean; id?: string }>({ open: false })
 
   useEffect(() => {
     const params = new URLSearchParams()
     if (q) params.set('q', q)
     if (page > 1) params.set('page', String(page))
-    if (_pageSize !== 10) params.set('pageSize', String(_pageSize))
-    if (sortBy !== 'date') params.set('sortBy', sortBy)
-    if (sortDir !== 'desc') params.set('sortDir', sortDir)
+    if (pageSize !== 10) params.set('pageSize', String(pageSize))
     const qs = params.toString()
     router.replace(`/admin/notices${qs ? `?${qs}` : ''}`)
-  }, [q, page, _pageSize, sortBy, sortDir, router])
+  }, [q, page, pageSize, router])
+
+  const loadNotices = useCallback(async (override?: { page?: number; size?: number; keyword?: string }) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const nextPage = override?.page ?? page
+      const nextSize = override?.size ?? pageSize
+      const nextKeyword = override?.keyword ?? q
+      const result = await fetchAdminNoticeList({ page: nextPage, size: nextSize, keyword: nextKeyword })
+      setTotal(result.total)
+      setRows(
+        result.items.map((item, idx) => mapToRow(item, {
+          page: result.page ?? nextPage,
+          size: result.size ?? nextSize,
+          index: idx,
+        })),
+      )
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '공지 목록을 불러오지 못했습니다.'
+      setError(message)
+      setRows([])
+    } finally {
+      setLoading(false)
+    }
+  }, [page, pageSize, q])
+
+  useEffect(() => {
+    loadNotices()
+  }, [loadNotices])
+
+  const emptyStateVisible = useMemo(() => !loading && rows.length === 0, [loading, rows.length])
 
   return (
-    <div>
+    <div className="space-y-4">
       <FilterBar
         right={
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <select
-                className="min-w-[180px] appearance-none rounded-full border pl-3 pr-12 py-2 text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-violet-500/20 focus:border-violet-500"
-                value={`${sortBy}:${sortDir}`}
-                onChange={(e) => {
-                  const [sb, sd] = e.target.value.split(':') as ['date' | 'views', 'asc' | 'desc']
-                  setPage(1)
-                  setSortBy(sb)
-                  setSortDir(sd)
-                }}
-              >
-                <option value="date:desc">작성일 최신순</option>
-                <option value="date:asc">작성일 오래된순</option>
-                <option value="views:desc">조회수 많은순</option>
-                <option value="views:asc">조회수 적은순</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-            </div>
-            <input
-              placeholder="검색..."
-              className="w-64 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm placeholder-gray-400 shadow-sm hover:shadow focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-              value={q}
-              onChange={(e) => {
+          <div className="flex flex-wrap items-center gap-2">
+            <form
+              className="flex items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault()
                 setPage(1)
-                setQ(e.target.value)
+                setQ(searchInput.trim())
               }}
-            />
-            <Link href="/admin/notices/new" className="rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white hover:bg-violet-700">새 공지</Link>
+            >
+              <input
+                placeholder="제목/내용 검색"
+                className="w-64 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm placeholder-gray-400 shadow-sm hover:shadow focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+              <button type="submit" className="rounded-full border border-gray-200 px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-700 dark:text-gray-100">
+                검색
+              </button>
+              {q && (
+                <button
+                  type="button"
+                  className="text-xs text-gray-500 underline decoration-dotted"
+                  onClick={() => {
+                    setSearchInput('')
+                    setPage(1)
+                    setQ('')
+                  }}
+                >
+                  초기화
+                </button>
+              )}
+            </form>
+            <Link href="/admin/notices/new" className="rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white hover:bg-violet-700">
+              새 공지
+            </Link>
           </div>
         }
       />
 
-      <DataTable
-        columns={[
-          { key: 'id', header: '번호', className: 'text-center text-gray-500', headerClassName: 'text-center', span: 1 },
-          { key: 'type', header: '구분', className: 'text-center', headerClassName: 'text-center', span: 1, render: (v) => (
-            v ? (
-              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                v === '공지' ? 'bg-violet-100 text-violet-700' : v === '대회' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'
-              }`}>{v}</span>
-            ) : <span className="text-gray-400">-</span>
-          ) },
-          { key: 'title', header: '제목', headerClassName: 'text-center', span: 7, render: (_, r) => (
-            <Link className="text-violet-600 hover:underline block truncate" href={`/admin/notices/${r.id}`}>{r.title}</Link>
-          ) },
-          { key: 'date', header: '작성일', className: 'text-center whitespace-nowrap', headerClassName: 'text-center', span: 1, sortable: true, sortActive: sortBy === 'date', sortDir: sortDir, onSort: () => { setPage(1); setSortBy('date'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc') } },
-          { key: 'views', header: '조회수', className: 'text-right whitespace-nowrap', headerClassName: 'text-right', span: 1, sortable: true, sortActive: sortBy === 'views', sortDir: sortDir, onSort: () => { setPage(1); setSortBy('views'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc') } },
-          { key: 'id', header: '작업', className: 'text-right', headerClassName: 'text-center', span: 1, render: (_, r) => (
-            <div className="flex justify-end gap-1">
-              <Link href={`/admin/notices/${r.id}/edit`} className="rounded-md border px-2 py-1 text-xs">수정</Link>
-              <button onClick={() => setConfirm({ open: true, id: r.id as number })} className="rounded-md border px-2 py-1 text-xs text-red-600">삭제</button>
-            </div>
-          ) },
-        ]}
-        rows={current}
-      />
+      {error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/60 dark:bg-red-900/20 dark:text-red-200">
+          {error}
+        </div>
+      ) : null}
 
-      {current.length === 0 && (
-        <div className="mt-6 rounded-md border border-gray-200 bg-white p-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+      <div className="relative">
+        {loading ? (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 dark:bg-gray-900/70">
+            <div className="rounded-full border-4 border-violet-200 border-t-violet-600 h-10 w-10 animate-spin" />
+          </div>
+        ) : null}
+        <DataTable
+          columns={[
+            { key: 'order', header: '번호', className: 'text-center text-gray-500', headerClassName: 'text-center', span: 1 },
+            {
+              key: 'title',
+              header: '제목',
+              headerClassName: 'text-left',
+              span: 5,
+              render: (_, row) => (
+                <Link className="text-violet-600 hover:underline block truncate font-medium" href={`/admin/notices/${row.id}`}>
+                    {row.title || '(제목 없음)'}
+                  </Link>
+              ),
+            },
+            { key: 'author', header: '작성자', className: 'text-center text-gray-700 dark:text-gray-300', headerClassName: 'text-center', span: 2, render: (value) => value || '-' },
+            { key: 'date', header: '작성일', className: 'text-center text-gray-700 dark:text-gray-300 whitespace-nowrap', headerClassName: 'text-center', span: 2, render: (value) => value || '-' },
+            {
+              key: 'id',
+              header: '작업',
+              className: 'text-right whitespace-nowrap overflow-visible',
+              headerClassName: 'text-right',
+              span: 2,
+              truncate: false,
+              render: (_, r) => (
+                <div className="inline-flex justify-end gap-2">
+                  <Link
+                    href={`/admin/notices/${r.id}/edit`}
+                    className="inline-flex items-center rounded-md border px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200"
+                  >
+                    수정
+                  </Link>
+                  <button
+                    onClick={() => setConfirm({ open: true, id: r.id })}
+                    className="inline-flex items-center rounded-md border px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+                  >
+                    삭제
+                  </button>
+                </div>
+              ),
+            },
+          ]}
+          rows={rows}
+        />
+      </div>
+
+      {emptyStateVisible ? (
+        <div className="rounded-md border border-gray-200 bg-white p-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
           일치하는 항목이 없습니다.
         </div>
-      )}
+      ) : null}
 
-      <Paginator page={page} total={total} pageSize={_pageSize} onChange={setPage} onChangePageSize={(s) => { setPage(1); _setPageSize(s) }} />
+      <Paginator
+        page={page}
+        total={total}
+        pageSize={pageSize}
+        onChange={setPage}
+        onChangePageSize={(size) => {
+          setPage(1)
+          setPageSize(size)
+        }}
+      />
 
       <ConfirmModal
         open={confirm.open}
@@ -109,14 +193,47 @@ export default function NoticesAdminClient({ items, q: initialQ = '', page: init
         onClose={() => setConfirm({ open: false })}
         onConfirm={async () => {
           if (!confirm.id) return
-          await fetch(`/api/admin/notices/${confirm.id}`, { method: 'DELETE' })
-          setConfirm({ open: false })
-          router.refresh()
-          setPage(1)
+          try {
+            await deleteAdminNotice(confirm.id)
+            setConfirm({ open: false })
+            setPage(1)
+            await loadNotices({ page: 1 })
+          } catch (err) {
+            setError(err instanceof Error ? err.message : '삭제에 실패했습니다.')
+          }
         }}
       />
     </div>
   )
+}
+
+function mapToRow(item: AdminNoticeRecord, meta: { page: number; size: number; index: number }): NoticeTableRow {
+  return {
+    id: item.id,
+    order: (meta.page - 1) * meta.size + meta.index + 1,
+    title: item.title ?? '',
+    author: item.author ?? '',
+    date: formatDate(item.createdAt ?? item.updatedAt ?? ''),
+    summary: item.content ? truncate(stripHtml(item.content), 120) : undefined,
+  }
+}
+
+function formatDate(value?: string) {
+  if (!value) return undefined
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return value.slice(0, 10)
+  }
+  return date.toISOString().slice(0, 10)
+}
+
+function stripHtml(value: string) {
+  return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+function truncate(value: string, len: number) {
+  if (value.length <= len) return value
+  return `${value.slice(0, len)}…`
 }
 
 

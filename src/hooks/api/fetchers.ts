@@ -3,14 +3,13 @@ export async function fetcher<T>(
     path: string,
     options: RequestInit = {}
 ): Promise<T> {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    
-    if (!baseUrl) {
-        throw new Error('API Base URL이 설정되지 않았습니다.');
+    const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!base) {
+        throw new Error('NEXT_PUBLIC_API_BASE_URL이 설정되어 있지 않습니다.');
     }
-    
-    // 단순하게 baseUrl + path 조합 (baseUrl에는 슬래시 없음, path에는 슬래시 있음)
-    const fullUrl = `${baseUrl}${path}`;
+    const baseUrl = base.replace(/\/$/, '');
+    const normalizedPath = path.startsWith('http') ? path : `${path.startsWith('/') ? path : `/${path}`}`;
+    const fullUrl = normalizedPath.startsWith('http') ? normalizedPath : `${baseUrl}${normalizedPath}`;
 
     // 헤더 구성: 기본 캐시 무효화, Content-Type은 body 있을 때만 설정
     const baseHeaders: Record<string, string> = {
@@ -34,8 +33,20 @@ export async function fetcher<T>(
         cache: 'no-store',      // 브라우저 캐시 사용 안 함
     });
 
-    // 302 리다이렉트는 바로 인증 실패로 처리 (로그아웃 후 카카오 로그인으로 리다이렉트)
+    // 302 리다이렉트 처리
     if (res.status === 302) {
+        // public API 경로인 경우는 인증 오류로 처리하지 않음
+        if (path.includes('/public/')) {
+            console.warn('Public API에서 302 응답:', path);
+            // 302 응답의 실제 데이터를 반환하거나 빈 응답 처리
+            try {
+                return res.json();
+            } catch {
+                return {} as T;
+            }
+        }
+        
+        // 일반 API의 경우 기존 로직 유지
         if (typeof window !== 'undefined') {
             window.location.href = '/login';
         }
@@ -102,7 +113,23 @@ export async function fetcher<T>(
     }
 
     if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status} - ${res.statusText}`);
+        // 서버 응답 본문을 확인하여 더 자세한 에러 메시지 추출
+        let errorMessage = `HTTP error! status: ${res.status} - ${res.statusText}`;
+        try {
+            const errorData = await res.clone().json();
+            if (errorData && typeof errorData === 'object') {
+                if (errorData.message) {
+                    errorMessage = errorData.message;
+                } else if (errorData.error) {
+                    errorMessage = errorData.error;
+                } else if (typeof errorData === 'string') {
+                    errorMessage = errorData;
+                }
+            }
+        } catch {
+            // JSON 파싱 실패 시 원본 에러 메시지 사용
+        }
+        throw new Error(errorMessage);
     }
 
     const ct = res.headers.get('content-type')?.toLowerCase() ?? '';

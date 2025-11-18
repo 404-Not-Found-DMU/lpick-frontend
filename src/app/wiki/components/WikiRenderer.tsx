@@ -1,4 +1,5 @@
 "use client"
+import Image from "next/image"
 import Link from "next/link"
 import Image from "next/image"
 import ReactMarkdown from "react-markdown"
@@ -30,16 +31,31 @@ export default function WikiRenderer({ content, components }: { content: string;
         </a>
       )
     },
-    img: ({ src, alt }) => (
-      <Image
-        src={String(src)}
-        alt={String(alt ?? '')}
-        width={1200}
-        height={800}
-        sizes="(min-width: 768px) 720px, 100vw"
-        className="mx-auto my-4 max-w-full h-auto rounded object-contain"
-      />
-    ),
+
+
+    img: ({ src, alt, ...props }) => {
+      const url = typeof src === "string" ? src : ""
+      if (!url) return null
+
+      // props에서 width와 height 제거 (Next.js Image 타입 충돌 방지)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { width: _w, height: _h, ...restProps } = props as { width?: unknown; height?: unknown; [key: string]: unknown }
+
+      return (
+        <span className="mx-auto my-4 flex max-w-full justify-center">
+          <Image
+            src={url}
+            alt={String(alt ?? "")}
+            width={800}
+            height={600}
+            sizes="100vw"
+            className="h-auto w-full max-w-3xl rounded object-contain"
+            style={{ height: "auto", width: "100%" }}
+            {...restProps}
+          />
+        </span>
+      )
+    },
     pre: ({ children }) => (
       <pre className="overflow-x-auto rounded bg-gray-900 p-4 text-gray-100">
         {children}

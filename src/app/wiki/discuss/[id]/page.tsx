@@ -5,13 +5,26 @@ import { useEffect, useMemo, useState } from "react";
 import { Button, Badge, Card, CardHeader, CardTitle, CardContent } from "@/components";
 import { Textarea } from "@/components/textarea";
 import { useDiscussions } from "../hooks/useDiscussions";
-// import type { DiscussionStance } from "../types";
+import { useDebateSocket } from "@/hooks/useDebateSocket";
+import { useUserStore } from "@/store/userStore";
+import type { DiscussionOpinion } from "../types";
 
 export default function DiscussionDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const { id } = params;
-  const { isReady, getThread, listOpinions, addOpinion, likeOpinion, closeThread, getVote, openVote, castVote, closeVote, cancelVoteStart } = useDiscussions();
+  const {
+    isReady,
+    getThread,
+    listOpinions,
+    likeOpinion,
+    closeThread,
+    getVote,
+    openVote,
+    castVote,
+    closeVote,
+    cancelVoteStart,
+  } = useDiscussions();
 
   const thread = useMemo(() => (isReady ? getThread(id) : undefined), [isReady, getThread, id]);
   const opinions = useMemo(() => (isReady ? listOpinions(id) : []), [isReady, listOpinions, id]);
@@ -21,6 +34,14 @@ export default function DiscussionDetailPage() {
   const [closing, setClosing] = useState(false);
   const [closeSummary, setCloseSummary] = useState("");
   const [selectedOption, setSelectedOption] = useState<string>("");
+
+  // 현재 사용자 정보 (oauthId 비교용)
+  const { userInfo } = useUserStore();
+
+  // 웹소켓 연결: 토론이 OPEN일 때만 활성화
+  const { isConnected, messages: liveMessages, latestError, sendMessage } = useDebateSocket(id, {
+    enabled: !!(isReady && getThread(id)?.status === "open"),
+  });
 
   const totalVotes = vote ? vote.options.reduce((sum, o) => sum + o.count, 0) : 0;
   const hasVoted = (() => {
@@ -55,7 +76,8 @@ export default function DiscussionDetailPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canAdd) return;
-    addOpinion({ threadId: id, author: "현재사용자", stance: "neutral", content });
+    // STOMP로 서버 전송 (토론 채팅)
+    sendMessage({ content, parentDebateChatId: null });
     setContent("");
   };
 
@@ -225,41 +247,73 @@ export default function DiscussionDetailPage() {
         </Card>
       )}
 
+      {latestError && (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          웹소켓 오류: {latestError}
+        </div>
+      )}
+
       <Card>
         <CardHeader>
-          <CardTitle>의견 {opinions.length}</CardTitle>
+          <CardTitle>
+            의견 {opinions.length}
+            <span className="ml-2 text-xs text-gray-500">{isConnected ? "실시간 연결됨" : "실시간 연결 안 됨"}</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {opinions.map((op) => {
-              const isMine = op.author === "현재사용자"; // TODO: 실제 로그인 사용자 닉네임/PK로 비교
-              return (
-                <div key={op.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                  <div className="max-w-[80%]">
-                    <div
-                      className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
-                        isMine
-                          ? "bg-violet-500 text-white rounded-br-md"
-                          : "bg-gray-100 text-gray-900 rounded-bl-md dark:bg-gray-800 dark:text-gray-100"
-                      }`}
-                    >
-                      {op.content}
-                    </div>
-                    <div className={`mt-1 flex items-center gap-2 text-xs ${isMine ? "justify-end text-violet-600/80" : "justify-start text-gray-500"}`}>
-                      <span>{op.author}</span>
-                      <span>{new Date(op.createdAt).toLocaleTimeString()}</span>
-                      <button
-                        className="hover:opacity-80"
-                        onClick={() => likeOpinion(op.id)}
-                        aria-label="like opinion"
+            {(() => {
+              type LiveOpinion = DiscussionOpinion & { __liveUserId?: string };
+
+              const liveAsOpinions: LiveOpinion[] = liveMessages.map((m) => ({
+                id: m.chatId,
+                threadId: id,
+                author: m.userNickname,
+                content: m.content,
+                createdAt: m.createdAt,
+                likes: 0,
+                stance: "neutral",
+                __liveUserId: m.userId,
+              }));
+
+              const combined: LiveOpinion[] = [...opinions, ...liveAsOpinions].sort(
+                (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+              );
+
+              return combined.map((op) => {
+                const isMine = op.__liveUserId
+                  ? (userInfo?.oauthId && op.__liveUserId === userInfo.oauthId)
+                  : op.author === "현재사용자";
+                return (
+                  <div key={op.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                    <div className="max-w-[80%]">
+                      <div
+                        className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
+                          isMine
+                            ? "bg-violet-500 text-white rounded-br-md"
+                            : "bg-gray-100 text-gray-900 rounded-bl-md dark:bg-gray-800 dark:text-gray-100"
+                        }`}
                       >
-                        👍 {op.likes}
-                      </button>
+                        {op.content}
+                      </div>
+                      <div className={`mt-1 flex items-center gap-2 text-xs ${isMine ? "justify-end text-violet-600/80" : "justify-start text-gray-500"}`}>
+                        <span>{op.author}</span>
+                        <span>{new Date(op.createdAt).toLocaleTimeString()}</span>
+                        {op.likes !== undefined && (
+                          <button
+                            className="hover:opacity-80"
+                            onClick={() => likeOpinion(op.id)}
+                            aria-label="like opinion"
+                          >
+                            👍 {op.likes}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              });
+            })()}
 
             {thread.status === "open" ? (
               <form onSubmit={handleSubmit} className="rounded-lg border p-4">

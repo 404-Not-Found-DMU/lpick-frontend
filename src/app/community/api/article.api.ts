@@ -13,7 +13,18 @@ import {
  * 커뮤니티 게시글 API
  */
 
-// 게시글 목록 조회
+// Public API - 인기 게시글 조회 (비로그인 가능)
+export const getPopularArticles = async (): Promise<ArticleListResponse> => {
+  try {
+    return await fetcher<ArticleListResponse>('/api/v1/public/community/popular/article');
+  } catch (error) {
+    console.error('Failed to fetch popular articles:', error);
+    throw error;
+  }
+};
+
+// Public API - 게시글 목록 조회 (비로그인 가능)
+// 게시글 목록 조회 (public API 사용)
 export const getArticles = async (params?: PaginationParams): Promise<ArticleListResponse> => {
   try {
     const searchParams = new URLSearchParams();
@@ -26,7 +37,7 @@ export const getArticles = async (params?: PaginationParams): Promise<ArticleLis
     searchParams.append('size', size.toString());
 
     const queryString = searchParams.toString();
-    const url = `/api/v1/community/article?${queryString}`;
+    const url = `/api/v1/public/community/article?${queryString}`;
     
     return await fetcher<ArticleListResponse>(url);
   } catch (error) {
@@ -35,10 +46,11 @@ export const getArticles = async (params?: PaginationParams): Promise<ArticleLis
   }
 };
 
-// 게시글 상세 조회
+// 게시글 상세 조회 (로그인 필요)
+// 게시글 상세 조회 (public API 사용)
 export const getArticle = async (articleId: string): Promise<ArticleDetail> => {
   try {
-    return await fetcher<ArticleDetail>(`/api/v1/community/article/${articleId}`);
+    return await fetcher<ArticleDetail>(`/api/v1/public/community/article/${articleId}`);
   } catch (error) {
     console.error(`Failed to fetch article ${articleId}:`, error);
     throw error;

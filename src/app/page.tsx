@@ -39,6 +39,68 @@ const GRADIENTS = [
   "from-purple-300 via-purple-200 to-indigo-200 dark:from-purple-900 dark:via-purple-800 dark:to-indigo-900",
 ]
 
+const SpinningRecord = ({ size = 220, coverImage, rotation = 0 }: { size?: number; coverImage?: string; rotation?: number }) => {
+  const centerSize = size * 0.45
+  const spindleSize = size * 0.08
+
+  return (
+    <div
+      className="relative flex items-center justify-center pointer-events-none select-none"
+      style={{ width: size, height: size }}
+    >
+      <div
+        className="relative w-full h-full animate-[spin_10s_linear_infinite] rounded-full shadow-[0_20px_45px_rgba(0,0,0,0.25)]"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at center, rgba(15,15,15,0.9) 0%, rgba(6,6,6,1) 55%, rgba(0,0,0,1) 70%),
+            repeating-radial-gradient(circle, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 3px)
+          `,
+          transform: `rotate(${rotation}deg)`,
+        }}
+      >
+        {/* 하이라이트 */}
+        <div className="absolute top-6 left-8 right-12 h-10 rounded-full bg-white/10 blur-3xl" />
+
+        {/* 라벨/커버 */}
+        <div
+          className="absolute overflow-hidden rounded-full border border-white/30 shadow-inner"
+          style={{
+            width: centerSize,
+            height: centerSize,
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          {coverImage ? (
+            <Image
+              src={coverImage}
+              alt="앨범 커버"
+              fill
+              sizes={`${centerSize}px`}
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-pink-200 via-rose-200 to-emerald-200" />
+          )}
+        </div>
+
+        {/* 스핀들 */}
+        <div
+          className="absolute rounded-full bg-gradient-to-b from-gray-200 to-gray-500 shadow-lg"
+          style={{
+            width: spindleSize,
+            height: spindleSize,
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
@@ -221,37 +283,40 @@ export default function HomePage() {
 
           {/* 앨범 캐러셀 */}
           <div className="relative">
-            <div className="flex items-center justify-center overflow-hidden h-[320px]">
+            <div className="flex items-center justify-center overflow-hidden h-[340px] relative">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={prevSlide}
                 className="absolute left-4 z-30 bg-white/80 dark:bg-gray-700/80 hover:bg-white dark:hover:bg-gray-700 shadow-md"
-                disabled={isAnimating}
+                disabled={isAnimating || featuredAlbums.length === 0}
               >
                 <ChevronLeft className="h-4 w-4 text-gray-700 dark:text-gray-300" />
               </Button>
 
-              {/* LP 레코드 배경 - 고정 위치 */}
-              <div className="absolute left-1/2 transform translate-x-2 z-0">
-                <div className="relative">
-                  <div className="w-[180px] h-[180px] rounded-full bg-gray-900 dark:bg-black shadow-xl"></div>
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[65px] h-[65px] rounded-full bg-violet-400 dark:bg-violet-500"></div>
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[20px] h-[20px] rounded-full bg-gray-200 dark:bg-gray-700"></div>
+              {/* 로딩 / 데이터 없음 상태 */}
+              {(loadingAlbums || (!loadingAlbums && featuredAlbums.length === 0)) && (
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                  <SpinningRecord size={260} />
+                  <p className="mt-4 text-sm">
+                    {loadingAlbums ? '추천 앨범을 불러오는 중입니다.' : '추천 앨범을 준비 중입니다.'}
+                  </p>
                 </div>
-              </div>
+              )}
 
               {/* 앨범 커버 캐러셀 */}
-              <div className="relative z-10 flex items-center justify-center">
-                {featuredAlbums.map((album, index) => {
+              {!loadingAlbums && featuredAlbums.length > 0 && (
+                <div className="relative z-10 flex items-center justify-center gap-16">
+                  {featuredAlbums.map((album, index) => {
                   const position = (index - currentSlide + featuredAlbums.length) % featuredAlbums.length
                   let translateX = 0
                   let scale = 0
                   let zIndex = 0
                   let opacity = 0
+                  const isCenter = position === 0
 
                   // 위치에 따른 스타일 조정
-                  if (position === 0) {
+                  if (isCenter) {
                     // 중앙 (3번)
                     translateX = 0
                     scale = 1
@@ -285,55 +350,67 @@ export default function HomePage() {
                     return null // 너무 멀리 있는 앨범은 렌더링하지 않음
                   }
 
-                  return (
-                    <div
-                      key={album.id}
-                      className="absolute transition-all duration-500 ease-in-out cursor-pointer"
-                      style={{
-                        transform: `translateX(${translateX}px) scale(${scale})`,
-                        zIndex,
-                        opacity,
-                      }}
-                      onClick={() => {
-                        if (position !== 0 && !isAnimating) {
-                          setIsAnimating(true)
-                          setCurrentSlide(index)
-                        }
-                      }}
-                    >
+                    return (
                       <div
-                        className={`w-[220px] h-[220px] bg-gradient-to-br ${album.gradient} shadow-lg dark:shadow-xl rounded-lg overflow-hidden border border-gray-100 dark:border-gray-700 relative`}
+                        key={album.id}
+                        className="absolute transition-all duration-500 ease-in-out cursor-pointer"
+                        style={{
+                          transform: `translateX(${translateX}px) scale(${scale})`,
+                          zIndex,
+                          opacity,
+                        }}
+                        onClick={() => {
+                          if (!isCenter && !isAnimating) {
+                            setIsAnimating(true)
+                            setCurrentSlide(index)
+                          }
+                        }}
                       >
-                        <Image
-                          src={album.imageUrl}
-                          alt={`${album.title} 앨범 커버`}
-                          fill
-                          sizes="220px"
-                          className="object-cover"
-                          onError={(e) => {
-                            const target = e.currentTarget as HTMLImageElement
-                            target.style.display = 'none'
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-300 flex flex-col items-center justify-center text-white opacity-0 hover:opacity-100">
-                          <div className="text-center">
-                            <p className="text-sm font-medium">{album.artist}</p>
-                            <h4 className="text-lg font-bold mt-2">{album.title}</h4>
-                            <p className="text-xs mt-1">{album.year}</p>
+                        <div className="relative flex items-center justify-center">
+                          {isCenter && (
+                            <div className="pointer-events-none absolute right-[-70px] top-1/2 -translate-y-1/2 -z-10 hidden sm:block">
+                              <SpinningRecord size={150} coverImage={album.imageUrl} rotation={-8} />
+                            </div>
+                          )}
+                          <div
+                            className={`w-[220px] h-[220px] bg-gradient-to-br ${album.gradient} shadow-xl rounded-[26px] overflow-hidden border border-white/40 dark:border-gray-700 relative backdrop-blur`}
+                          >
+                            <Image
+                              src={album.imageUrl}
+                              alt={`${album.title} 앨범 커버`}
+                              fill
+                              sizes="220px"
+                              className="object-cover"
+                              onError={(e) => {
+                                const target = e.currentTarget as HTMLImageElement
+                                target.style.display = 'none'
+                              }}
+                            />
+
+                            {!isCenter && (
+                              <div
+                                className="absolute inset-0 flex flex-col items-center justify-center text-center px-3 text-white opacity-0 transition-opacity duration-300 hover:opacity-100"
+                                style={{ textShadow: "0 6px 18px rgba(0,0,0,0.4)" }}
+                              >
+                                <p className="text-sm font-medium">{album.artist}</p>
+                                <h4 className="text-lg font-semibold mt-1">{album.title}</h4>
+                                <p className="text-xs mt-2 opacity-90">{album.year}</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              )}
 
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={nextSlide}
                 className="absolute right-4 z-30 bg-white/80 dark:bg-gray-700/80 hover:bg-white dark:hover:bg-gray-700 shadow-md"
-                disabled={isAnimating}
+                disabled={isAnimating || featuredAlbums.length === 0}
               >
                 <ChevronRight className="h-4 w-4 text-gray-700 dark:text-gray-300" />
               </Button>
