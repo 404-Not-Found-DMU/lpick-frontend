@@ -105,24 +105,24 @@ export default function NoticesClient() {
           const displayNumber = n.no ?? total - ((page - 1) * pageSize + idx)
           return (
             <Link key={noticeKey} href={`/support/notices/${noticeKey}`} className="block">
-              <div className={`grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/60 ${idx % 2 === 1 ? 'bg-gray-50/40 dark:bg-gray-800/30' : ''} border-b last:border-0 border-gray-100 dark:border-gray-700`}>
-                <div className="col-span-1 flex items-center justify-center gap-2">
-                  {n.type ? (
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white ${
-                      n.type === '공지' ? 'bg-gray-900' : n.type === '대회' ? 'bg-red-500' : 'bg-blue-500'
-                    }`}>{n.type}</span>
-                  ) : (
+            <div className={`grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/60 ${idx % 2 === 1 ? 'bg-gray-50/40 dark:bg-gray-800/30' : ''} border-b last:border-0 border-gray-100 dark:border-gray-700`}>
+              <div className="col-span-1 flex items-center justify-center gap-2">
+                {n.type ? (
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white ${
+                    n.type === '공지' ? 'bg-gray-900' : n.type === '대회' ? 'bg-red-500' : 'bg-blue-500'
+                  }`}>{n.type}</span>
+                ) : (
                     <span className="text-sm text-gray-500">{displayNumber}</span>
-                  )}
-                </div>
-                <div className="col-span-8">
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100 leading-tight">{n.title}</h3>
+                )}
+              </div>
+              <div className="col-span-8">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 leading-tight">{n.title}</h3>
                   {n.summary ? <p className="mt-1 text-[13px] text-gray-600 dark:text-gray-300 line-clamp-1">{n.summary}</p> : null}
-                </div>
+              </div>
                 <div className="col-span-2 text-center text-sm text-gray-500 tabular-nums">{formatDate(n.createdAt)}</div>
                 <div className="col-span-1 text-right text-sm text-gray-500 tabular-nums pr-1">{n.views != null ? n.views.toLocaleString() : '-'}</div>
-              </div>
-            </Link>
+            </div>
+          </Link>
           )
         })
         )}

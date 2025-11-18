@@ -68,11 +68,11 @@ export default function DataTable<T extends Record<string, unknown>>({
             const value = row[c.key]
             const span = c.span ?? 12 / columns.length
             return (
-            <div
-              key={`${String(c.key)}-${colIdx}`}
-              style={{ gridColumn: `span ${span} / span ${span}` }}
+              <div
+                key={`${String(c.key)}-${colIdx}`}
+                style={{ gridColumn: `span ${span} / span ${span}` }}
               className={`min-w-0 ${c.truncate === false ? '' : 'truncate'} ${c.className ?? ''}`.trim()}
-            >
+              >
                 {c.render ? c.render(value, row) : (value as React.ReactNode)}
               </div>
             )

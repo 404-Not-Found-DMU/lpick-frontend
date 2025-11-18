@@ -134,8 +134,8 @@ export default function NoticesAdminClient({ initialQuery = '', initialPage = 1,
               span: 5,
               render: (_, row) => (
                 <Link className="text-violet-600 hover:underline block truncate font-medium" href={`/admin/notices/${row.id}`}>
-                  {row.title || '(제목 없음)'}
-                </Link>
+                    {row.title || '(제목 없음)'}
+                  </Link>
               ),
             },
             { key: 'author', header: '작성자', className: 'text-center text-gray-700 dark:text-gray-300', headerClassName: 'text-center', span: 2, render: (value) => value || '-' },

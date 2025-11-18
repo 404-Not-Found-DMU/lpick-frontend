@@ -43,10 +43,10 @@ export default function InquiryListClient() {
   }, [keyword, page, pageSize])
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+      e.preventDefault()
     setPage(1)
     setKeyword(keywordInput.trim())
-  }
+    }
 
   const list = useMemo(() => items ?? [], [items])
 
@@ -99,39 +99,39 @@ export default function InquiryListClient() {
             return (
               <div key={item.questionId}>
                 <Link href={`/support/inquiry/${item.questionId}?type=question`} className="block">
-                  <div className={`grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/60 ${idx % 2 === 1 ? 'bg-gray-50/40 dark:bg-gray-800/30' : ''} border-b border-gray-100 dark:border-gray-700`}>
+              <div className={`grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/60 ${idx % 2 === 1 ? 'bg-gray-50/40 dark:bg-gray-800/30' : ''} border-b border-gray-100 dark:border-gray-700`}>
                     <div className="col-span-1 flex items-center justify-center text-sm text-gray-500">{displayNumber}</div>
-                    <div className="col-span-7">
-                      <div className="flex items-center gap-2">
-                        <span className="w-12 flex justify-start">
-                          <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white bg-blue-500">문의</span>
-                        </span>
+                <div className="col-span-7">
+                  <div className="flex items-center gap-2">
+                    <span className="w-12 flex justify-start">
+                      <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white bg-blue-500">문의</span>
+                    </span>
                         <h3 className="font-medium text-gray-900 dark:text-gray-100 leading-tight">{item.title}</h3>
-                      </div>
-                    </div>
+                  </div>
+                </div>
                     <div className="col-span-2 text-center text-sm text-gray-500 tabular-nums">{item.author}</div>
                     <div className="col-span-2 text-center text-sm text-gray-500 tabular-nums">{new Date(item.createdAt).toISOString().slice(0, 10)}</div>
-                  </div>
-                </Link>
+              </div>
+            </Link>
                 {answer && (
                   <Link href={`/support/inquiry/${item.questionId}?type=answer`} className="block">
                     <div className={`grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/60 border-b last:border-0 border-gray-100 dark:border-gray-700 ${idx % 2 === 1 ? 'bg-gray-50/40 dark:bg-gray-800/30' : ''}`}>
-                      <div className="col-span-1" />
-                      <div className="col-span-7">
-                        <div className="flex items-center gap-2">
-                          <span className="w-12 flex justify-start">
-                            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white bg-green-500">답변</span>
-                          </span>
-                          <span className="w-4 text-gray-400 select-none">↳</span>
+                  <div className="col-span-1" />
+                  <div className="col-span-7">
+                    <div className="flex items-center gap-2">
+                      <span className="w-12 flex justify-start">
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white bg-green-500">답변</span>
+                      </span>
+                      <span className="w-4 text-gray-400 select-none">↳</span>
                           <h4 className="font-medium text-gray-900 dark:text-gray-100 leading-tight">{answer.title}</h4>
-                        </div>
-                      </div>
+                    </div>
+                  </div>
                       <div className="col-span-2 text-center text-sm text-gray-500 tabular-nums">{answer.author}</div>
                       <div className="col-span-2 text-center text-sm text-gray-500 tabular-nums">{answer.createdAt ? new Date(answer.createdAt).toISOString().slice(0, 10) : '-'}</div>
-                    </div>
-                  </Link>
-                )}
-              </div>
+                </div>
+              </Link>
+            )}
+          </div>
             )
           })
         )}

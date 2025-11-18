@@ -26,7 +26,7 @@ export default function InquiryNewClient() {
       setSubmitting(true)
       await createInquiryQuestion({ title: title.trim(), content, secret: isSecret })
       alert('문의가 등록되었습니다.')
-      window.location.href = '/support/inquiry'
+    window.location.href = '/support/inquiry'
     } catch (error) {
       console.error('문의 등록 실패:', error)
       alert(error instanceof Error ? error.message : '문의 등록 중 오류가 발생했습니다.')
