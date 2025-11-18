@@ -122,6 +122,11 @@ const PostsTab = () => {
     router.push(`/community/write?edit=${articleId}`);
   };
 
+  // 게시글 클릭 처리 (상세 페이지로 이동)
+  const handlePostClick = (articleId: string) => {
+    router.push(`/community/${articleId}`);
+  };
+
   const categoryConfig = {
     '자유게시판': {
       icon: MessageCircle,
@@ -137,7 +142,7 @@ const PostsTab = () => {
       icon: FileText,
       color: 'text-purple-600 dark:text-purple-400',
       bg: 'bg-purple-100 dark:bg-purple-900/20',
-    },
+    },  
     '아티스트': {
       icon: User,
       color: 'text-blue-600 dark:text-blue-400',
@@ -240,7 +245,7 @@ const PostsTab = () => {
             {filteredArticles.map((post) => (
               <div
                 key={post.articleId}
-                onClick={() => router.push(`/community/write?edit=${post.articleId}`)}
+                onClick={() => handlePostClick(post.articleId)}
                 className="group block rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:border-indigo-200 hover:bg-gradient-to-br hover:from-indigo-50/50 hover:to-violet-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-indigo-700 cursor-pointer"
               >
                 <div className="flex justify-between">
