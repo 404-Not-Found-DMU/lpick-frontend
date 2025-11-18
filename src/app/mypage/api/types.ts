@@ -51,7 +51,8 @@ export interface UserGear {
   name: string;
   modelName: string;
   brand: string;
-  gearClass: 'SPEAKER' | 'HEADPHONE' | 'TURNTABLE';
+  gearClass: 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE';
+  img: string;
   wikiId: string;
   favorite: boolean;
 }
@@ -74,8 +75,51 @@ export interface MyPageGearResponse {
 
 // 장비 추가 요청
 export interface AddGearRequest {
-  gearClass: 'SPEAKER' | 'HEADPHONE' | 'TURNTABLE';
   gearId: string;
+  gearClass: 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE';
+}
+
+// 장비 검색 응답
+export interface GearSearchResult {
+  gearId: string;
+  eqClass: 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE';
+  modelName: string;
+  brand: string;
+  name: string;
+  img: string | null;
+}
+
+// 임시 장비 추가 요청
+export interface TempGearRequest {
+  modelName: string;
+  gearClass: 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE';
+  brand: string;
+  specJson: Record<string, unknown>;
+}
+
+// 임시 장비 추가 응답
+export interface TempGearResponse {
+  id: string;
+}
+
+// 분류별 장비 리스트 조회 응답
+export interface GearListItem {
+  id: string;
+  name: string;
+  modelName: string;
+  brand: string;
+  gearClass: 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE';
+  img: string;
+  wikiId: string;
+  favorite: boolean;
+}
+
+export type GearListResponse = GearListItem[];
+
+// 다른 사용자 장비 조회 응답
+export interface OtherUserGearResponse {
+  data: UserGearData;
+  blindedToOther: boolean;
 }
 
 // 장비 즐겨찾기 토글 요청

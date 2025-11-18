@@ -6,6 +6,8 @@ import { fetcher } from '@/hooks/api/fetchers';
 import {
   CommentListResponse,
   LikedParentCommentsResponse,
+  MyCommentsResponse,
+  MyCommentsParams,
   CreateCommentRequest,
   UpdateCommentRequest,
   PaginationParams
@@ -67,6 +69,37 @@ export const getLikedParentComments = async (
     return await fetcher<LikedParentCommentsResponse>(url);
   } catch (error) {
     console.error('Failed to fetch liked parent comments:', error);
+    throw error;
+  }
+};
+
+/**
+ * 내 댓글 목록 조회
+ * @param params 페이지네이션 및 필터 파라미터
+ */
+export const getMyComments = async (
+  params?: MyCommentsParams
+): Promise<MyCommentsResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    // 기본값 설정
+    const page = params?.page ?? 1;
+    const size = params?.size ?? 20;
+    const filter = params?.filter ?? 'ALL';
+    
+    queryParams.append('page', page.toString());
+    queryParams.append('size', size.toString());
+    queryParams.append('filter', filter);
+
+    const queryString = queryParams.toString();
+    const url = `${COMMENT_API_BASE}/me?${queryString}`;
+    
+    console.log('Fetching my comments from:', url);
+    
+    return await fetcher<MyCommentsResponse>(url);
+  } catch (error) {
+    console.error('Failed to fetch my comments:', error);
     throw error;
   }
 };

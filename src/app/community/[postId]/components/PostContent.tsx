@@ -28,15 +28,6 @@ export const PostContent = ({
   onDelete,
   canEdit = false,
 }: PostContentProps) => {
-  const getTagColor = (tag?: string) => {
-    const colors: { [key: string]: string } = {
-      질문: 'bg-gradient-to-r from-green-500 to-green-600 text-white',
-      정보: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white',
-      홍보: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
-    };
-    return colors[tag || ''] || 'bg-gradient-to-r from-gray-500 to-gray-600 text-white';
-  };
-
   const getBoardColor = (board?: string) => {
     const colors: { [key: string]: string } = {
       자유게시판: 'bg-gradient-to-r from-gray-500 to-gray-600 text-white',
@@ -65,13 +56,6 @@ export const PostContent = ({
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${getBoardColor(post.board)}`}
                   >
                     {post.board}
-                  </span>
-                )}
-                {post.tag && (
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getTagColor(post.tag)}`}
-                  >
-                    {post.tag}
                   </span>
                 )}
               </div>

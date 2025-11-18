@@ -2,8 +2,8 @@
 import { Search, PenSquare, Users, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { Input } from '@/components/Input/Input';
-import { BoardType, TagType } from '../../community.types';
-import { BOARD_OPTIONS, TAG_OPTIONS } from '../../constants';
+import { BoardType } from '../../community.types';
+import { BOARD_OPTIONS } from '../../constants';
 import { usePostNavigation } from '../../hooks/usePostNavigation';
 
 interface HeaderProps {
@@ -11,8 +11,6 @@ interface HeaderProps {
   onSearchChange: (query: string) => void;
   activeBoard: BoardType | 'all';
   onBoardChange: (board: BoardType | 'all') => void;
-  activeTag?: TagType;
-  onTagChange: (tag?: TagType) => void;
 }
 
 export const Header = ({
@@ -20,8 +18,6 @@ export const Header = ({
   onSearchChange,
   activeBoard,
   onBoardChange,
-  activeTag,
-  onTagChange,
 }: HeaderProps) => {
   const { navigateToWrite } = usePostNavigation();
 
@@ -86,36 +82,6 @@ export const Header = ({
                 }`}
               >
                 {board.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 글머리 필터 */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">글머리:</span>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => onTagChange(undefined)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                !activeTag
-                  ? 'bg-violet-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-violet-100 hover:text-violet-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-              }`}
-            >
-              전체
-            </button>
-            {TAG_OPTIONS.map((tag) => (
-              <button
-                key={tag.id}
-                onClick={() => onTagChange(tag.id)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                  activeTag === tag.id
-                    ? `${tag.color} text-white shadow-md`
-                    : 'bg-gray-100 text-gray-700 hover:bg-violet-100 hover:text-violet-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                {tag.name}
               </button>
             ))}
           </div>

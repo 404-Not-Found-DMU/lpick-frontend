@@ -35,11 +35,11 @@ export const FeaturedCard = ({ post }: FeaturedCardProps) => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent" />
           <div className="absolute left-2 top-2 sm:left-3 sm:top-3">
-            {(post.tag || post.board) && (
+            {post.board && (
               <span
-                className={`rounded-lg px-2 py-1 text-xs font-medium backdrop-blur-md sm:px-3 sm:text-sm ${getCategoryColor(post.tag || post.board || '')}`}
+                className={`rounded-lg px-2 py-1 text-xs font-medium backdrop-blur-md sm:px-3 sm:text-sm ${getCategoryColor(post.board)}`}
               >
-                {post.tag || post.board}
+                {post.board}
               </span>
             )}
           </div>

@@ -4,8 +4,8 @@ import { useSearchParams } from 'next/navigation';
 import { Input } from '@/components/Input/Input';
 import { Button } from '@/components/Button/Button';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { PostFormData, BoardType, TagType } from '../../community.types';
-import { Send, AlertCircle, Hash, FileText, Tag, Save } from 'lucide-react';
+import { PostFormData, BoardType } from '../../community.types';
+import { Send, AlertCircle, Hash, FileText, Save } from 'lucide-react';
 
 interface EnhancedPostFormProps {
   formData: PostFormData;
@@ -19,12 +19,6 @@ const BOARD_TYPES: { id: BoardType; label: string }[] = [
   { id: '음반', label: '음반' },
   { id: '아티스트', label: '아티스트' },
   { id: '장비', label: '장비' },
-];
-
-const BADGE_TYPES: { id: TagType; label: string }[] = [
-  { id: '질문', label: '질문' },
-  { id: '정보', label: '정보' },
-  { id: '홍보', label: '홍보' },
 ];
 
 export const EnhancedPostForm = ({
@@ -78,9 +72,8 @@ export const EnhancedPostForm = ({
           </div>
         </div>
 
-        {/* 게시판 및 글머리 섹션 */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* 게시판 선택 */}
+        {/* 게시판 선택 */}
+        <div className="grid gap-6">
           <div>
             <div className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               <Hash className="h-4 w-4" />
@@ -98,29 +91,6 @@ export const EnhancedPostForm = ({
                   }`}
                 >
                   {boardType.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 글머리 선택 */}
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              <Tag className="h-4 w-4" />
-              글머리
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {BADGE_TYPES.map((badgeType) => (
-                <button
-                  key={badgeType.id}
-                  onClick={() => updateFormData({ badgeType: badgeType.id })}
-                  className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
-                    formData.badgeType === badgeType.id
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                      : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500'
-                  }`}
-                >
-                  {badgeType.label}
                 </button>
               ))}
             </div>

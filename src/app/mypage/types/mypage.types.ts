@@ -8,9 +8,6 @@ export interface User {
   email: string;
   avatar?: string;
   bio?: string;
-  level: number;
-  experience: number;
-  maxExperience: number;
 }
 
 export interface ActivityStats {

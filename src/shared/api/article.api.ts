@@ -7,6 +7,7 @@ import {
   MyArticlesResponse,
   LikedArticlesResponse,
   BookmarkedArticlesResponse,
+  ArticleBookmarksResponse,
   PaginationParams
 } from '../types/api.types';
 
@@ -230,6 +231,30 @@ export const getBookmarkedArticles = async (params?: PaginationParams): Promise<
     return await fetcher<BookmarkedArticlesResponse>(url);
   } catch (error) {
     console.error('Failed to fetch bookmarked articles:', error);
+    throw error;
+  }
+};
+
+// 사용자의 게시글 북마크 목록 조회 (새로운 API)
+export const getArticleBookmarks = async (params?: PaginationParams): Promise<ArticleBookmarksResponse> => {
+  try {
+    const searchParams = new URLSearchParams();
+    
+    // 파라미터 검증 및 기본값 설정
+    const page = Math.max(1, params?.page || 1); // 1-based 페이징
+    const size = Math.max(1, Math.min(100, params?.size || 10));
+    
+    searchParams.append('page', page.toString());
+    searchParams.append('size', size.toString());
+
+    const queryString = searchParams.toString();
+    const url = `/api/v1/community/article/book-mark-list?${queryString}`;
+    
+    console.log('Fetching article bookmarks from:', url);
+    
+    return await fetcher<ArticleBookmarksResponse>(url);
+  } catch (error) {
+    console.error('Failed to fetch article bookmarks:', error);
     throw error;
   }
 };

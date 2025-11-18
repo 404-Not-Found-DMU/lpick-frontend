@@ -9,7 +9,6 @@ import {
   Edit,
   MessageCircle,
   Calendar,
-  Filter,
   User,
   Loader2,
 } from 'lucide-react';
@@ -159,36 +158,6 @@ const PostsTab = () => {
     return config?.bg || 'bg-gray-100 dark:bg-gray-900/20';
   };
 
-  const FilterButton = ({
-    filter,
-    isSelected,
-    onClick,
-  }: {
-    filter: FilterItem;
-    isSelected: boolean;
-    onClick: () => void;
-  }) => (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-        isSelected
-          ? 'scale-105 bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md'
-          : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-      }`}
-    >
-      {filter.name}
-      <span
-        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-          isSelected
-            ? 'bg-white/20 text-white'
-            : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-400'
-        }`}
-      >
-        {filter.count}
-      </span>
-    </button>
-  );
-
   return (
     <div className="space-y-6">
       <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -210,21 +179,29 @@ const PostsTab = () => {
         </div>
 
         {/* Filter */}
-        <div className="mb-6 rounded-2xl bg-gray-50 p-4 dark:bg-gray-800/50">
-          <div className="mb-3 flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              카테고리 필터
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-6">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2">
             {filters.map((filter) => (
-              <FilterButton
+              <button
                 key={filter.name}
-                filter={filter}
-                isSelected={selectedFilter === filter.name}
                 onClick={() => setSelectedFilter(filter.name)}
-              />
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2 ${
+                  selectedFilter === filter.name
+                    ? 'bg-indigo-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                }`}
+              >
+                {filter.name}
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    selectedFilter === filter.name
+                      ? 'bg-white/20 text-white'
+                      : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-400'
+                  }`}
+                >
+                  {filter.count}
+                </span>
+              </button>
             ))}
           </div>
         </div>

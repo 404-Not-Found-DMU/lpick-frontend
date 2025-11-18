@@ -26,6 +26,18 @@ export async function fetcher<T>(
         baseHeaders['Content-Type'] = 'application/json';
     }
 
+    // FormData 사용 시 Content-Type 헤더를 설정하지 않음 (브라우저가 자동 설정)
+    const defaultHeaders: Record<string, string> = {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+    };
+
+    // FormData가 아닌 경우에만 Content-Type을 application/json으로 설정
+    if (!(options.body instanceof FormData)) {
+        defaultHeaders['Content-Type'] = 'application/json';
+    }
+
     const res = await fetch(fullUrl, {
         ...options,
         headers: baseHeaders,

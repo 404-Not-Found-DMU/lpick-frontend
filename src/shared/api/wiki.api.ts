@@ -4,7 +4,7 @@
 
 import { fetcher } from '@/hooks/api/fetchers';
 import {
-  BookmarkedWikisResponse,
+  WikiBookmarksResponse,
   PaginationParams
 } from '../types/api.types';
 
@@ -42,10 +42,10 @@ export const unbookmarkWiki = async (wikiId: string): Promise<void> => {
 };
 
 /**
- * 북마크한 위키 목록 조회
+ * 북마크한 위키 목록 조회 (새로운 API)
  * @param params 페이지네이션 파라미터
  */
-export const getBookmarkedWikis = async (params?: PaginationParams): Promise<BookmarkedWikisResponse> => {
+export const getBookmarkedWikis = async (params?: PaginationParams): Promise<WikiBookmarksResponse> => {
   try {
     const searchParams = new URLSearchParams();
     
@@ -57,9 +57,11 @@ export const getBookmarkedWikis = async (params?: PaginationParams): Promise<Boo
     searchParams.append('size', size.toString());
 
     const queryString = searchParams.toString();
-    const url = `/api/v1/wiki/bookmark/me?${queryString}`;
+    const url = `/api/v1/wiki/book-mark-list?${queryString}`;
     
-    return await fetcher<BookmarkedWikisResponse>(url);
+    console.log('Fetching wiki bookmarks from:', url);
+    
+    return await fetcher<WikiBookmarksResponse>(url);
   } catch (error) {
     console.error('Failed to fetch bookmarked wikis:', error);
     throw error;

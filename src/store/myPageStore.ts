@@ -19,9 +19,6 @@ export const useMyPageStore = create<MyPageState>((set) => ({
     name: '음악덕후',
     username: '@musiclover',
     email: 'music@example.com',
-    level: 15,
-    experience: 2340,
-    maxExperience: 3000,
   },
   activityStats: {
     posts: 23,

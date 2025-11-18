@@ -1,25 +1,29 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Shield,
   Key,
   Mail,
   Trash2,
-  Save,
   Settings as SettingsIcon,
   ChevronRight,
   User,
   Lock,
   Brain,
+  Bell,
+  Eye,
+  Loader2,
 } from 'lucide-react';
 import { useAccountDelete } from '../../hooks/useAccountDelete';
 import { useUserStore } from '@/store/userStore';
+import { useUserSettings } from '@/shared/hooks';
+import { UserPrivacySettings, UserNotificationSettings } from '@/shared/types';
 
 interface ToggleSwitchProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label: string;
+  description?: string;
 }
 
 interface SettingCardProps {
@@ -37,15 +41,14 @@ interface MenuButtonProps {
   danger?: boolean;
 }
 
-interface PrivacySettings {
-  profilePublic: boolean;
-  postsPublic: boolean;
-  activityPublic: boolean;
-}
-
-const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, label }) => (
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, label, description }) => (
   <div className="flex items-center justify-between py-3">
-    <span className="font-medium text-gray-700 dark:text-gray-300">{label}</span>
+    <div className="flex-1">
+      <span className="font-medium text-gray-700 dark:text-gray-300">{label}</span>
+      {description && (
+        <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
+      )}
+    </div>
     <button
       onClick={() => onChange(!checked)}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
@@ -108,13 +111,9 @@ const MenuButton: React.FC<MenuButtonProps> = ({
 );
 
 const SettingsTab: React.FC = () => {
-  const { handleDeleteAccount, isLoading } = useAccountDelete();
+  const { handleDeleteAccount, isLoading: isDeleting } = useAccountDelete();
   const { userInfo } = useUserStore();
-  const [privacy, setPrivacy] = useState<PrivacySettings>({
-    profilePublic: true,
-    postsPublic: true,
-    activityPublic: false,
-  });
+  const { settings, loading, error, updateSettings } = useUserSettings();
 
   // LPTI 유효성 체크 함수
   const hasValidLPTI = () => {
@@ -131,15 +130,85 @@ const SettingsTab: React.FC = () => {
     return false;
   };
 
-  const updatePrivacy = (key: keyof PrivacySettings, value: boolean) => {
-    setPrivacy((prev) => ({ ...prev, [key]: value }));
+  // 프라이버시 설정 업데이트
+  const updatePrivacy = async (key: keyof UserPrivacySettings, value: boolean) => {
+    if (!settings) return;
+    
+    try {
+      // 부분 업데이트: 해당 프라이버시 설정만 전송
+      await updateSettings({
+        privacy: {
+          [key]: value,
+        }
+      });
+    } catch (err) {
+      console.error('프라이버시 설정 업데이트 실패:', err);
+    }
   };
 
+  // 알림 설정 업데이트
+  const updateNotification = async (key: keyof UserNotificationSettings, value: boolean) => {
+    if (!settings) return;
+    
+    try {
+      // 부분 업데이트: 해당 알림 설정만 전송
+      await updateSettings({
+        notification: {
+          [key]: value,
+        }
+      });
+    } catch (err) {
+      console.error('알림 설정 업데이트 실패:', err);
+    }
+  };
+
+  // 프라이버시 설정 항목들
   const privacyItems = [
-    { key: 'profilePublic', label: '프로필 공개' },
-    { key: 'postsPublic', label: '게시글 공개' },
-    { key: 'activityPublic', label: '활동 내역 공개' },
-  ] as const;
+    { 
+      key: 'allowViewActCount' as keyof UserPrivacySettings, 
+      label: '활동 통계 공개', 
+      description: '다른 사용자가 내 활동 통계를 볼 수 있습니다' 
+    },
+    { 
+      key: 'allowViewRecentAct' as keyof UserPrivacySettings, 
+      label: '최근 활동 공개', 
+      description: '다른 사용자가 내 최근 활동을 볼 수 있습니다' 
+    },
+    { 
+      key: 'allowViewGear' as keyof UserPrivacySettings, 
+      label: '장비 정보 공개', 
+      description: '다른 사용자가 내 장비 정보를 볼 수 있습니다' 
+    },
+    { 
+      key: 'allowViewCollection' as keyof UserPrivacySettings, 
+      label: '컬렉션 공개', 
+      description: '다른 사용자가 내 앨범 컬렉션을 볼 수 있습니다' 
+    },
+  ];
+
+  // 알림 설정 항목들
+  const notificationItems = [
+    { 
+      key: 'isAlarmWikiEdit' as keyof UserNotificationSettings, 
+      label: '위키 편집 알림', 
+      description: '위키 페이지가 수정되었을 때 알림을 받습니다' 
+    },
+    { 
+      key: 'isAlarmNewDebateAnswer' as keyof UserNotificationSettings, 
+      label: '토론 답변 알림', 
+      description: '토론에 새로운 답변이 달렸을 때 알림을 받습니다' 
+    },
+    { 
+      key: 'isAlarmCommented' as keyof UserNotificationSettings, 
+      label: '댓글 알림', 
+      description: '내 게시글에 댓글이 달렸을 때 알림을 받습니다' 
+    },
+    { 
+      key: 'isAlarmEvent' as keyof UserNotificationSettings, 
+      label: '이벤트 알림', 
+      description: '새로운 이벤트가 있을 때 알림을 받습니다' 
+    },
+  ];
 
   const accountMenuItems = [
     { icon: User, title: '프로필 정보 수정', subtitle: '이름, 프로필 사진 등' },
@@ -147,6 +216,25 @@ const SettingsTab: React.FC = () => {
     { icon: Mail, title: '이메일 변경', subtitle: '계정 이메일 주소 변경' },
     { icon: Lock, title: '2단계 인증', subtitle: '보안 강화를 위한 2FA 설정' },
   ];
+
+  // 로딩 상태
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        <span className="ml-2 text-gray-600 dark:text-gray-400">설정을 불러오는 중...</span>
+      </div>
+    );
+  }
+
+  // 에러 상태
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-900/20">
+        <div className="text-red-600 dark:text-red-400">설정을 불러올 수 없습니다: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -162,6 +250,44 @@ const SettingsTab: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 프라이버시 설정 */}
+      <SettingCard
+        icon={Eye}
+        title="프라이버시 설정"
+        description="내 정보 공개 범위를 설정하세요"
+      >
+        <div className="space-y-1">
+          {privacyItems.map(({ key, label, description }) => (
+            <ToggleSwitch
+              key={key}
+              checked={settings?.privacy[key] || false}
+              onChange={(value) => updatePrivacy(key, value)}
+              label={label}
+              description={description}
+            />
+          ))}
+        </div>
+      </SettingCard>
+
+      {/* 알림 설정 */}
+      <SettingCard
+        icon={Bell}
+        title="알림 설정"
+        description="받고 싶은 알림을 선택하세요"
+      >
+        <div className="space-y-1">
+          {notificationItems.map(({ key, label, description }) => (
+            <ToggleSwitch
+              key={key}
+              checked={settings?.notification[key] || false}
+              onChange={(value) => updateNotification(key, value)}
+              label={label}
+              description={description}
+            />
+          ))}
+        </div>
+      </SettingCard>
 
       {/* LPTI Information */}
       <SettingCard
@@ -211,24 +337,6 @@ const SettingsTab: React.FC = () => {
         </div>
       </SettingCard>
 
-      {/* Privacy */}
-      <SettingCard
-        icon={Shield}
-        title="개인정보 및 보안"
-        description="프로필 공개 범위를 설정하세요"
-      >
-        <div className="space-y-1">
-          {privacyItems.map(({ key, label }) => (
-            <ToggleSwitch
-              key={key}
-              checked={privacy[key]}
-              onChange={(checked) => updatePrivacy(key, checked)}
-              label={label}
-            />
-          ))}
-        </div>
-      </SettingCard>
-
       {/* Account Management */}
       <SettingCard
         icon={User}
@@ -243,21 +351,13 @@ const SettingsTab: React.FC = () => {
             <MenuButton
               icon={Trash2}
               title="계정 삭제"
-              subtitle={isLoading ? "삭제 중..." : "계정을 영구적으로 삭제합니다"}
+              subtitle={isDeleting ? "삭제 중..." : "계정을 영구적으로 삭제합니다"}
               onClick={handleDeleteAccount}
               danger
             />
           </div>
         </div>
       </SettingCard>
-
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <button className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl">
-          <Save className="h-4 w-4" />
-          변경사항 저장
-        </button>
-      </div>
     </div>
   );
 };

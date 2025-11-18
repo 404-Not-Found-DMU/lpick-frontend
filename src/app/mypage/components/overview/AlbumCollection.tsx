@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, ExternalLink, Heart, Filter, Music, Loader2, Trash2, Star } from 'lucide-react';
-import { useAlbumManager, useAlbumList, useAlbumCountByGenre } from '../../hooks';
+import { Play, ExternalLink, Heart, Filter, Music, Loader2, Trash2, Star, Plus, Mic } from 'lucide-react';
+import { useAlbumManager, useAlbumList, useAlbumCountByGenre, useDeleteAlbumRecord, useAddUserAlbum } from '../../hooks';
 import { useUserStore } from '@/store/userStore';
 import type { UserAlbum } from '../../api/types';
 import Image from 'next/image';
 
 const AlbumCollection = () => {
   const [selectedGenre, setSelectedGenre] = useState('전체');
+  const [showAddAlbumModal, setShowAddAlbumModal] = useState(false);
+  const [newAlbumId, setNewAlbumId] = useState('');
   const { userInfo } = useUserStore();
   
-  // 새로운 앨범 관리 훅 사용
+  // 기존 앨범 관리 훅
   const { 
     data: albumsData, 
     loading: albumsLoading, 
@@ -21,6 +23,10 @@ const AlbumCollection = () => {
     toggleFavorite,
     getAlbumRecord
   } = useAlbumManager();
+  
+  // 새로운 훅들
+  const { deleteRecord, loading: deleteRecordLoading } = useDeleteAlbumRecord();
+  const { addAlbum, loading: addAlbumLoading } = useAddUserAlbum();
   
   // 앨범 리스트 변환
   const albumList = useAlbumList(albumsData);
@@ -50,6 +56,32 @@ const AlbumCollection = () => {
       console.log('Playing record:', record.recordFile);
     } else {
       alert('재생할 수 있는 레코드 파일이 없습니다.');
+    }
+  };
+
+  // 새로운 핸들러들
+  const handleDeleteRecord = async (userAlbumId: string) => {
+    if (confirm('녹음 파일을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      const success = await deleteRecord(userAlbumId);
+      if (success) {
+        alert('녹음 파일이 성공적으로 삭제되었습니다.');
+        fetchAlbums({ page: 1, size: 12 }); // 목록 새로고침
+      }
+    }
+  };
+
+  const handleAddAlbum = async () => {
+    if (!newAlbumId.trim()) {
+      alert('앨범 ID를 입력해주세요.');
+      return;
+    }
+
+    const result = await addAlbum(newAlbumId.trim());
+    if (result) {
+      alert('앨범이 성공적으로 추가되었습니다.');
+      setNewAlbumId('');
+      setShowAddAlbumModal(false);
+      fetchAlbums({ page: 1, size: 12 }); // 목록 새로고침
     }
   };
 
@@ -143,6 +175,14 @@ const AlbumCollection = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setShowAddAlbumModal(true)}
+            className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            disabled={addAlbumLoading}
+          >
+            <Plus className="h-4 w-4" />
+            {addAlbumLoading ? '추가 중...' : '앨범 추가'}
+          </button>
           <button className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-500 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl">
             <ExternalLink className="h-4 w-4" />
             전체보기
@@ -242,13 +282,23 @@ const AlbumCollection = () => {
                       onClick={() => handlePlayRecord(album.userAlbumId)}
                       disabled={albumsLoading}
                       className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-lg backdrop-blur-sm transition-all hover:scale-105 hover:bg-white disabled:opacity-50"
+                      title="레코드 재생"
                     >
                       <Play className="ml-0.5 h-5 w-5 text-gray-800" />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteRecord(album.userAlbumId)}
+                      disabled={deleteRecordLoading}
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-lg backdrop-blur-sm transition-all hover:scale-105 hover:bg-orange-50 disabled:opacity-50"
+                      title="녹음 파일 삭제"
+                    >
+                      <Mic className="h-4 w-4 text-orange-600" />
                     </button>
                     <button 
                       onClick={() => handleToggleFavorite(album.userAlbumId, album.favorite)}
                       disabled={albumsLoading}
                       className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-lg backdrop-blur-sm transition-all hover:scale-105 hover:bg-white disabled:opacity-50"
+                      title="즐겨찾기 토글"
                     >
                       <Star className={`h-4 w-4 ${album.favorite ? 'fill-current text-yellow-500' : 'text-gray-800'}`} />
                     </button>
@@ -256,6 +306,7 @@ const AlbumCollection = () => {
                       onClick={() => handleDeleteAlbum(album.userAlbumId)}
                       disabled={albumsLoading}
                       className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-lg backdrop-blur-sm transition-all hover:scale-105 hover:bg-red-50 disabled:opacity-50"
+                      title="앨범 삭제"
                     >
                       <Trash2 className="h-4 w-4 text-red-600" />
                     </button>
@@ -315,6 +366,61 @@ const AlbumCollection = () => {
           </div>
         )}
       </div>
+
+      {/* 앨범 추가 모달 */}
+      {showAddAlbumModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl dark:bg-gray-800">
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">새 앨범 추가</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                서비스에 등록된 앨범 ID를 입력하여 내 컬렉션에 추가하세요.
+              </p>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                앨범 ID
+              </label>
+              <input
+                type="text"
+                value={newAlbumId}
+                onChange={(e) => setNewAlbumId(e.target.value)}
+                placeholder="예: album-12345"
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                disabled={addAlbumLoading}
+              />
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowAddAlbumModal(false);
+                  setNewAlbumId('');
+                }}
+                disabled={addAlbumLoading}
+                className="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleAddAlbum}
+                disabled={addAlbumLoading || !newAlbumId.trim()}
+                className="flex-1 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:from-green-600 hover:to-emerald-700 disabled:opacity-50"
+              >
+                {addAlbumLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    추가 중...
+                  </div>
+                ) : (
+                  '추가'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

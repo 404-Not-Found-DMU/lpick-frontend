@@ -1,7 +1,7 @@
 'use client';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { SortOption, CommunityFilters, BoardType, TagType } from '../types/community.types';
+import { SortOption, CommunityFilters, BoardType } from '../types/community.types';
 import { POSTS_PER_PAGE } from '../constants';
 import { useArticles } from './useArticles';
 import { usePopularArticles } from './usePopularArticles';
@@ -57,6 +57,22 @@ export const useCommunity = () => {
       return Math.abs(hash);
     };
 
+    // articleType에 따라 게시판 타입 변환
+    const getBoardDisplayName = (articleType: BoardType): string => {
+      switch (articleType) {
+        case 'FREE':
+          return '자유게시판';
+        case 'ALBUM':
+          return '음반';
+        case 'ARTIST':
+          return '아티스트';
+        case 'GEAR':
+          return '장비';
+        default:
+          return '자유게시판';
+      }
+    };
+
     return {
       id: generateNumericId(article.articleId),
       articleId: article.articleId,
@@ -65,7 +81,7 @@ export const useCommunity = () => {
       author: article.author, // API에서 제공하는 author 필드 사용
       oauthId: article.oauthId,
       date: formatDate(article.createdAt),
-      board: '자유게시판' as BoardType, // 기본값, 실제로는 게시판 정보 필요
+      board: getBoardDisplayName(article.articleType),
       tag: undefined as TagType | undefined, // 태그 정보 필요
       likes: article.likeCount,
       likeCount: article.likeCount,
@@ -79,8 +95,24 @@ export const useCommunity = () => {
 
   // 현재 페이지의 게시물들
   const currentPosts = useMemo(() => {
-    return articles.map(convertToPostFormat);
-  }, [articles, convertToPostFormat]);
+    let filteredPosts = articles.map(convertToPostFormat);
+    
+    // 게시판 필터 적용
+    if (filters.board !== 'all') {
+      filteredPosts = filteredPosts.filter(post => post.board === filters.board);
+    }
+    
+    // 검색어 필터 적용
+    if (filters.searchQuery.trim()) {
+      const query = filters.searchQuery.toLowerCase().trim();
+      filteredPosts = filteredPosts.filter(post =>
+        post.title.toLowerCase().includes(query) ||
+        post.author.toLowerCase().includes(query)
+      );
+    }
+    
+    return filteredPosts;
+  }, [articles, convertToPostFormat, filters.board, filters.searchQuery]);
 
   // 인기 게시글 (인기 게시글 API 사용)
   const {
@@ -97,19 +129,13 @@ export const useCommunity = () => {
   const setSearchQuery = useCallback((query: string) => {
     setFilters((prev) => ({ ...prev, searchQuery: query }));
     setCurrentPage(1);
-    // TODO: 검색 API 연동 필요
+    // 클라이언트 사이드 필터링 적용됨
   }, []);
 
   const setBoardFilter = useCallback((board: BoardType | 'all') => {
     setFilters((prev) => ({ ...prev, board }));
     setCurrentPage(1);
-    // TODO: 게시판 필터 API 연동 필요
-  }, []);
-
-  const setTagFilter = useCallback((tag?: TagType) => {
-    setFilters((prev) => ({ ...prev, tag }));
-    setCurrentPage(1);
-    // TODO: 태그 필터 API 연동 필요
+    // 클라이언트 사이드 필터링 적용됨
   }, []);
 
   const setSortBy = useCallback((sortBy: SortOption) => {
@@ -146,7 +172,6 @@ export const useCommunity = () => {
     error,
     setSearchQuery,
     setBoardFilter,
-    setTagFilter,
     setSortBy,
     setCurrentPage: setCurrentPageHandler,
     refresh,

@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Headphones, Plus, Star, ExternalLink, Loader2, Settings, Trash2, X } from 'lucide-react';
-import { useGearManager, useGearList } from '../../hooks';
+import { Headphones, Plus, Star, ExternalLink, Loader2, Settings, Trash2, Disc3, Speaker } from 'lucide-react';
+import { useGearManager, useUserGearList } from '../../hooks';
 import { useUserStore } from '@/store/userStore';
-import type { AddGearRequest } from '../../api/types';
+import GearAddModal from '../modals/GearAddModal';
+import AllGearModal from '../modals/AllGearModal';
 
 const EquipmentSection = () => {
   const { userInfo } = useUserStore();
@@ -13,29 +14,27 @@ const EquipmentSection = () => {
     isLoading, 
     error, 
     toggleFavorite, 
-    addGear, 
-    deleteGear 
+    deleteGear,
+    refetch
   } = useGearManager();
-  const gearList = useGearList(gearData);
+  const gearList = useUserGearList(gearData);
   
-  // 장비 추가 모달 상태
+  // 모달 상태
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newGear, setNewGear] = useState<AddGearRequest>({
-    gearClass: 'SPEAKER',
-    gearId: ''
-  });
+  const [showAllGearModal, setShowAllGearModal] = useState(false);
+  const [selectedGearClass, setSelectedGearClass] = useState<'TURNTABLE' | 'SPEAKER' | 'HEADPHONE'>('TURNTABLE');
 
   // 아이콘 매핑
   const getGearIcon = (type: string) => {
     switch (type.toLowerCase()) {
       case 'speaker':
-        return '🔊';
+        return <Speaker className="h-6 w-6" />;
       case 'headphone':
-        return '🎧';
+        return <Headphones className="h-6 w-6" />;
       case 'turntable':
-        return '🎛️';
+        return <Disc3 className="h-6 w-6" />;
       default:
-        return '📻';
+        return <Settings className="h-6 w-6" />;
     }
   };
 
@@ -50,17 +49,18 @@ const EquipmentSection = () => {
     }
   };
 
-  const handleAddGear = async () => {
-    if (!newGear.gearId.trim()) {
-      alert('장비 ID를 입력해주세요.');
-      return;
-    }
-    
-    const success = await addGear(newGear);
-    if (success) {
-      setShowAddModal(false);
-      setNewGear({ gearClass: 'SPEAKER', gearId: '' });
-    }
+  const handleOpenAddModal = (gearClass: 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE') => {
+    setSelectedGearClass(gearClass);
+    setShowAddModal(true);
+  };
+
+  const handleOpenAllGearModal = (gearClass: 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE') => {
+    setSelectedGearClass(gearClass);
+    setShowAllGearModal(true);
+  };
+
+  const handleAddSuccess = () => {
+    refetch(); // 장비 목록 새로고침
   };
 
   // 로그인하지 않은 경우
@@ -77,22 +77,8 @@ const EquipmentSection = () => {
     );
   }
 
-  // 에러 처리
-  if (error) {
-    return (
-      <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex items-center justify-center py-8">
-          <div className="text-center">
-            <Settings className="h-12 w-12 text-red-400 mx-auto mb-4" />
-            <p className="text-red-500 mb-2 font-semibold">장비 정보를 불러오는데 실패했습니다</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              잠시 후 다시 시도해주세요.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // 에러 처리 - 장비가 없는 것으로 표시
+  const effectiveGearList = error ? [] : gearList;
 
   return (
     <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -107,7 +93,7 @@ const EquipmentSection = () => {
           </div>
         </div>
         <button 
-          onClick={() => setShowAddModal(true)}
+          onClick={() => handleOpenAddModal('TURNTABLE')}
           className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-teal-500 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
         >
           <Plus className="h-4 w-4" />
@@ -135,16 +121,17 @@ const EquipmentSection = () => {
               </div>
             </div>
           ))
-        ) : gearList.length > 0 ? (
+        ) : effectiveGearList.length > 0 ? (
           // 실제 장비 데이터
-          gearList.map((item) => (
+          effectiveGearList.map((item) => (
             <div
               key={item.id}
-              className="group rounded-2xl border border-gray-100 p-4 transition-all duration-300 hover:border-teal-200 hover:bg-gradient-to-br hover:from-teal-50/50 hover:to-cyan-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-teal-700"
+              onClick={() => handleOpenAllGearModal(item.type.toUpperCase() as 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE')}
+              className="group rounded-2xl border border-gray-100 p-4 transition-all duration-300 hover:border-teal-200 hover:bg-gradient-to-br hover:from-teal-50/50 hover:to-cyan-50/50 hover:shadow-lg cursor-pointer dark:border-gray-800 dark:hover:border-teal-700"
             >
               <div className="mb-3 flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="text-2xl">{getGearIcon(item.type)}</div>
+                  <div className="text-teal-600 dark:text-teal-400">{getGearIcon(item.type)}</div>
                   <div>
                     <div className="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                       {item.type}
@@ -197,20 +184,39 @@ const EquipmentSection = () => {
             </div>
           ))
         ) : (
-          // 장비가 없는 경우
-          <div className="col-span-1 md:col-span-2 text-center py-8">
+          // 장비가 없는 경우 (에러 포함)
+          <div 
+            onClick={() => handleOpenAddModal('TURNTABLE')}
+            className="col-span-1 md:col-span-2 text-center py-8 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors dark:hover:bg-gray-800"
+          >
             <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">등록된 장비가 없습니다.</p>
+            <p className="text-gray-600 dark:text-gray-400">장비가 없습니다.</p>
             <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">상단의 &apos;장비 추가&apos; 버튼을 눌러 첫 번째 장비를 등록해보세요.</p>
           </div>
         )}
       </div>
 
+      {/* 모든 기기 보기 버튼 */}
+      {effectiveGearList.length > 0 && (
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => {
+              const firstGearType = effectiveGearList[0]?.type.toUpperCase() as 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE';
+              handleOpenAllGearModal(firstGearType || 'TURNTABLE');
+            }}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            모든 기기 보기
+          </button>
+        </div>
+      )}
+
       <div className="mt-4 text-center">
-        {gearList.length > 0 && (
+        {effectiveGearList.length > 0 && (
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              총 {gearList.length}개의 장비
+              총 {effectiveGearList.length}개의 장비
             </span>
             {isLoading && (
               <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -223,67 +229,20 @@ const EquipmentSection = () => {
       </div>
       
       {/* 장비 추가 모달 */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">장비 추가</h3>
-              <button 
-                onClick={() => setShowAddModal(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  장비 종류
-                </label>
-                <select
-                  value={newGear.gearClass}
-                  onChange={(e) => setNewGear({ ...newGear, gearClass: e.target.value as 'SPEAKER' | 'HEADPHONE' | 'TURNTABLE' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                >
-                  <option value="SPEAKER">스피커</option>
-                  <option value="HEADPHONE">헤드폰</option>
-                  <option value="TURNTABLE">턴테이블</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  장비 ID
-                </label>
-                <input
-                  type="text"
-                  value={newGear.gearId}
-                  onChange={(e) => setNewGear({ ...newGear, gearId: e.target.value })}
-                  placeholder="장비 ID를 입력하세요"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-            </div>
-            
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleAddGear}
-                disabled={isLoading || !newGear.gearId.trim()}
-                className="flex-1 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isLoading ? '추가 중...' : '추가'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <GearAddModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={handleAddSuccess}
+        gearClass={selectedGearClass}
+      />
+      
+      {/* 전체 장비 모달 */}
+      <AllGearModal
+        isOpen={showAllGearModal}
+        onClose={() => setShowAllGearModal(false)}
+        gearClass={selectedGearClass}
+        onSuccess={handleAddSuccess}
+      />
     </div>
   );
 };

@@ -2,9 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Bookmark, FileText, Music, Calendar, Filter, Heart, Eye, User } from 'lucide-react';
-import { useBookmarkedArticles, useBookmarkedWikis } from '@/shared/hooks';
-import { BoardType } from '@/shared/types';
+import { Bookmark, FileText, Music, Calendar, Heart, Eye, User, MessageCircle, Loader2 } from 'lucide-react';
+import { useArticleBookmarks, useBookmarkedWikis } from '@/shared/hooks';
 
 const BookmarkTab = () => {
   const [selectedFilter, setSelectedFilter] = useState('전체');
@@ -14,7 +13,7 @@ const BookmarkTab = () => {
     bookmarks: articleBookmarks, 
     loading: articleLoading, 
     error: articleError 
-  } = useBookmarkedArticles({ page: 1, size: 20 });
+  } = useArticleBookmarks({ page: 1, size: 20 });
 
   const { 
     bookmarks: wikiBookmarks, 
@@ -24,18 +23,42 @@ const BookmarkTab = () => {
 
   // 통합된 북마크 데이터와 필터링
   const allBookmarks = useMemo(() => {
-    const articles = articleBookmarks.map((article) => ({
-      ...article,
-      type: 'post' as const,
-      category: '게시글 북마크',
-      id: article.articleId,
-    }));
+    const articles = articleBookmarks.map((article, index) => {
+      // 실제 articleId가 있으면 사용, 없으면 임시 방안으로 index 기반 ID 생성
+      // TODO: API에서 실제 articleId를 제공하면 이 로직을 수정해야 함
+      let actualArticleId = article.articleId;
+      if (!actualArticleId) {
+        // 임시 방안: 북마크 순서 기반으로 ID 생성 (실제로는 API에서 articleId를 제공해야 함)
+        console.warn('ArticleId not provided in bookmark API response, using fallback');
+        actualArticleId = `bookmark-${index}`;
+      }
+      
+      return {
+        articleId: actualArticleId,
+        title: article.articleTitle,
+        author: article.writerName,
+        createdAt: article.articleCreatedAt,
+        likeCount: article.likeCount,
+        commentCount: 0, // API에서 제공되지 않음
+        viewCount: article.viewCount,
+        content: article.articleContent,
+        type: 'post' as const,
+        category: '게시글 북마크',
+        id: actualArticleId,
+      };
+    });
 
     const wikis = wikiBookmarks.map((wiki) => ({
-      ...wiki,
+      wikiId: wiki.wikiPageId,
+      title: wiki.wikiTitle,
+      author: '', // API에서 제공되지 않음
+      createdAt: '', // API에서 제공되지 않음
+      likeCount: 0,
+      viewCount: 0,
+      content: '',
+      category: wiki.wikiPageClass,
       type: 'wiki' as const,
-      category: '위키 북마크',
-      id: wiki.wikiId,
+      id: wiki.wikiPageId,
     }));
 
     return [...articles, ...wikis];
@@ -51,7 +74,9 @@ const BookmarkTab = () => {
   // 필터링된 북마크
   const filteredBookmarks = useMemo(() => {
     if (selectedFilter === '전체') return allBookmarks;
-    return allBookmarks.filter((bookmark) => bookmark.category === selectedFilter);
+    if (selectedFilter === '게시글 북마크') return allBookmarks.filter((bookmark) => bookmark.type === 'post');
+    if (selectedFilter === '위키 북마크') return allBookmarks.filter((bookmark) => bookmark.type === 'wiki');
+    return allBookmarks;
   }, [allBookmarks, selectedFilter]);
 
   // 날짜 포맷팅
@@ -63,37 +88,46 @@ const BookmarkTab = () => {
     }
   };
 
-  // 보드 타입 한글 변환
-  const getBoardTypeLabel = (boardType: BoardType) => {
-    const boardTypeMap: Record<BoardType, string> = {
-      FREE: '자유',
-      ALBUM: '앨범',
-      ARTIST: '아티스트',
-      GEAR: '장비',
-    };
-    return boardTypeMap[boardType] || boardType;
+  // 게시글 카테고리 설정 (게시글 탭과 동일)
+  const categoryConfig = {
+    '자유게시판': {
+      icon: MessageCircle,
+      color: 'text-green-600 dark:text-green-400',
+      bg: 'bg-green-100 dark:bg-green-900/20',
+    },
+    '장비': {
+      icon: Heart,
+      color: 'text-pink-600 dark:text-pink-400',
+      bg: 'bg-pink-100 dark:bg-pink-900/20',
+    },
+    '음반': {
+      icon: FileText,
+      color: 'text-purple-600 dark:text-purple-400',
+      bg: 'bg-purple-100 dark:bg-purple-900/20',
+    },
+    '아티스트': {
+      icon: User,
+      color: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-blue-100 dark:bg-blue-900/20',
+    },
+    '게시글': {
+      icon: FileText,
+      color: 'text-indigo-600 dark:text-indigo-400',
+      bg: 'bg-indigo-100 dark:bg-indigo-900/20',
+    },
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'post':
-        return <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
-      case 'wiki':
-        return <Music className="h-5 w-5 text-violet-600 dark:text-violet-400" />;
-      default:
-        return <Bookmark className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
-    }
+  const getCategoryIcon = (category: string) => {
+    const config = categoryConfig[category as keyof typeof categoryConfig];
+    if (!config) return <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
+
+    const Icon = config.icon;
+    return <Icon className={`h-5 w-5 ${config.color}`} />;
   };
 
-  const getTypeBg = (type: string) => {
-    switch (type) {
-      case 'post':
-        return 'bg-blue-100 dark:bg-blue-900/20';
-      case 'wiki':
-        return 'bg-violet-100 dark:bg-violet-900/20';
-      default:
-        return 'bg-gray-100 dark:bg-gray-900/20';
-    }
+  const getCategoryBg = (category: string) => {
+    const config = categoryConfig[category as keyof typeof categoryConfig];
+    return config?.bg || 'bg-gray-100 dark:bg-gray-900/20';
   };
 
   const loading = articleLoading || wikiLoading;
@@ -118,29 +152,23 @@ const BookmarkTab = () => {
 
         {/* 필터 */}
         <div className="mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Filter className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              북마크 분류
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2">
             {filters.map((filter) => (
               <button
                 key={filter.name}
                 onClick={() => setSelectedFilter(filter.name)}
-                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2 ${
                   selectedFilter === filter.name
-                    ? 'bg-amber-100 text-amber-800 shadow-sm dark:bg-amber-900/30 dark:text-amber-200'
+                    ? 'bg-amber-500 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                 }`}
               >
                 {filter.name}
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${
+                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                     selectedFilter === filter.name
-                      ? 'bg-amber-200 text-amber-900 dark:bg-amber-800 dark:text-amber-100'
-                      : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                      ? 'bg-white/20 text-white'
+                      : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-400'
                   }`}
                 >
                   {filter.count}
@@ -154,79 +182,106 @@ const BookmarkTab = () => {
         <div className="space-y-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
-                <p className="text-gray-500 dark:text-gray-400">북마크를 불러오는 중...</p>
-              </div>
+              <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+              <span className="ml-2 text-gray-600 dark:text-gray-400">북마크를 불러오는 중...</span>
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <p className="text-red-500 mb-2">북마크를 불러오는데 실패했습니다</p>
-              <p className="text-gray-500 dark:text-gray-400">{error}</p>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+                <Bookmark className="h-8 w-8 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                북마크를 불러올 수 없습니다
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">{error}</p>
             </div>
           ) : filteredBookmarks.length > 0 ? (
             filteredBookmarks.map((bookmark) => (
-              <div
+              <Link
                 key={`${bookmark.type}-${bookmark.id}`}
-                className="rounded-2xl border border-gray-100 p-4 transition-all hover:shadow-md dark:border-gray-800 dark:hover:border-gray-700"
+                href={bookmark.type === 'post' ? `/community/${bookmark.id}` : `/wiki/${bookmark.id}`}
+                className="group block rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:border-amber-200 hover:bg-gradient-to-br hover:from-amber-50/50 hover:to-orange-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-amber-700 cursor-pointer"
               >
                 <div className="flex items-start gap-4">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${getTypeBg(bookmark.type)}`}>
-                    {getTypeIcon(bookmark.type)}
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${
+                    bookmark.type === 'post' 
+                      ? getCategoryBg('게시글') 
+                      : 'bg-violet-100 dark:bg-violet-900/20'
+                  } shadow-sm`}>
+                    {bookmark.type === 'post' ? (
+                      getCategoryIcon('게시글')
+                    ) : (
+                      <Music className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <div className="mb-2 flex items-start justify-between">
-                      <div>
-                        <Link
-                          href={bookmark.type === 'post' ? `/community/${bookmark.id}` : `/wiki/${bookmark.id}`}
-                          className="text-lg font-semibold text-gray-900 hover:text-amber-600 dark:text-white dark:hover:text-amber-400"
-                        >
-                          {bookmark.title}
-                        </Link>
-                        <div className="mt-1 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <User className="h-4 w-4" />
-                          <span>{bookmark.authorName}</span>
-                          {bookmark.type === 'post' && 'boardType' in bookmark && (
-                            <>
-                              <span>•</span>
-                              <span className="rounded bg-gray-100 px-2 py-1 text-xs dark:bg-gray-800">
-                                {getBoardTypeLabel(bookmark.boardType)}
-                              </span>
-                            </>
-                          )}
-                          {bookmark.type === 'wiki' && 'category' in bookmark && (
-                            <>
-                              <span>•</span>
-                              <span className="rounded bg-gray-100 px-2 py-1 text-xs dark:bg-gray-800">
-                                {bookmark.category}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className={`text-xs font-medium uppercase ${
+                        bookmark.type === 'post'
+                          ? 'text-indigo-600 dark:text-indigo-400'
+                          : 'text-violet-600 dark:text-violet-400'
+                      }`}>
+                        {bookmark.type === 'post' ? '게시글' : '위키'}
+                      </span>
+                      {bookmark.type === 'wiki' && bookmark.category && (
+                        <>
+                          <span className="text-xs text-gray-400">•</span>
+                          <span className="text-xs text-gray-500">{bookmark.category}</span>
+                        </>
+                      )}
+                      {bookmark.createdAt && (
+                        <>
+                          <span className="text-xs text-gray-400">•</span>
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <Calendar className="h-3 w-3" />
+                            {formatDate(bookmark.createdAt)}
+                          </div>
+                        </>
+                      )}
                     </div>
-                    <p className="mb-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
-                      {bookmark.content}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <Heart className="h-4 w-4" />
-                          <span>{bookmark.type === 'post' ? bookmark.likeCount : 0}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          <span>{bookmark.viewCount}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>{formatDate(bookmark.createdAt)}</span>
-                        </div>
+
+                    <h4 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-400">
+                      {bookmark.title}
+                    </h4>
+
+                    {(bookmark.content || bookmark.author) && (
+                      <div className="mb-3">
+                        {bookmark.content && (
+                          <p className="mb-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                            {bookmark.content}
+                          </p>
+                        )}
+                        {bookmark.author && (
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <User className="h-4 w-4" />
+                            <span>{bookmark.author}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-4">
+                      {bookmark.type === 'post' && (
+                        <>
+                          <div className="flex items-center gap-1 text-red-500">
+                            <Heart className="h-4 w-4 fill-current" />
+                            <span className="text-sm font-medium">{bookmark.likeCount || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-blue-500">
+                            <MessageCircle className="h-4 w-4" />
+                            <span className="text-sm font-medium">{bookmark.commentCount || 0}</span>
+                          </div>
+                        </>
+                      )}
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Eye className="h-4 w-4" />
+                        <span className="text-sm font-medium">{bookmark.viewCount || 0}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">

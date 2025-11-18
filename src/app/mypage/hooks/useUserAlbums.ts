@@ -9,6 +9,8 @@ import {
   deleteUserAlbum,
   getUserAlbumRecord,
   toggleAlbumFavoriteNew,
+  deleteUserAlbumRecord,
+  addUserAlbum,
 } from '../api/user-album.api';
 import type {
   UserAlbumsResponse,
@@ -305,4 +307,60 @@ export const useAlbumManager = () => {
  */
 export const useAlbumList = (albumData: UserAlbumsResponse | null) => {
   return albumData?.content || [];
+};
+
+/**
+ * 앨범 녹음 파일 삭제 훅
+ */
+export const useDeleteAlbumRecord = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const deleteRecord = useCallback(async (userAlbumId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await deleteUserAlbumRecord(userAlbumId);
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '녹음 파일 삭제에 실패했습니다.');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return {
+    deleteRecord,
+    loading,
+    error,
+  };
+};
+
+/**
+ * 사용자 앨범 추가 훅
+ */
+export const useAddUserAlbum = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const addAlbum = useCallback(async (albumId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await addUserAlbum({ albumId });
+      return response;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '앨범 추가에 실패했습니다.');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return {
+    addAlbum,
+    loading,
+    error,
+  };
 };
