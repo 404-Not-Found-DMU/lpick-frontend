@@ -2,8 +2,9 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import NoticeDetailClient from '../parts/NoticeDetailClient'
 
-export default function NoticeDetailPage({ params }: { params: { id: string } }) {
-  const noticeId = decodeURIComponent(params.id)
+export default async function NoticeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const noticeId = decodeURIComponent(id)
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-6 md:px-8 py-10">

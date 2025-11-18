@@ -34,17 +34,21 @@ export default function WikiRenderer({ content, components }: { content: string;
       const url = typeof src === "string" ? src : ""
       if (!url) return null
 
+      // props에서 width와 height 제거 (Next.js Image 타입 충돌 방지)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { width: _w, height: _h, ...restProps } = props as { width?: unknown; height?: unknown; [key: string]: unknown }
+
       return (
         <span className="mx-auto my-4 flex max-w-full justify-center">
           <Image
             src={url}
             alt={String(alt ?? "")}
-            width={0}
-            height={0}
+            width={800}
+            height={600}
             sizes="100vw"
             className="h-auto w-full max-w-3xl rounded object-contain"
             style={{ height: "auto", width: "100%" }}
-            {...props}
+            {...restProps}
           />
         </span>
       )

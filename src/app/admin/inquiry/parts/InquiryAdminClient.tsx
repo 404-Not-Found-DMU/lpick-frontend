@@ -159,7 +159,7 @@ export default function InquiryAdminClient() {
             try {
               const detail = await fetchInquiryDetail(confirm.id)
               answerId = detail.answerInfo?.answerId
-            } catch (detailErr) {
+            } catch {
               // 상세 정보를 가져오지 못한 경우 목록 정보로 확인
               const targetItem = items.find(item => item.questionId === confirm.id)
               answerId = targetItem?.answerInfo?.answerId
