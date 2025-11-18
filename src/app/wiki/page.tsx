@@ -1,21 +1,57 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Plus, TrendingUp } from "lucide-react"
 import { Button, Card, CardContent, CardHeader, CardTitle, Badge } from "@/components"
 import Link from "next/link"
 import RecentUpdatedCard from "@/app/wiki/components/RecentUpdatedCard"
+import { getPopularWiki, getPublicWiki} from "@/hooks/api"
  
-
-const popularArticles = [
-  { title: "Pink Floyd - The Dark Side of the Moon", views: 1234, category: "LP" },
-  { title: "The Beatles - Abbey Road", views: 856, category: "LP" },
-  { title: "Fender Stratocaster", views: 743, category: "장비" },
-  { title: "The Beatles", views: 689, category: "아티스트" },
-  { title: "Blue Note Records", views: 567, category: "기타" },
-]
-
+type PopularRow = { id: string; rank: number; title: string; views: number; category?: 'artist' | 'lp' | 'equipment' | 'other' }
 
 const WikiRootPage = () => {
+  const [popular, setPopular] = useState<PopularRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    async function run() {
+      try {
+        setLoading(true)
+        setError(null)
+        const list = await getPopularWiki({ type: 'ALL', size: 10 })
+        if (!active) return
+        const base: PopularRow[] = (list || []).map((it, idx) => ({
+          id: it.id,
+          rank: idx + 1,
+          title: it.name,
+          views: Number(it.viewCount ?? 0),
+        }))
+        const enriched: PopularRow[] = await Promise.all(
+          base.map(async (r): Promise<PopularRow> => {
+            try {
+              const w = await getPublicWiki(r.id)
+              const seg: NonNullable<PopularRow['category']> =
+                w.wikiPageClass === 'ARTIST' ? 'artist' :
+                w.wikiPageClass === 'ALBUM' ? 'lp' :
+                w.wikiPageClass === 'GEAR' ? 'equipment' : 'other'
+              return { ...r, category: seg }
+            } catch {
+              return r
+            }
+          })
+        )
+        setPopular(enriched)
+      } catch {
+        setError("인기 문서를 불러오지 못했습니다.")
+      } finally {
+        setLoading(false)
+      }
+    }
+    run()
+    return () => { active = false }
+  }, [])
 
   return (
     <div className="min-h-screen">
@@ -58,73 +94,53 @@ const WikiRootPage = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
+                    {error && <div className="text-sm text-red-500 mb-2">{error}</div>}
                     <div className="space-y-3">
-                      {popularArticles.map((article, index) => (
-                        <div key={index} className="flex items-center gap-3">
-                          <div
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${
-                              index === 0
-                                ? "bg-yellow-500"
-                                : index === 1
-                                  ? "bg-gray-400"
-                                  : index === 2
-                                    ? "bg-orange-500"
-                                    : "bg-violet-400"
-                            }`}
-                          >
-                            {index + 1}
-                          </div>
-                          <div className="flex-1">
-                            <Link
-                              href="#"
-                              className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-violet-500 line-clamp-1"
-                            >
-                              {article.title}
-                            </Link>
-                            <div className="flex items-center justify-between mt-1">
-                              <Badge variant="outline" className="text-xs">
-                                {article.category}
-                              </Badge>
-                              <span className="text-xs text-gray-500">{article.views} views</span>
+                      {loading
+                        ? Array.from({ length: 10 }).map((_, i) => (
+                            <div key={i} className="animate-pulse">
+                              <div className="h-[46px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md" />
                             </div>
-                          </div>
-                        </div>
-                      ))}
+                          ))
+                        : popular.map((row) => {
+                            const content = (
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+                                    row.rank === 1
+                                      ? "bg-yellow-500"
+                                      : row.rank === 2
+                                        ? "bg-gray-400"
+                                        : row.rank === 3
+                                          ? "bg-orange-500"
+                                          : "bg-violet-400"
+                                  }`}
+                                >
+                                  {row.rank}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-violet-500 line-clamp-1">
+                                    {row.title}
+                                  </div>
+                                  <div className="flex items-center justify-between mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {row.category === 'lp' ? 'LP' : row.category === 'artist' ? '아티스트' : row.category === 'equipment' ? '장비' : '기타'}
+                                    </Badge>
+                                    <span className="text-xs text-gray-500">{row.views.toLocaleString()} views</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                            return row.category ? (
+                              <Link key={row.id} href={`/wiki/${row.category}/${encodeURIComponent(row.id)}`}>{content}</Link>
+                            ) : (
+                              <div key={row.id}>{content}</div>
+                            )
+                          })}
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Quick Links */}
-                <Card className="mt-6">
-                  <CardHeader>
-                    <CardTitle>빠른 링크</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Link
-                        href="#"
-                        className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      >
-                        <div className="font-medium text-sm">편집 가이드</div>
-                        <div className="text-xs text-gray-500">위키 편집 방법 알아보기</div>
-                      </Link>
-                      <Link
-                        href="#"
-                        className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      >
-                        <div className="font-medium text-sm">커뮤니티 규칙</div>
-                        <div className="text-xs text-gray-500">위키 작성 규칙과 가이드라인</div>
-                      </Link>
-                      <Link
-                        href="#"
-                        className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      >
-                        <div className="font-medium text-sm">도움말</div>
-                        <div className="text-xs text-gray-500">자주 묻는 질문과 답변</div>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             </div>
           </div>

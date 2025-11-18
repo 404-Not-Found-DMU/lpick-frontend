@@ -30,6 +30,8 @@ export default function WikiRenderer({ content, components }: { content: string;
         </a>
       )
     },
+
+
     img: ({ src, alt, ...props }) => {
       const url = typeof src === "string" ? src : ""
       if (!url) return null

@@ -1,34 +1,13 @@
 import type { Metadata } from "next"
-import { headers } from "next/headers"
 import ActionButtons from "@/app/wiki/components/ActionButtons"
 import InfoboxLP from "@/app/wiki/components/InfoboxLP"
 import ContentWithToc from "@/app/wiki/components/ContentWithToc"
 import ScrollTopButton from "@/app/wiki/components/ScrollTopButton"
 import WikiLayout from "@/app/wiki/components/WikiLayout"
-import { getDummyWikiBySlug } from "@/app/wiki/edit/data/dummyData"
-export default async function WikiViewPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-
-  // 서버에서 문서 데이터 fetch (timeout + retry)
-  async function fetchWithTimeout(url: string, opts: RequestInit & { timeoutMs?: number; retries?: number } = {}) {
-    const { timeoutMs = 5000, retries = 1, ...rest } = opts
-    for (let attempt = 0; attempt <= retries; attempt++) {
-      const ac = new AbortController()
-      const id = setTimeout(() => ac.abort(), timeoutMs)
-      try {
-        const r = await fetch(url, { ...rest, signal: ac.signal, next: { revalidate: 60 } })
-        clearTimeout(id)
-        if (!r.ok) throw new Error('bad status')
-        return r
-      } catch (e) {
-        clearTimeout(id)
-        if (attempt === retries) throw e
-      }
-    }
-    throw new Error('unreachable')
-  }
-
-  const hdrs = await headers()
+import { getDummyWikiBySlug } from "@/lib/dummy/wiki"
+import { fetchWithTimeout, getBaseUrlFromHeaders } from "@/lib/server/fetch"
+export default async function WikiViewPage(ctx: { params: Promise<{ slug: string }> }) {
+  const { slug } = await ctx.params
 
   // 개발/임시: 더미 데이터로 확인하기 (환경변수로 활성화)
   if (process.env.NEXT_PUBLIC_WIKI_DUMMY === 'true') {
@@ -57,9 +36,7 @@ export default async function WikiViewPage({ params }: { params: Promise<{ slug:
       </>
     )
   }
-  const proto = hdrs.get('x-forwarded-proto') ?? 'http'
-  const host = hdrs.get('host') ?? 'localhost:3000'
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? `${proto}://${host}`
+  const baseUrl = await getBaseUrlFromHeaders()
   const res = await fetchWithTimeout(`${baseUrl}/api/wiki/${encodeURIComponent(slug)}`, { timeoutMs: 5000, retries: 1 })
   if (!res.ok) {
     // 404 처리
@@ -117,13 +94,10 @@ export default async function WikiViewPage({ params }: { params: Promise<{ slug:
   )
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params
+export async function generateMetadata(ctx: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await ctx.params
   try {
-    const hdrs = await headers()
-    const proto = hdrs.get('x-forwarded-proto') ?? 'http'
-    const host = hdrs.get('host') ?? 'localhost:3000'
-    const base = process.env.NEXT_PUBLIC_BASE_URL ?? `${proto}://${host}`
+    const base = await getBaseUrlFromHeaders()
     const res = await fetch(`${base}/api/wiki/${encodeURIComponent(slug)}`, { cache: 'no-store' })
     if (!res.ok) return { title: `위키 - ${slug}`, alternates: { canonical: `/wiki/${slug}` } }
     const data = await res.json()

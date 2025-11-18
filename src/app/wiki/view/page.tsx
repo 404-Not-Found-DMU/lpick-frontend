@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
@@ -19,11 +19,17 @@ import {
 } from "lucide-react"
 import { LivePreview } from "@/app/wiki/edit/components/preview/LivePreview"
 import RecentUpdatedCard from "../components/RecentUpdatedCard"
-import { getDummyData } from "@/app/wiki/edit/data/dummyData"
+import { getDummyData } from "@/lib/dummy/wiki"
 import type { WikiCategory } from "@/types/hierarchical.editor.types"
 
 export default function WikiViewPage() {
   const [showTableOfContents, setShowTableOfContents] = useState(true)
+
+  // 데모 사용 플래그가 꺼져 있으면 안내
+  const demoEnabled = process.env.NEXT_PUBLIC_WIKI_DUMMY === 'true'
+  useEffect(() => {
+    // 클라이언트 전용: 필요한 경우 라우팅 처리 가능
+  }, [])
 
   // 더미 데이터 사용
   const wikiData = getDummyData('lp')
@@ -47,6 +53,22 @@ export default function WikiViewPage() {
       { title: "프로그레시브 록", slug: "progressive-rock" },
       { title: "1970년대 음악", slug: "1970s-music" },
     ],
+  }
+
+  if (!demoEnabled) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 max-w-lg w-full text-center">
+          <h1 className="text-2xl font-bold mb-2">데모 페이지 비활성화됨</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            환경변수 NEXT_PUBLIC_WIKI_DUMMY=true 일 때만 /wiki/view 데모가 활성화됩니다.
+          </p>
+          <Link href="/wiki" className="inline-flex">
+            <Button>위키로 이동</Button>
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (

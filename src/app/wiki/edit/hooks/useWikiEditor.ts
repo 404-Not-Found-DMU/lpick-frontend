@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { CategoryData, TextBlock, WikiCategory, InfoboxData, TracklistData, ArtistInfo, EquipmentInfo, OtherInfo } from '@/types/hierarchical.editor.types';
-import { getDummyData } from '../data/dummyData';
+import { getDummyData } from '@/lib/dummy/wiki';
 
 interface UseWikiEditorProps {
   category: WikiCategory;

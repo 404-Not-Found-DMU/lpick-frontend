@@ -11,15 +11,24 @@ export async function fetcher<T>(
     const normalizedPath = path.startsWith('http') ? path : `${path.startsWith('/') ? path : `/${path}`}`;
     const fullUrl = normalizedPath.startsWith('http') ? normalizedPath : `${baseUrl}${normalizedPath}`;
 
+    // 헤더 구성: 기본 캐시 무효화, Content-Type은 body 있을 때만 설정
+    const baseHeaders: Record<string, string> = {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        ...(options.headers as Record<string, string> || {}),
+    };
+    const shouldSetJson =
+        options.body !== undefined &&
+        !(typeof FormData !== 'undefined' && (options.body as unknown) instanceof FormData) &&
+        !('Content-Type' in baseHeaders);
+    if (shouldSetJson) {
+        baseHeaders['Content-Type'] = 'application/json';
+    }
+
     const res = await fetch(fullUrl, {
         ...options,
-        headers: {
-            'Content-Type': 'application/json', // json 방식 사용
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-            ...(options.headers || {}),
-        },
+        headers: baseHeaders,
         credentials: 'include', // 쿠키 전달 필요
         cache: 'no-store',      // 브라우저 캐시 사용 안 함
     });
@@ -56,12 +65,22 @@ export async function fetcher<T>(
 
             if (refreshResponse.ok) {
                 // 토큰 갱신 성공 시 원래 요청 재시도
+                const retryHeaders: Record<string, string> = {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0',
+                    ...(options.headers as Record<string, string> || {}),
+                };
+                const retryShouldSetJson =
+                    options.body !== undefined &&
+                    !(typeof FormData !== 'undefined' && (options.body as unknown) instanceof FormData) &&
+                    !('Content-Type' in retryHeaders);
+                if (retryShouldSetJson) {
+                    retryHeaders['Content-Type'] = 'application/json';
+                }
                 const retryRes = await fetch(fullUrl, {
                     ...options,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(options.headers || {}),
-                    },
+                    headers: retryHeaders,
                     credentials: 'include',
                     cache: 'no-store',
                 });
@@ -70,7 +89,17 @@ export async function fetcher<T>(
                     throw new Error(`HTTP error! status: ${retryRes.status} - ${retryRes.statusText}`);
                 }
 
-                return retryRes.json();
+                const retryCt = retryRes.headers.get('content-type')?.toLowerCase() ?? '';
+                if (retryCt.includes('application/json')) {
+                    return retryRes.json();
+                } else {
+                    const text = await retryRes.text();
+                    try {
+                        return JSON.parse(text) as T;
+                    } catch {
+                        return text as unknown as T;
+                    }
+                }
             }
         } catch (refreshError) {
             console.warn('토큰 갱신 실패:', refreshError);
@@ -103,5 +132,15 @@ export async function fetcher<T>(
         throw new Error(errorMessage);
     }
 
-    return res.json();
+    const ct = res.headers.get('content-type')?.toLowerCase() ?? '';
+    if (ct.includes('application/json')) {
+        return res.json();
+    } else {
+        const text = await res.text();
+        try {
+            return JSON.parse(text) as T;
+        } catch {
+            return text as unknown as T;
+        }
+    }
 }
