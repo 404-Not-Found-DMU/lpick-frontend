@@ -219,7 +219,7 @@ export const useGearManager = () => {
 };
 
 /**
- * 장비 목록을 배열로 변환하는 유틸리티 훅
+ * 장비 목록을 배열로 변환하는 유틸리티 훅 (즐겨찾기 우선 정렬)
  */
 export const useUserGearList = (gearData: UserGearResponse | null) => {
   const gearList = React.useMemo(() => {
@@ -239,7 +239,12 @@ export const useUserGearList = (gearData: UserGearResponse | null) => {
       gears.push({ ...gearData.ownedTurnTable, type: 'Turntable' });
     }
     
-    return gears;
+    // 즐겨찾기 우선 정렬 (즐겨찾기 → 일반 순서)
+    return gears.sort((a, b) => {
+      if (a.favorite && !b.favorite) return -1;
+      if (!a.favorite && b.favorite) return 1;
+      return 0;
+    });
   }, [gearData]);
 
   return gearList;
