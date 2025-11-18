@@ -32,9 +32,9 @@ export default function ConfirmModal({
             {cancelText}
           </button>
           <button
-            onClick={() => {
-              onConfirm?.()
-              onClose()
+            onClick={async () => {
+              await onConfirm?.()
+              // onConfirm이 완료된 후에만 모달 닫기 (비동기 함수 지원)
             }}
             className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700"
           >
