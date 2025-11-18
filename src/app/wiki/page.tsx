@@ -5,7 +5,7 @@ import { Plus, TrendingUp } from "lucide-react"
 import { Button, Card, CardContent, CardHeader, CardTitle, Badge } from "@/components"
 import Link from "next/link"
 import RecentUpdatedCard from "@/app/wiki/components/RecentUpdatedCard"
-import { getPopularWiki, getPublicWiki, type PopularWikiItem } from "@/hooks/api"
+import { getPopularWiki, getPublicWiki} from "@/hooks/api"
  
 type PopularRow = { id: string; rank: number; title: string; views: number; category?: 'artist' | 'lp' | 'equipment' | 'other' }
 
@@ -28,19 +28,22 @@ const WikiRootPage = () => {
           title: it.name,
           views: Number(it.viewCount ?? 0),
         }))
-        const enriched = await Promise.all(base.map(async (r) => {
-          try {
-            const w = await getPublicWiki(r.id)
-            const seg = w.wikiPageClass === 'ARTIST' ? 'artist' :
-              w.wikiPageClass === 'ALBUM' ? 'lp' :
-              w.wikiPageClass === 'GEAR' ? 'equipment' : 'other'
-            return { ...r, category: seg }
-          } catch {
-            return r
-          }
-        }))
+        const enriched: PopularRow[] = await Promise.all(
+          base.map(async (r): Promise<PopularRow> => {
+            try {
+              const w = await getPublicWiki(r.id)
+              const seg: NonNullable<PopularRow['category']> =
+                w.wikiPageClass === 'ARTIST' ? 'artist' :
+                w.wikiPageClass === 'ALBUM' ? 'lp' :
+                w.wikiPageClass === 'GEAR' ? 'equipment' : 'other'
+              return { ...r, category: seg }
+            } catch {
+              return r
+            }
+          })
+        )
         setPopular(enriched)
-      } catch (e) {
+      } catch {
         setError("인기 문서를 불러오지 못했습니다.")
       } finally {
         setLoading(false)

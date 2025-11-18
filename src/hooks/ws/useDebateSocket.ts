@@ -46,11 +46,6 @@ export function useDebateSocket(opts: {
       webSocketFactory: () =>
         new SockJS(`${baseUrl}/ws`, undefined, {
           transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
-          // Ensure cookies are sent for XHR-based fallbacks (cross-origin)
-          transportOptions: {
-            'xhr-streaming': { withCredentials: true },
-            'xhr-polling': { withCredentials: true },
-          },
         }),
       reconnectDelay: 5000,
       debug: (str: string) => {

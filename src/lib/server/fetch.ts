@@ -1,7 +1,7 @@
 import { headers } from "next/headers"
 
-export function getBaseUrlFromHeaders(): string {
-  const hdrs = headers()
+export async function getBaseUrlFromHeaders(): Promise<string> {
+  const hdrs = await headers()
   const proto = hdrs.get('x-forwarded-proto') ?? 'http'
   const host = hdrs.get('host') ?? 'localhost:3000'
   return process.env.NEXT_PUBLIC_BASE_URL ?? `${proto}://${host}`
@@ -16,9 +16,9 @@ export async function fetchWithTimeout(
     const ac = new AbortController()
     const id = setTimeout(() => ac.abort(), timeoutMs)
     try {
-      type NextOptions = { next?: { revalidate?: number } }
-      const nextOptions: NextOptions = opts.next ? { next: opts.next } : { next: { revalidate: 60 } }
-      const init: RequestInit & NextOptions = { ...(rest as RequestInit), signal: ac.signal, ...nextOptions }
+      const init = { ...(rest as RequestInit), signal: ac.signal } as RequestInit & Record<string, unknown>
+      const providedNext = (opts as Record<string, unknown>)['next']
+      ;(init as Record<string, unknown>)['next'] = providedNext !== undefined ? providedNext : { revalidate: 60 }
       const res = await fetch(url, init as unknown as RequestInit)
       clearTimeout(id)
       if (!res.ok) throw new Error('bad status')
