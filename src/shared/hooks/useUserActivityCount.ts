@@ -25,14 +25,11 @@ export const useUserActivityCount = (): UseUserActivityCountReturn => {
 
     try {
       const response = await getUserActivityCount();
-      console.log('API Response:', response);
       
       // API 응답이 직접 데이터인지 래퍼 객체인지 확인
       if (response.data) {
-        console.log('Using response.data:', response.data);
         setActivityCount(response.data);
       } else {
-        console.log('Using response directly:', response);
         setActivityCount(response as unknown as UserActivityCount);
       }
     } catch (err) {

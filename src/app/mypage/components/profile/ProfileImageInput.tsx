@@ -48,7 +48,9 @@ const ProfileImageInput: React.FC<ProfileImageInputProps> = ({ value, onChange }
           <ImageIcon className="h-4 w-4" />
         </span>
       </div>
-      <span className="text-xs text-gray-400 dark:text-gray-500">프로필 사진을 선택하세요</span>
+      <span className="text-xs text-gray-500 dark:text-gray-400">
+        클릭하여 프로필 사진 변경
+      </span>
     </div>
   );
 };

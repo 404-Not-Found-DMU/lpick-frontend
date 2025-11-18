@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Music, Settings, LogOut, User, Target } from 'lucide-react';
 import Image from 'next/image';
 import { useMyPageStore } from '@/store/myPageStore';
@@ -8,6 +8,7 @@ import { useUserStore } from '@/store/userStore';
 import { useLogout } from '../../hooks/useLogout';
 import { useRouter } from 'next/navigation';
 import { useUserActivityCount } from '@/shared/hooks';
+import ProfileEditModal from './ProfileEditModal';
 
 interface StatCardProps {
   label: string;
@@ -28,6 +29,7 @@ const ProfileSidebar = () => {
   const { handleLogout } = useLogout();
   const router = useRouter();
   const { activityCount } = useUserActivityCount();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // LPTI 유효성 체크 함수
   const hasValidLPTI = () => {
@@ -55,12 +57,11 @@ const ProfileSidebar = () => {
       <div className="mb-4 text-center">
         <div className="relative mb-3 inline-block">
           {userInfo?.profile ? (
-            <div className="h-16 w-16 rounded-full overflow-hidden shadow-lg">
+            <div className="relative h-16 w-16 rounded-full overflow-hidden shadow-lg">
               <Image
                 src={userInfo.profile}
                 alt={`${userInfo.nickname}님의 프로필`}
-                width={64}
-                height={64}
+                fill
                 className="object-cover"
               />
             </div>
@@ -149,7 +150,10 @@ const ProfileSidebar = () => {
 
       {/* Action Buttons */}
       <div className="mb-4 space-y-2">
-        <button className="w-full transform rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl">
+        <button 
+          onClick={() => setIsEditModalOpen(true)}
+          className="w-full transform rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl"
+        >
           프로필 편집
         </button>
         <div className="grid grid-cols-2 gap-2">
@@ -169,6 +173,12 @@ const ProfileSidebar = () => {
           </button>
         </div>
       </div>
+
+      {/* 프로필 편집 모달 */}
+      <ProfileEditModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => setIsEditModalOpen(false)} 
+      />
     </div>
   );
 };

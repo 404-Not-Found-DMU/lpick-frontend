@@ -77,8 +77,8 @@ const EquipmentSection = () => {
     );
   }
 
-  // 에러 처리 - 장비가 없는 것으로 표시
-  const effectiveGearList = error ? [] : gearList;
+  // 에러 처리 - 장비가 없는 것으로 표시, 최대 4개까지만 표시
+  const effectiveGearList = error ? [] : gearList.slice(0, 4);
 
   return (
     <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -104,7 +104,7 @@ const EquipmentSection = () => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {isLoading ? (
           // 로딩 상태
-          Array.from({ length: 3 }).map((_, index) => (
+          Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="rounded-2xl border border-gray-100 p-4 dark:border-gray-800">
               <div className="animate-pulse">
                 <div className="flex items-start justify-between mb-3">
@@ -123,9 +123,9 @@ const EquipmentSection = () => {
           ))
         ) : effectiveGearList.length > 0 ? (
           // 실제 장비 데이터
-          effectiveGearList.map((item) => (
+          effectiveGearList.map((item, index) => (
             <div
-              key={item.id}
+              key={item.id || `gear-${index}`}
               onClick={() => handleOpenAllGearModal(item.type.toUpperCase() as 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE')}
               className="group rounded-2xl border border-gray-100 p-4 transition-all duration-300 hover:border-teal-200 hover:bg-gradient-to-br hover:from-teal-50/50 hover:to-cyan-50/50 hover:shadow-lg cursor-pointer dark:border-gray-800 dark:hover:border-teal-700"
             >
@@ -151,7 +151,7 @@ const EquipmentSection = () => {
                     disabled={isLoading}
                     className="transition-colors hover:scale-110"
                   >
-                    <Star className={`h-4 w-4 ${item.favorite ? 'fill-current text-yellow-400' : 'text-gray-400'}`} />
+                    <Heart className={`h-4 w-4 ${item.favorite ? 'fill-current text-red-500' : 'text-gray-400'}`} />
                   </button>
                   <button
                     onClick={() => handleDeleteGear(item.id)}

@@ -66,14 +66,13 @@ const WelcomeModal = ({
           <div className="flex items-center space-x-4">
             {/* 프로필 이미지 */}
             <div className="relative">
-              <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 ring-4 ring-white dark:ring-gray-900 shadow-lg">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 ring-4 ring-white dark:ring-gray-900 shadow-lg">
                 {displayUserInfo.profile ? (
                   <Image
                     src={displayUserInfo.profile}
                     alt={`${displayUserInfo.nickname}님의 프로필`}
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   /* Header와 동일한 기본 아바타 스타일 적용 */

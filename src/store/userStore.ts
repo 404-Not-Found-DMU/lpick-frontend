@@ -8,6 +8,8 @@ interface UserStoreActions {
   getUserInfo: () => Promise<void>;
   // 사용자 정보 설정
   setUserInfo: (userInfo: UserInfo | null) => void;
+  // 사용자 정보 업데이트 (부분 업데이트)
+  updateUserInfo: (updates: Partial<UserInfo>) => void;
   // 에러 설정
   setError: (error: string | null) => void;
   // 로딩 상태 설정
@@ -49,6 +51,13 @@ export const useUserStore = create<UserStore>()(
       // 사용자 정보 직접 설정
       setUserInfo: (userInfo) => {
         set({ userInfo, error: null });
+      },
+
+      // 사용자 정보 부분 업데이트
+      updateUserInfo: (updates) => {
+        set((state) => ({
+          userInfo: state.userInfo ? { ...state.userInfo, ...updates } : null,
+        }));
       },
 
       // 에러 설정

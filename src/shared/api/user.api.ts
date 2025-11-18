@@ -43,3 +43,22 @@ export const updateUserSettings = async (settings: Partial<UserSettings>): Promi
     throw error;
   }
 };
+
+/**
+ * 사용자 프로필 업데이트
+ */
+export const updateUserProfile = async (formData: FormData): Promise<{ message: string }> => {
+  try {
+    return await fetcher<{ message: string }>('/api/v1/auth', {
+      method: 'PATCH',
+      body: formData,
+      headers: {
+        // FormData를 사용할 때는 Content-Type을 설정하지 않음
+        // 브라우저가 자동으로 multipart/form-data로 설정
+      }
+    });
+  } catch (error) {
+    console.error('Failed to update user profile:', error);
+    throw error;
+  }
+};

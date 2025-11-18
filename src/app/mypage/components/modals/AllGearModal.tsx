@@ -39,10 +39,10 @@ const AllGearModal: React.FC<AllGearModalProps> = ({
 
   const getGearIcon = (gearClass: string) => {
     switch (gearClass) {
-      case 'TURNTABLE': return '🎛️';
-      case 'SPEAKER': return '🔊';
-      case 'HEADPHONE': return '🎧';
-      default: return '📻';
+      case 'TURNTABLE': return <Disc3 className="h-6 w-6" />;
+      case 'SPEAKER': return <Speaker className="h-6 w-6" />;
+      case 'HEADPHONE': return <Headphones className="h-6 w-6" />;
+      default: return <Settings className="h-6 w-6" />;
     }
   };
 
@@ -74,7 +74,7 @@ const AllGearModal: React.FC<AllGearModalProps> = ({
         {/* 헤더 */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
-            <div className="text-2xl">{getGearIcon(gearClass)}</div>
+            <div className="text-teal-600 dark:text-teal-400">{getGearIcon(gearClass)}</div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 내 {getGearClassName(gearClass)} 목록
@@ -139,7 +139,7 @@ const AllGearModal: React.FC<AllGearModalProps> = ({
                           />
                         ) : (
                           <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center dark:bg-gray-700">
-                            <span className="text-2xl">{getGearIcon(gear.gearClass)}</span>
+                            <div className="text-teal-600 dark:text-teal-400">{getGearIcon(gear.gearClass)}</div>
                           </div>
                         )}
                       </div>
@@ -169,12 +169,12 @@ const AllGearModal: React.FC<AllGearModalProps> = ({
                             <button
                               onClick={() => handleToggleFavorite(gear.id, gear.favorite)}
                               disabled={actionLoading}
-                              className="p-2 text-gray-400 hover:text-yellow-500 transition-colors disabled:opacity-50"
+                              className="p-2 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
                               title={gear.favorite ? '즐겨찾기 해제' : '즐겨찾기 설정'}
                             >
-                              <Star 
+                              <Heart 
                                 className={`h-5 w-5 ${
-                                  gear.favorite ? 'fill-current text-yellow-400' : ''
+                                  gear.favorite ? 'fill-current text-red-500' : ''
                                 }`} 
                               />
                             </button>

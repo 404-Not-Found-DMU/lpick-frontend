@@ -37,7 +37,7 @@ const StatsGrid = () => {
   // 로딩 상태
   if (loading) {
     return (
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="relative z-10 mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
@@ -58,13 +58,13 @@ const StatsGrid = () => {
 
   // 에러나 데이터가 없어도 기본값으로 표시
   return (
-    <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="relative z-10 mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
       {stats.map((stat, index) => {
         const IconComponent = stat.icon;
         return (
           <div
             key={index}
-            className="group relative overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900"
+            className="group relative z-0 overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900"
           >
             {/* Background Gradient */}
             <div

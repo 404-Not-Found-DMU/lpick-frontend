@@ -173,9 +173,13 @@ const PostsTab = () => {
               </p>
             </div>
           </div>
-          <button className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl">
-            <Plus className="h-5 w-5" />새 게시글
-          </button>
+          <Link
+            href="/community/write"
+            className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+          >
+            <Plus className="h-5 w-5" />
+            새 게시글
+          </Link>
         </div>
 
         {/* Filter */}
@@ -234,9 +238,9 @@ const PostsTab = () => {
         {!loading && !error && (
           <div className="space-y-4">
             {filteredArticles.map((post) => (
-              <Link
+              <div
                 key={post.articleId}
-                href={`/community/${post.articleId}`}
+                onClick={() => router.push(`/community/write?edit=${post.articleId}`)}
                 className="group block rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:border-indigo-200 hover:bg-gradient-to-br hover:from-indigo-50/50 hover:to-violet-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-indigo-700 cursor-pointer"
               >
                 <div className="flex justify-between">
@@ -298,7 +302,7 @@ const PostsTab = () => {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
@@ -315,16 +319,9 @@ const PostsTab = () => {
                 <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
                   작성한 게시글이 없습니다
                 </h3>
-                <p className="mb-4 text-gray-600 dark:text-gray-400">
-                  첫 번째 게시글을 작성해보세요!
+                <p className="text-gray-600 dark:text-gray-400">
+                  커뮤니티로 가서 처음 게시글을 작성해보세요!
                 </p>
-                <Link
-                  href="/community/write"
-                  className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 px-6 py-3 font-semibold text-white transition-all hover:from-indigo-600 hover:to-violet-700"
-                >
-                  <Plus className="h-4 w-4" />
-                  새 게시글 작성
-                </Link>
               </div>
             )}
             

@@ -104,6 +104,21 @@ const GearAddModal: React.FC<GearAddModalProps> = ({
     }
   };
 
+  // 검색 결과 클릭 시 바로 장비 추가
+  const handleGearClick = async (gear: GearSearchResult) => {
+    if (isAdding) return; // 이미 추가 중이면 클릭 방지
+
+    const success = await addGear({
+      gearId: gear.gearId,
+      gearClass: gear.eqClass
+    });
+
+    if (success) {
+      onSuccess();
+      onClose();
+    }
+  };
+
   const handleCreateTempGear = async () => {
     if (!tempGearData.modelName.trim() || !tempGearData.brand.trim()) {
       alert('모델명과 브랜드를 입력해주세요.');
@@ -344,11 +359,11 @@ const GearAddModal: React.FC<GearAddModalProps> = ({
                     {searchResults.map((gear) => (
                       <div
                         key={gear.gearId}
-                        onClick={() => setSelectedGear(gear)}
+                        onClick={() => handleGearClick(gear)}
                         className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                          selectedGear?.gearId === gear.gearId
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                          isAdding 
+                            ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50 dark:border-gray-700 dark:bg-gray-800' 
+                            : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 dark:border-gray-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/20'
                         }`}
                       >
                         <div className="flex items-center space-x-3">
