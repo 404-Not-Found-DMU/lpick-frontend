@@ -27,10 +27,10 @@ export const useUserActivityCount = (): UseUserActivityCountReturn => {
       const response = await getUserActivityCount();
       
       // API 응답이 직접 데이터인지 래퍼 객체인지 확인
-      if (response.data) {
+      if ('data' in response && response.data) {
         setActivityCount(response.data);
       } else {
-        setActivityCount(response as unknown as UserActivityCount);
+        setActivityCount(response as UserActivityCount);
       }
     } catch (err) {
       console.error('활동 통계 조회 실패:', err);

@@ -90,7 +90,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
       updateUserInfo({
         nickname: nickname.trim(),
         about: bio.trim(),
-        profile: profileImg || userInfo.profile,
+        profile: profileImg || userInfo?.profile,
       });
       
       // 마이페이지 스토어 동기화

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { UserInfo, UserState } from '@/app/login/types';
 import { fetchUserInfo } from '@/app/login/hooks';
+import { setLoggedOutState } from '@/hooks/api/fetchers';
 
 interface UserStoreActions {
   // 사용자 정보 조회
@@ -40,6 +41,9 @@ export const useUserStore = create<UserStore>()(
         try {
           const userInfo = await fetchUserInfo();
           set({ userInfo, isLoading: false });
+          
+          // 사용자 정보 로드 성공 시 로그아웃 상태 해제
+          setLoggedOutState(false);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : '사용자 정보를 불러올 수 없습니다.';
           set({ error: errorMessage, isLoading: false, userInfo: null });

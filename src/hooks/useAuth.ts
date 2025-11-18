@@ -47,6 +47,13 @@ export const useAuth = (): UseAuthReturn => {
   }, [getUserInfo, clearUserInfo]);
 
   useEffect(() => {
+    // 로그인 페이지에서는 자동 인증 체크 하지 않음
+    if (typeof window !== 'undefined' && window.location.pathname === '/login') {
+      setIsLoading(false);
+      setIsAuthenticated(false);
+      return;
+    }
+    
     checkAuth();
   }, [checkAuth]);
 

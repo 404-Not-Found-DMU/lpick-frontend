@@ -32,11 +32,11 @@ const GearAddModal: React.FC<GearAddModalProps> = ({
   });
   const [tempGearImage, setTempGearImage] = useState<File | null>(null);
   
-  const searchTimeout = useRef<NodeJS.Timeout>();
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { searchResults, isSearching, searchError, search, clearSearch } = useGearSearch();
-  const { isAdding, addError, addGear } = useAddGear();
+  const { loading: isAdding, error: addError, addGear } = useAddGear();
   const { isCreating, createError, createGear } = useCreateTempGear();
 
   // 검색 키워드 변경 시 디바운스 검색
