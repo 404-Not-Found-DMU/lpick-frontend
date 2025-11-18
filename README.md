@@ -8,10 +8,11 @@
 
 | 이채원 | 프론트엔드 개발자 |
 | 이창열 | 프론트엔드 개발자 |
+| 고재건 | 프론트엔드 개발자 |
 
 ## 📦 기술 스택
 
-- **Framework**: [Next.js 14 (App Router)](https://nextjs.org/)
+- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
 - **Language**: TypeScript
 - **State Management**: Zustand
 - **CSS**: TailwindCSS, CSS Modules
@@ -42,7 +43,7 @@
 
 ```bash
 # 1. 레포지토리 클론
-git clone https://github.com/LPick/LPick-frontend.git
+git clone https://github.com/404-Not-Found-DMU/lpick-frontend.git
 
 # 2. 의존성 설치
 yarn install
@@ -96,7 +97,7 @@ yarn dev
 
 - 브랜치 전략
   - `main`: 배포 브랜치
-  - `dev`: 개발 통합 브랜치
+  - `develop`: 개발 통합 브랜치
   - `feature/*`, `fix/*`, `design/*` 등 작업 단위 브랜치 생성
 
 - 커밋 컨벤션
