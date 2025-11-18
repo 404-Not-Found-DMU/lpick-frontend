@@ -59,7 +59,7 @@ export const useCommunity = () => {
     };
 
     // articleType에 따라 게시판 타입 변환
-    const getBoardDisplayName = (articleType: ApiBoardType): string => {
+    const getBoardDisplayName = (articleType: ApiBoardType): BoardType => {
       switch (articleType) {
         case ApiBoardType.FREE:
           return '자유게시판';

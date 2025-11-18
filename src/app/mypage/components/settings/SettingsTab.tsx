@@ -138,6 +138,7 @@ const SettingsTab: React.FC = () => {
       // 부분 업데이트: 해당 프라이버시 설정만 전송
       await updateSettings({
         privacy: {
+          ...settings.privacy,
           [key]: value,
         }
       });
@@ -154,6 +155,7 @@ const SettingsTab: React.FC = () => {
       // 부분 업데이트: 해당 알림 설정만 전송
       await updateSettings({
         notification: {
+          ...settings.notification,
           [key]: value,
         }
       });

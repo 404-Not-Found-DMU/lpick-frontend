@@ -8,7 +8,6 @@ import {
   toggleAlbumFavorite,
   deleteUserAlbum,
   getUserAlbumRecord,
-  toggleAlbumFavoriteNew,
   deleteUserAlbumRecord,
   addUserAlbum,
 } from '../api/user-album.api';
@@ -263,7 +262,7 @@ export const useAlbumManager = () => {
     try {
       setLoading(true);
       setError(null);
-      await toggleAlbumFavoriteNew(userAlbumId, favorite);
+      await toggleAlbumFavorite(userAlbumId, favorite);
       
       // 토글 후 목록 새로고침
       await fetchAlbums();
