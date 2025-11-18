@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { X, Star, Trash2, Loader2, Settings } from 'lucide-react';
+import Image from 'next/image';
+import { X, Trash2, Loader2, Settings, Disc3, Speaker, Headphones, Heart } from 'lucide-react';
 import { useGearCategoryList } from '../../hooks/useGearList';
 import { useGearManager } from '../../hooks/useUserGear';
 
@@ -69,10 +70,10 @@ const AllGearModal: React.FC<AllGearModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white dark:bg-gray-900 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* 헤더 */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="text-teal-600 dark:text-teal-400">{getGearIcon(gearClass)}</div>
             <div>
@@ -93,7 +94,7 @@ const AllGearModal: React.FC<AllGearModalProps> = ({
         </div>
 
         {/* 콘텐츠 */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <div className="p-6 overflow-y-auto flex-1 min-h-0">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center space-x-2">
@@ -129,9 +130,11 @@ const AllGearModal: React.FC<AllGearModalProps> = ({
                       {/* 장비 이미지 */}
                       <div className="flex-shrink-0">
                         {gear.img ? (
-                          <img
+                          <Image
                             src={gear.img}
                             alt={gear.name}
+                            width={64}
+                            height={64}
                             className="w-16 h-16 object-cover rounded-lg"
                             onError={(e) => {
                               (e.target as HTMLImageElement).style.display = 'none';
@@ -217,7 +220,7 @@ const AllGearModal: React.FC<AllGearModalProps> = ({
         </div>
 
         {/* 푸터 */}
-        <div className="border-t border-gray-200 p-4 dark:border-gray-700">
+        <div className="border-t border-gray-200 p-4 dark:border-gray-700 flex-shrink-0">
           <button
             onClick={onClose}
             className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"

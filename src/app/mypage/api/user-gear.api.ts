@@ -98,7 +98,7 @@ export const toggleGearFavorite = async (
 ): Promise<GearFavoriteToggleResponse> => {
   try {
     return await fetcher<GearFavoriteToggleResponse>(`/api/v1/user/gear/${userGearId}/favorite-toggle`, {
-      method: 'POST',
+      method: 'PATCH',
       body: JSON.stringify(request),
     });
   } catch (error: unknown) {

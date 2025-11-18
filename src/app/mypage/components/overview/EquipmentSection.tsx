@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Headphones, Plus, Star, ExternalLink, Loader2, Settings, Trash2, Disc3, Speaker } from 'lucide-react';
+import { Headphones, Plus, Star, ExternalLink, Loader2, Settings, Disc3, Speaker } from 'lucide-react';
 import { useGearManager, useUserGearList } from '../../hooks';
 import { useUserStore } from '@/store/userStore';
 import GearAddModal from '../modals/GearAddModal';
@@ -14,7 +14,6 @@ const EquipmentSection = () => {
     isLoading, 
     error, 
     toggleFavorite, 
-    deleteGear,
     refetch
   } = useGearManager();
   const gearList = useUserGearList(gearData);
@@ -41,12 +40,6 @@ const EquipmentSection = () => {
   // 이벤트 핸들러들
   const handleToggleFavorite = async (userGearId: string, currentFavorite: boolean) => {
     await toggleFavorite(userGearId, !currentFavorite);
-  };
-
-  const handleDeleteGear = async (userGearId: string) => {
-    if (confirm('정말로 이 장비를 삭제하시겠습니까?')) {
-      await deleteGear(userGearId);
-    }
   };
 
   const handleOpenAddModal = (gearClass: 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE') => {
@@ -101,10 +94,10 @@ const EquipmentSection = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading ? (
-          // 로딩 상태
-          Array.from({ length: 4 }).map((_, index) => (
+          // 로딩 상태 (3개 항목)
+          Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="rounded-2xl border border-gray-100 p-4 dark:border-gray-800">
               <div className="animate-pulse">
                 <div className="flex items-start justify-between mb-3">
@@ -127,56 +120,50 @@ const EquipmentSection = () => {
             <div
               key={item.id || `gear-${index}`}
               onClick={() => handleOpenAllGearModal(item.type.toUpperCase() as 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE')}
-              className="group rounded-2xl border border-gray-100 p-4 transition-all duration-300 hover:border-teal-200 hover:bg-gradient-to-br hover:from-teal-50/50 hover:to-cyan-50/50 hover:shadow-lg cursor-pointer dark:border-gray-800 dark:hover:border-teal-700"
+              className="group rounded-2xl border border-gray-100 p-3 transition-all duration-300 hover:border-teal-200 hover:bg-gradient-to-br hover:from-teal-50/50 hover:to-cyan-50/50 hover:shadow-lg cursor-pointer dark:border-gray-800 dark:hover:border-teal-700"
             >
               <div className="mb-3 flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="text-teal-600 dark:text-teal-400">{getGearIcon(item.type)}</div>
-                  <div>
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div className="text-teal-600 dark:text-teal-400 flex-shrink-0">{getGearIcon(item.type)}</div>
+                  <div className="min-w-0 flex-1">
                     <div className="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                       {item.type}
                     </div>
-                    <h4 className="font-bold text-gray-900 transition-colors group-hover:text-teal-600 dark:text-white dark:group-hover:text-teal-400">
+                    <h4 className="font-bold text-gray-900 transition-colors group-hover:text-teal-600 dark:text-white dark:group-hover:text-teal-400 truncate">
                       {item.name}
                     </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{item.brand}</p>
-                    {item.modelName && (
-                      <p className="text-xs text-gray-500 dark:text-gray-500">{item.modelName}</p>
-                    )}
+                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{item.brand}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <button 
-                    onClick={() => handleToggleFavorite(item.id, item.favorite)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleFavorite(item.id, item.favorite);
+                    }}
                     disabled={isLoading}
-                    className="transition-colors hover:scale-110"
+                    className="transition-colors hover:scale-110 p-1"
                   >
-                    <Heart className={`h-4 w-4 ${item.favorite ? 'fill-current text-red-500' : 'text-gray-400'}`} />
+                    <Star className={`h-4 w-4 ${item.favorite ? 'fill-current text-yellow-500' : 'text-gray-400'}`} />
                   </button>
-                  <button
-                    onClick={() => handleDeleteGear(item.id)}
-                    disabled={isLoading}
-                    className="transition-colors hover:text-red-500"
-                  >
-                    <Trash2 className="h-4 w-4 text-gray-400" />
-                  </button>
-                  <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                    보유중
-                  </span>
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    모델: {item.modelName || '정보 없음'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
+                <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  보유중
+                </span>
+                <div className="flex items-center gap-1">
                   {item.wikiId && (
-                    <button className="flex items-center gap-1 text-xs font-medium text-teal-600 transition-colors hover:text-teal-700 dark:text-teal-400">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // 위키 페이지로 이동 로직 추가 가능
+                      }}
+                      className="flex items-center gap-1 text-xs font-medium text-teal-600 transition-colors hover:text-teal-700 dark:text-teal-400"
+                    >
                       <ExternalLink className="h-3 w-3" />
-                      상세정보
+                      정보
                     </button>
                   )}
                 </div>
@@ -187,7 +174,7 @@ const EquipmentSection = () => {
           // 장비가 없는 경우 (에러 포함)
           <div 
             onClick={() => handleOpenAddModal('TURNTABLE')}
-            className="col-span-1 md:col-span-2 text-center py-8 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors dark:hover:bg-gray-800"
+            className="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-8 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors dark:hover:bg-gray-800"
           >
             <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400">장비가 없습니다.</p>
@@ -196,34 +183,11 @@ const EquipmentSection = () => {
         )}
       </div>
 
-      {/* 모든 기기 보기 버튼 */}
-      {effectiveGearList.length > 0 && (
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => {
-              const firstGearType = effectiveGearList[0]?.type.toUpperCase() as 'TURNTABLE' | 'SPEAKER' | 'HEADPHONE';
-              handleOpenAllGearModal(firstGearType || 'TURNTABLE');
-            }}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            모든 기기 보기
-          </button>
-        </div>
-      )}
-
       <div className="mt-4 text-center">
-        {effectiveGearList.length > 0 && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              총 {effectiveGearList.length}개의 장비
-            </span>
-            {isLoading && (
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                로딩 중...
-              </div>
-            )}
+        {isLoading && (
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            로딩 중...
           </div>
         )}
       </div>

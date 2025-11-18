@@ -177,35 +177,6 @@ export const getUserAlbumRecord = async (userAlbumId: string): Promise<AlbumReco
 };
 
 /**
- * 앨범 즐겨찾기 토글 (새로운 API 스펙)
- * POST /api/v1/user-album/{userAlbumId}/favorite-toggle
- */
-export const toggleAlbumFavoriteNew = async (
-  userAlbumId: string,
-  favorite: boolean
-): Promise<void> => {
-  try {
-    return await fetcher<void>(`/api/v1/user-album/${userAlbumId}/favorite-toggle`, {
-      method: 'PATCH',
-      body: JSON.stringify({ favorite }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'httpStatus' in error) {
-      if (error.httpStatus === 'NOT_FOUND') {
-        throw new Error('앨범을 찾을 수 없습니다.');
-      }
-      if (error.httpStatus === 'FORBIDDEN') {
-        throw new Error('즐겨찾기를 변경할 권한이 없습니다.');
-      }
-    }
-    throw error;
-  }
-};
-
-/**
  * 사용자 소유 앨범에 대한 녹음 파일 제거
  * DELETE /api/v1/user-album/{userAlbumId}/record
  */
