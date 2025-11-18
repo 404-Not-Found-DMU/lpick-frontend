@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Heart, Reply, MoreHorizontal } from 'lucide-react';
-import { Comment } from '../../types/community.types';
+import { Comment } from '../../community.types';
 
 interface CommentItemProps {
   comment: Comment;

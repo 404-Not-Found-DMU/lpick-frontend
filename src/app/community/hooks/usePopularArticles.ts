@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { getPopularArticles } from '../api/article.api';
-import { ArticleListItem } from '../types/api.types';
+import { getPopularArticles } from '@/shared/api';
+import { ArticleListItem } from '@/shared/types';
 
 export const usePopularArticles = () => {
   const [articles, setArticles] = useState<ArticleListItem[]>([]);

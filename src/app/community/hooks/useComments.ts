@@ -5,10 +5,9 @@
 import { useState, useCallback, useMemo } from 'react';
 import { 
   getComments,
-  getLikedParentComments,
-  getLikedChildComments
-} from '../api/comment.api';
-import { PaginationParams, CommentListItem } from '../types/api.types';
+  getLikedParentComments
+} from '@/shared/api';
+import { PaginationParams, CommentListItem } from '@/shared/types';
 
 export const useComments = (articleId?: string, initialParams?: PaginationParams) => {
   const [comments, setComments] = useState<CommentListItem[]>([]);
@@ -158,31 +157,17 @@ export const useLikedChildComments = (initialParams?: PaginationParams) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // initialParams를 안정적으로 만들기 위해 useMemo 사용
-  const stableParams = useMemo(() => ({
-    page: initialParams?.page,
-    size: initialParams?.size
-  }), [
-    initialParams?.page,
-    initialParams?.size
-  ]);
-
-  const fetchLikedComments = useCallback(async (params?: PaginationParams) => {
+  const fetchLikedComments = useCallback(async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const validParams = {
-        ...params,
-        page: Math.max(1, params?.page || 1),
-        size: Math.max(1, params?.size || 10),
-      };
-      
-      const response = await getLikedChildComments(validParams);
-      setComments(response.content);
-      setTotalElements(response.totalElements);
-      setTotalPages(response.totalPages);
-      setCurrentPage(response.number + 1);
+      // TODO: 자식 댓글 좋아요 API가 구현되면 활성화
+      console.warn('Child comment likes API not implemented yet');
+      setComments([]);
+      setTotalElements(0);
+      setTotalPages(0);
+      setCurrentPage(1);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch liked child comments';
       setError(errorMessage);
@@ -192,14 +177,13 @@ export const useLikedChildComments = (initialParams?: PaginationParams) => {
     }
   }, []);
 
-  const loadPage = useCallback((page: number) => {
-    const validPage = Math.max(1, page);
-    fetchLikedComments({ ...stableParams, page: validPage });
-  }, [fetchLikedComments, stableParams]);
+  const loadPage = useCallback(() => {
+    console.warn('Child comment likes not implemented yet');
+  }, []);
 
   const refresh = useCallback(() => {
-    fetchLikedComments({ ...stableParams, page: currentPage });
-  }, [fetchLikedComments, stableParams, currentPage]);
+    fetchLikedComments();
+  }, [fetchLikedComments]);
 
   return {
     comments,

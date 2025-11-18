@@ -1,8 +1,8 @@
 'use client';
 import Image from 'next/image';
 import { Eye, Heart, MessageSquare, Clock, Bookmark } from 'lucide-react';
-import { Post } from '../../types/community.types';
-import { getBoardColor, getTagColor, formatViews } from '../../utils';
+import { Post } from '../../community.types';
+import { getBoardColor, formatViews } from '../../utils';
 import { usePostNavigation } from '../../hooks/usePostNavigation';
 
 interface PostCardProps {
@@ -50,13 +50,6 @@ export const PostCard = ({ post }: PostCardProps) => {
                   className={`rounded px-1.5 py-0.5 text-xs font-medium text-white sm:px-2 ${getBoardColor(post.board)}`}
                 >
                   {post.board}
-                </span>
-              )}
-              {post.tag && (
-                <span
-                  className={`rounded px-1.5 py-0.5 text-xs font-medium text-white sm:px-2 ${getTagColor(post.tag)}`}
-                >
-                  {post.tag}
                 </span>
               )}
             </div>

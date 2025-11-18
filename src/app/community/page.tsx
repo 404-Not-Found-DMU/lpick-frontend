@@ -14,7 +14,6 @@ const CommunityPageContent = () => {
     error,
     setSearchQuery,
     setBoardFilter,
-    setTagFilter,
     setSortBy,
     setCurrentPage,
     refresh,
@@ -46,8 +45,6 @@ const CommunityPageContent = () => {
           onSearchChange={setSearchQuery}
           activeBoard={filters.board}
           onBoardChange={setBoardFilter}
-          activeTag={filters.tag}
-          onTagChange={setTagFilter}
         />
 
         <div className="mt-8 space-y-8">

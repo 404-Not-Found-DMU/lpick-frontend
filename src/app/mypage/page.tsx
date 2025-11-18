@@ -5,10 +5,8 @@ import React from 'react';
 // 기능별로 그룹화된 컴포넌트 import
 import { TabNavigation } from './components/common';
 import {
-  ActivitySections,
-  AlbumCollection,
+  // AlbumCollection, // 앨범 기능 비활성화
   EquipmentSection,
-  RecentDocuments,
   StatsGrid,
 } from './components/overview';
 import { PostsTab } from './components/post';
@@ -16,7 +14,7 @@ import { CommentsTab } from './components/comment';
 import { LikesTab } from './components/like';
 import { BookmarkTab } from './components/bookmark';
 import { SettingsTab } from './components/settings';
-import { InquiryTab } from './components/inquiry';
+// import { InquiryTab } from './components/inquiry'; // 비활성화
 import { ProfileSidebar } from './components/profile';
 
 // 커스텀 훅
@@ -31,10 +29,8 @@ const MyPage = () => {
         return (
           <div className="space-y-6">
             <StatsGrid />
-            <AlbumCollection />
+            {/* <AlbumCollection /> */} {/* 앨범 기능 비활성화 */}
             <EquipmentSection />
-            <RecentDocuments />
-            <ActivitySections />
           </div>
         );
       case '게시글':
@@ -47,8 +43,8 @@ const MyPage = () => {
         return <BookmarkTab />;
       case '설정':
         return <SettingsTab />;
-      case '문의':
-        return <InquiryTab />;
+      // case '문의': // 비활성화
+      //   return <InquiryTab />;
       default:
         return null;
     }

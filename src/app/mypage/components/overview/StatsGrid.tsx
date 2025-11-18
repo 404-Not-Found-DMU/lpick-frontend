@@ -1,47 +1,70 @@
 'use client';
 
 import React from 'react';
-import { useMyPageStore } from '@/store/myPageStore';
 import { FileText, MessageCircle, Edit, Users } from 'lucide-react';
+import { useUserActivityCount } from '@/shared/hooks';
 
 const StatsGrid = () => {
-  const { activityStats } = useMyPageStore();
+  const { activityCount, loading } = useUserActivityCount();
 
   const stats = [
     {
       icon: FileText,
-      value: activityStats.posts,
+      value: activityCount?.articleCount || 0,
       label: '작성글',
       color: 'bg-blue-500',
     },
     {
       icon: MessageCircle,
-      value: activityStats.comments,
+      value: activityCount?.commentCount || 0,
       label: '댓글',
       color: 'bg-green-500',
     },
     {
       icon: Edit,
-      value: activityStats.wikiEdits,
+      value: activityCount?.wikiEditCount || 0,
       label: '위키편집',
       color: 'bg-purple-500',
     },
     {
       icon: Users,
-      value: activityStats.discussions,
+      value: activityCount?.debateChatCount || 0,
       label: '토론참여',
       color: 'bg-orange-500',
     },
   ];
 
+  // 로딩 상태
+  if (loading) {
+    return (
+      <div className="relative z-10 mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={index}
+            className="group relative overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900"
+          >
+            <div className="relative">
+              <div className="mb-4 h-12 w-12 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
+              <div className="space-y-1">
+                <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // 에러나 데이터가 없어도 기본값으로 표시
   return (
-    <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="relative z-10 mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
       {stats.map((stat, index) => {
         const IconComponent = stat.icon;
         return (
           <div
             key={index}
-            className="group relative overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900"
+            className="group relative z-0 overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900"
           >
             {/* Background Gradient */}
             <div

@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { Share2, Music, Settings, LogOut, Star, Zap, User, Target } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Music, Settings, LogOut, User, Target } from 'lucide-react';
 import Image from 'next/image';
 import { useMyPageStore } from '@/store/myPageStore';
 import { useUserStore } from '@/store/userStore';
 import { useLogout } from '../../hooks/useLogout';
 import { useRouter } from 'next/navigation';
+import { useUserActivityCount } from '@/shared/hooks';
+import ProfileEditModal from './ProfileEditModal';
 
 interface StatCardProps {
   label: string;
@@ -22,10 +24,12 @@ const StatCard = ({ label, value, className = '' }: StatCardProps) => (
 );
 
 const ProfileSidebar = () => {
-  const { userProfile, activityStats, setActiveTab, syncUserInfo } = useMyPageStore();
+  const { userProfile, setActiveTab, syncUserInfo } = useMyPageStore();
   const { userInfo } = useUserStore();
   const { handleLogout } = useLogout();
   const router = useRouter();
+  const { activityCount } = useUserActivityCount();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // LPTI 유효성 체크 함수
   const hasValidLPTI = () => {
@@ -53,12 +57,11 @@ const ProfileSidebar = () => {
       <div className="mb-4 text-center">
         <div className="relative mb-3 inline-block">
           {userInfo?.profile ? (
-            <div className="h-16 w-16 rounded-full overflow-hidden shadow-lg">
+            <div className="relative h-16 w-16 rounded-full overflow-hidden shadow-lg">
               <Image
                 src={userInfo.profile}
                 alt={`${userInfo.nickname}님의 프로필`}
-                width={64}
-                height={64}
+                fill
                 className="object-cover"
               />
             </div>
@@ -128,31 +131,6 @@ const ProfileSidebar = () => {
         )}
       </div>
 
-      {/* Level & Experience Bar */}
-      <div className="mb-4 rounded-2xl bg-gradient-to-r from-yellow-50 to-orange-50 p-3 dark:from-yellow-900/20 dark:to-orange-900/20">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Star className="h-4 w-4 text-yellow-500" />
-            <span className="text-sm font-bold text-gray-900 dark:text-white">
-              레벨 {userProfile.level}
-            </span>
-          </div>
-          <span className="text-xs text-gray-600 dark:text-gray-400">
-            {userProfile.experience} / {userProfile.maxExperience} XP
-          </span>
-        </div>
-        <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 transition-all duration-500"
-            style={{ width: `${(userProfile.experience / userProfile.maxExperience) * 100}%` }}
-          />
-        </div>
-        <div className="mt-1 flex items-center gap-1 text-xs text-yellow-600 dark:text-yellow-400">
-          <Zap className="h-3 w-3" />
-          <span>다음 레벨까지 {userProfile.maxExperience - userProfile.experience} XP</span>
-        </div>
-      </div>
-
       {/* Bio */}
       {userInfo?.about && (
         <div className="mb-4 rounded-2xl bg-gray-50 p-3 dark:bg-gray-800/50">
@@ -164,22 +142,21 @@ const ProfileSidebar = () => {
 
       {/* Additional Stats */}
       <div className="mb-4 grid grid-cols-2 gap-2">
-        <StatCard label="작성글" value={activityStats.posts} />
-        <StatCard label="댓글" value={activityStats.comments} />
-        <StatCard label="위키편집" value={activityStats.wikiEdits} />
-        <StatCard label="토론참여" value={activityStats.discussions} />
+        <StatCard label="작성글" value={activityCount?.articleCount || 0} />
+        <StatCard label="댓글" value={activityCount?.commentCount || 0} />
+        <StatCard label="위키편집" value={activityCount?.wikiEditCount || 0} />
+        <StatCard label="토론참여" value={activityCount?.debateChatCount || 0} />
       </div>
 
       {/* Action Buttons */}
       <div className="mb-4 space-y-2">
-        <button className="w-full transform rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl">
+        <button 
+          onClick={() => setIsEditModalOpen(true)}
+          className="w-full transform rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl"
+        >
           프로필 편집
         </button>
-        <div className="grid grid-cols-3 gap-2">
-          <button className="flex items-center justify-center gap-1.5 rounded-xl bg-gray-100 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
-            <Share2 className="h-3 w-3" />
-            공유
-          </button>
+        <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => setActiveTab('설정')}
             className="flex items-center justify-center gap-1.5 rounded-xl bg-gray-100 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -196,6 +173,12 @@ const ProfileSidebar = () => {
           </button>
         </div>
       </div>
+
+      {/* 프로필 편집 모달 */}
+      <ProfileEditModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => setIsEditModalOpen(false)} 
+      />
     </div>
   );
 };

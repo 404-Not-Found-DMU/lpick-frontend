@@ -7,11 +7,11 @@ import {
   unlikeArticle,
   bookmarkArticle,
   unbookmarkArticle
-} from '../api/article.api';
+} from '@/shared/api';
 import {
   CreateArticleRequest,
   UpdateArticleRequest
-} from '../types/api.types';
+} from '@/shared/types';
 
 /**
  * 게시글 관리 훅 (CRUD 작업)

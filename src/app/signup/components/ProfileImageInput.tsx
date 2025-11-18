@@ -30,7 +30,7 @@ const ProfileImageInput: React.FC<ProfileImageInputProps> = ({ value, onChange }
         role="button"
       >
         {value ? (
-          <Image src={value} alt="프로필 사진" fill className="object-cover" />
+          <Image src={value} alt="프로필 사진" fill className="rounded-full object-cover" />
         ) : (
           <User className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 text-violet-300 dark:text-violet-700" />
         )}

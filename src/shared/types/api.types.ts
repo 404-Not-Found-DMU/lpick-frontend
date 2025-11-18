@@ -2,6 +2,51 @@
  * 커뮤니티 API 타입 정의 (Swagger 기반)
  */
 
+// 사용자 설정
+export interface UserPrivacySettings {
+  allowViewActCount: boolean;
+  allowViewRecentAct: boolean;
+  allowViewGear: boolean;
+  allowViewCollection: boolean;
+}
+
+export interface UserNotificationSettings {
+  isAlarmWikiEdit: boolean;
+  isAlarmNewDebateAnswer: boolean;
+  isAlarmCommented: boolean;
+  isAlarmEvent: boolean;
+}
+
+export interface UserSettings {
+  privacy: UserPrivacySettings;
+  theme: 'LIGHT' | 'DARK';
+  notification: UserNotificationSettings;
+}
+
+export interface UserSettingsResponse {
+  success: boolean;
+  message: string;
+  data: UserSettings;
+}
+
+// 사용자 활동 통계
+export interface UserActivityCount {
+  articleCount: number;
+  commentCount: number;
+  wikiEditCount: number;
+  debateChatCount: number;
+}
+
+// API 응답은 직접 데이터이거나 래퍼 객체일 수 있음
+export type UserActivityCountResponse = UserActivityCount | {
+  success: boolean;
+  message: string;
+  data: UserActivityCount;
+};
+
+// 댓글 필터 타입
+export type MyCommentFilter = 'ALL' | 'ONLY_COMMENT' | 'ONLY_REPLY' | 'LIKE_DESC';
+
 // 공통 페이지네이션 타입
 export interface Pageable {
   pageNumber: number;
@@ -38,6 +83,7 @@ export interface PagedResponse<T> {
 export interface ArticleListItem {
   articleId: string;
   title: string;
+  articleType: BoardType;
   createdAt: string;
   modifiedAt: string;
   likeCount: number;
@@ -45,6 +91,7 @@ export interface ArticleListItem {
   bookmarkCount: number;
   oauthId: string;
   author: string;
+  viewCount: number;
 }
 
 // 게시글 상세 정보
@@ -152,3 +199,62 @@ export interface UpdateCommentRequest {
 export type CommentListResponse = PagedResponse<CommentListItem>;
 export type LikedParentCommentsResponse = PagedResponse<CommentListItem>;
 export type LikedChildCommentsResponse = PagedResponse<CommentListItem>;
+
+// 북마크 관련 타입
+export interface BookmarkItem {
+  articleId: string;
+  title: string;
+  content: string;
+  boardType: BoardType;
+  viewCount: number;
+  likeCount: number;
+  bookmarkCount: number;
+  commentCount: number;
+  authorName: string;
+  authorProfileImage: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 새로운 게시글 북마크 API 타입
+export interface ArticleBookmarkItem {
+  articleId?: string; // 게시글 ID 추가
+  writerName: string;
+  articleCreatedAt: string;
+  articleTitle: string;
+  articleContent: string;
+  likeCount: number;
+  viewCount: number;
+}
+
+// 새로운 위키 북마크 API 타입
+export interface WikiBookmarkItem {
+  wikiBookmarkId: string;
+  wikiPageId: string;
+  wikiTitle: string;
+  wikiPageClass: string;
+}
+
+// 북마크 응답 타입
+export type BookmarkedArticlesResponse = PagedResponse<BookmarkItem>;
+export type ArticleBookmarksResponse = PagedResponse<ArticleBookmarkItem>;
+export type WikiBookmarksResponse = PagedResponse<WikiBookmarkItem>;
+export type BookmarkedWikisResponse = WikiBookmarksResponse; // 호환성을 위해 유지
+
+// 내 댓글 관련 타입
+export interface MyCommentItem {
+  isReplyComment: boolean;
+  parentCommentWriterName: string | null;
+  commentValue: string;
+  createdAt: string;
+  articleId: string;
+  articleTitle: string;
+  articleWriterName: string;
+  commentLikeCount: number;
+}
+
+export interface MyCommentsParams extends PaginationParams {
+  filter?: MyCommentFilter;
+}
+
+export type MyCommentsResponse = PagedResponse<MyCommentItem>;

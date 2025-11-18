@@ -166,7 +166,7 @@ export const deleteUserAlbum = async (userAlbumId: string): Promise<void> => {
 export const getUserAlbumRecord = async (userAlbumId: string): Promise<AlbumRecord> => {
   try {
     return await fetcher<AlbumRecord>(`/api/v1/user-album/${userAlbumId}/record`, {
-      method: 'GET',
+      method: 'PATCH',
     });
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'httpStatus' in error && error.httpStatus === 'NOT_FOUND') {
@@ -186,7 +186,7 @@ export const toggleAlbumFavoriteNew = async (
 ): Promise<void> => {
   try {
     return await fetcher<void>(`/api/v1/user-album/${userAlbumId}/favorite-toggle`, {
-      method: 'POST',
+      method: 'PATCH',
       body: JSON.stringify({ favorite }),
       headers: {
         'Content-Type': 'application/json',
@@ -199,6 +199,57 @@ export const toggleAlbumFavoriteNew = async (
       }
       if (error.httpStatus === 'FORBIDDEN') {
         throw new Error('즐겨찾기를 변경할 권한이 없습니다.');
+      }
+    }
+    throw error;
+  }
+};
+
+/**
+ * 사용자 소유 앨범에 대한 녹음 파일 제거
+ * DELETE /api/v1/user-album/{userAlbumId}/record
+ */
+export const deleteUserAlbumRecord = async (userAlbumId: string): Promise<void> => {
+  try {
+    await fetcher<void>(`/api/v1/user-album/${userAlbumId}/record`, {
+      method: 'DELETE',
+    });
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'httpStatus' in error) {
+      if (error.httpStatus === 'NOT_FOUND') {
+        throw new Error('앨범 또는 녹음 파일을 찾을 수 없습니다.');
+      }
+      if (error.httpStatus === 'FORBIDDEN') {
+        throw new Error('녹음 파일을 삭제할 권한이 없습니다.');
+      }
+    }
+    throw error;
+  }
+};
+
+/**
+ * 사용자 소유 앨범 추가
+ * POST /api/v1/user-album
+ */
+export const addUserAlbum = async (albumData: { albumId: string }): Promise<UserAlbumDetailResponse> => {
+  try {
+    return await fetcher<UserAlbumDetailResponse>('/api/v1/user-album', {
+      method: 'POST',
+      body: JSON.stringify(albumData),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'httpStatus' in error) {
+      if (error.httpStatus === 'NOT_FOUND') {
+        throw new Error('해당 앨범을 서비스에서 찾을 수 없습니다.');
+      }
+      if (error.httpStatus === 'CONFLICT') {
+        throw new Error('이미 소유하고 있는 앨범입니다.');
+      }
+      if (error.httpStatus === 'BAD_REQUEST') {
+        throw new Error('잘못된 앨범 정보입니다.');
       }
     }
     throw error;

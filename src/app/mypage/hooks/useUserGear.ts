@@ -5,6 +5,7 @@ import {
   toggleGearFavorite,
   addUserGear,
   deleteUserGear,
+  createTempGear,
 } from '../api/user-gear.api';
 import type {
   UserGearResponse,
@@ -12,6 +13,7 @@ import type {
   UserGear,
   AddGearRequest,
   GearFavoriteToggleRequest,
+  TempGearRequest,
 } from '../api/types';
 
 /**
@@ -219,7 +221,7 @@ export const useGearManager = () => {
 /**
  * 장비 목록을 배열로 변환하는 유틸리티 훅
  */
-export const useGearList = (gearData: UserGearResponse | null) => {
+export const useUserGearList = (gearData: UserGearResponse | null) => {
   const gearList = React.useMemo(() => {
     if (!gearData) return [];
     
@@ -241,4 +243,33 @@ export const useGearList = (gearData: UserGearResponse | null) => {
   }, [gearData]);
 
   return gearList;
+};
+
+/**
+ * 임시 장비 생성 훅
+ */
+export const useCreateTempGear = () => {
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  const createGear = async (data: TempGearRequest, imageFile?: File) => {
+    setIsCreating(true);
+    setCreateError(null);
+
+    try {
+      const result = await createTempGear(data, imageFile);
+      return result;
+    } catch (error) {
+      setCreateError(error instanceof Error ? error.message : '임시 장비 생성 중 오류가 발생했습니다.');
+      return null;
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  return {
+    isCreating,
+    createError,
+    createGear,
+  };
 };

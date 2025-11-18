@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { SortOption } from '../../types/community.types';
+import { SortOption } from '../../community.types';
 import { SORT_OPTIONS } from '../../constants';
 
 interface SortDropdownProps {

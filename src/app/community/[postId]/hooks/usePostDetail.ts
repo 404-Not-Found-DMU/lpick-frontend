@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast/ToastProvider';
-import { Post, Comment, convertApiCommentToUiComment } from '../../types/community.types';
-import { ChildComment, CommentListItem } from '../../types/api.types';
+import { Post, Comment, convertApiCommentToUiComment } from '../../community.types';
+import { ChildComment, CommentListItem } from '@/shared/types';
 import { useArticle } from '../../hooks/useArticles';
 import { useArticleInteractions, useArticleManager } from '../../hooks/useArticleManager';
 import { useComments, useCommentManager, useCommentInteractions } from '../../hooks';

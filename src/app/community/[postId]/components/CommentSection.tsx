@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Comment } from '../../types/community.types';
+import { Comment } from '../../community.types';
 import { CommentHeader, type CommentSortOption } from './CommentHeader';
 import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';

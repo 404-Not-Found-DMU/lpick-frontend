@@ -1,10 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PostFormData, BoardTypeMapping, BadgeTypeMapping } from '../../types/community.types';
+import { PostFormData, BoardTypeMapping, BadgeTypeMapping } from '../../community.types';
 import { useArticleManager } from '../../hooks/useArticleManager';
 import { useArticle } from '../../hooks/useArticles';
-import { CreateArticleRequest, UpdateArticleRequest } from '../../types/api.types';
+import { CreateArticleRequest, UpdateArticleRequest } from '@/shared/types';
 
 export const usePostForm = () => {
   const router = useRouter();

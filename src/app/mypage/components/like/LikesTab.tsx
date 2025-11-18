@@ -1,104 +1,67 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Heart, MessageCircle, User, FileText, Music, Calendar, Eye, Filter } from 'lucide-react';
+import React from 'react';
+import { Heart, MessageCircle, User, FileText, Calendar, Eye, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useLikedArticles } from '@/shared/hooks';
+import { BoardType } from '@/shared/types';
 
 const LikesTab = () => {
-  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const { articles, loading, error } = useLikedArticles({ page: 1, size: 20 });
 
-  const categories = [
-    { name: '전체', count: 156 },
-    { name: '게시글', count: 45 },
-    { name: '댓글', count: 67 },
-    { name: '아티스트', count: 23 },
-    { name: '위키 리뷰', count: 21 },
-  ];
-
-  const likedItems = [
-    {
-      id: 1,
-      type: 'post',
-      title: 'Pink Floyd - The Wall 앨범 리뷰',
-      author: 'MusicCritic',
-      date: '2024-01-15',
-      likes: 234,
-      views: '1.2k',
-      content: '이 앨범은 정말 대단한 작품입니다...',
-    },
-    {
-      id: 2,
-      type: 'comment',
-      title: '정말 좋은 분석이네요! 저도 같은 생각입니다.',
-      author: 'VinylLover',
-      date: '2024-01-14',
-      likes: 12,
-      views: '89',
-      originalPost: 'David Bowie 디스코그래피 분석',
-    },
-    {
-      id: 3,
-      type: 'artist',
-      title: 'The Beatles',
-      author: 'Official Artist',
-      date: '2024-01-12',
-      likes: 567,
-      views: '15k',
-      content: '영국 리버풀 출신의 전설적인 록 밴드',
-    },
-    {
-      id: 4,
-      type: 'wiki',
-      title: 'Led Zeppelin IV 앨범 분석',
-      author: 'WikiEditor',
-      date: '2024-01-10',
-      likes: 89,
-      views: '456',
-      content: 'Stairway to Heaven이 수록된 명반...',
-    },
-  ];
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'post':
-        return <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
-      case 'comment':
-        return <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
-      case 'artist':
-        return <User className="h-5 w-5 text-violet-600 dark:text-violet-400" />;
-      case 'wiki':
-        return <Music className="h-5 w-5 text-orange-600 dark:text-orange-400" />;
-      default:
-        return <Heart className="h-5 w-5 text-red-500" />;
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toISOString().split('T')[0];
+    } catch {
+      return dateString;
     }
   };
 
-  const getTypeBg = (type: string) => {
-    switch (type) {
-      case 'post':
-        return 'bg-blue-100 dark:bg-blue-900/20';
-      case 'comment':
-        return 'bg-green-100 dark:bg-green-900/20';
-      case 'artist':
-        return 'bg-violet-100 dark:bg-violet-900/20';
-      case 'wiki':
-        return 'bg-orange-100 dark:bg-orange-900/20';
-      default:
-        return 'bg-red-100 dark:bg-red-900/20';
-    }
-  };
-
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case 'post':
-        return '게시글';
-      case 'comment':
-        return '댓글';
-      case 'artist':
+  // BoardType을 한글 라벨로 변환
+  const getBoardTypeLabel = (boardType: BoardType): string => {
+    switch (boardType) {
+      case BoardType.FREE:
+        return '자유게시판';
+      case BoardType.GEAR:
+        return '장비';
+      case BoardType.ALBUM:
+        return '음반';
+      case BoardType.ARTIST:
         return '아티스트';
-      case 'wiki':
-        return '위키 리뷰';
       default:
-        return type;
+        return '자유게시판';
+    }
+  };
+
+  // 카테고리별 아이콘 및 색상 설정
+  const getCategoryIcon = (boardType: BoardType) => {
+    switch (boardType) {
+      case BoardType.FREE:
+        return <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
+      case BoardType.GEAR:
+        return <Heart className="h-5 w-5 text-pink-600 dark:text-pink-400" />;
+      case BoardType.ALBUM:
+        return <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />;
+      case BoardType.ARTIST:
+        return <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
+      default:
+        return <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
+    }
+  };
+
+  const getCategoryBg = (boardType: BoardType) => {
+    switch (boardType) {
+      case BoardType.FREE:
+        return 'bg-green-100 dark:bg-green-900/20';
+      case BoardType.GEAR:
+        return 'bg-pink-100 dark:bg-pink-900/20';
+      case BoardType.ALBUM:
+        return 'bg-purple-100 dark:bg-purple-900/20';
+      case BoardType.ARTIST:
+        return 'bg-blue-100 dark:bg-blue-900/20';
+      default:
+        return 'bg-gray-100 dark:bg-gray-900/20';
     }
   };
 
@@ -111,124 +74,107 @@ const LikesTab = () => {
               <Heart className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">좋아요한 콘텐츠</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">좋아요</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                마음에 들어한 콘텐츠를 모아보세요
+                좋아요한 게시글을 확인하세요
               </p>
             </div>
           </div>
         </div>
 
-        {/* 카테고리 필터 */}
-        <div className="mb-6 rounded-2xl bg-gray-50 p-4 dark:bg-gray-800/50">
-          <div className="mb-3 flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              카테고리 필터
-            </span>
+        {/* 로딩 상태 */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+            <span className="ml-2 text-gray-600 dark:text-gray-400">게시글을 불러오는 중...</span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category.name}
-                onClick={() => setSelectedCategory(category.name)}
-                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                  selectedCategory === category.name
-                    ? 'scale-105 bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-md'
-                    : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                }`}
+        )}
+
+        {/* 에러 상태 */}
+        {error && !loading && (
+          <div className="py-12 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+              <Heart className="h-8 w-8 text-red-600 dark:text-red-400" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              좋아요한 게시글을 불러올 수 없습니다
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* 좋아요한 게시글 목록 */}
+        {!loading && !error && (
+          <div className="space-y-4">
+            {articles.map((article) => (
+              <Link
+                key={article.articleId}
+                href={`/community/${article.articleId}`}
+                className="group block rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:border-red-200 hover:bg-gradient-to-br hover:from-red-50/50 hover:to-pink-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-red-700 cursor-pointer"
               >
-                {category.name}
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    selectedCategory === category.name
-                      ? 'bg-white/20 text-white'
-                      : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-400'
-                  }`}
-                >
-                  {category.count}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 좋아요 목록 */}
-        <div className="space-y-4">
-          {likedItems.map((item) => (
-            <div
-              key={item.id}
-              className="group rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:border-red-200 hover:bg-gradient-to-br hover:from-red-50/50 hover:to-pink-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-red-700"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex flex-1 items-start gap-4">
-                  <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-xl ${getTypeBg(item.type)} shadow-sm`}
-                  >
-                    {getTypeIcon(item.type)}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
-                        {getTypeLabel(item.type)}
-                      </span>
-                      <span className="text-xs text-gray-400">•</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {item.author}
-                      </span>
-                      <span className="text-xs text-gray-400">•</span>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <Calendar className="h-3 w-3" />
-                        {item.date}
-                      </div>
+                <div className="flex items-start justify-between">
+                  <div className="flex flex-1 items-start gap-4">
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-xl ${getCategoryBg(article.articleType)} shadow-sm`}
+                    >
+                      {getCategoryIcon(article.articleType)}
                     </div>
 
-                    <h4 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-red-600 dark:text-white dark:group-hover:text-red-400">
-                      {item.title}
-                    </h4>
-
-                    {item.content && (
-                      <p className="mb-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
-                        {item.content}
-                      </p>
-                    )}
-
-                    {item.originalPost && (
-                      <p className="mb-3 text-sm text-blue-600 dark:text-blue-400">
-                        원글: {item.originalPost}
-                      </p>
-                    )}
-
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1 text-red-500">
-                        <Heart className="h-4 w-4 fill-current" />
-                        <span className="text-sm font-medium">{item.likes}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className="text-xs font-medium uppercase text-red-600 dark:text-red-400">
+                          {getBoardTypeLabel(article.articleType)}
+                        </span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {article.author}
+                        </span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <Calendar className="h-3 w-3" />
+                          {formatDate(article.createdAt)}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <Eye className="h-4 w-4" />
-                        <span className="text-sm font-medium">{item.views}</span>
+
+                      <h4 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-red-600 dark:text-white dark:group-hover:text-red-400">
+                        {article.title}
+                      </h4>
+
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1 text-red-500">
+                          <Heart className="h-4 w-4 fill-current" />
+                          <span className="text-sm font-medium">{article.likeCount}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-blue-500">
+                          <MessageCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">{article.commentCount}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-500">
+                          <Eye className="h-4 w-4" />
+                          <span className="text-sm font-medium">{article.viewCount}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+              </Link>
+            ))}
+          </div>
+        )}
 
-                <button className="text-red-500 transition-colors hover:text-red-600">
-                  <Heart className="h-5 w-5 fill-current" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {likedItems.length === 0 && (
+        {/* 빈 상태 */}
+        {!loading && !error && articles.length === 0 && (
           <div className="py-12 text-center">
-            <Heart className="mx-auto mb-4 h-16 w-16 text-gray-400 opacity-50" />
-            <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-              아직 좋아요한 콘텐츠가 없습니다
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+              <Heart className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              좋아요한 게시글이 없습니다
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              마음에 드는 게시글, 댓글, 아티스트에 좋아요를 눌러보세요
+              마음에 드는 게시글에 좋아요를 눌러보세요
             </p>
           </div>
         )}
