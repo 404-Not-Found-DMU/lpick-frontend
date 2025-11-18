@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button, Input, Badge } from "@/components";
 import { getDebatesByWiki, type DebateListItem, type DebateStatus, type DebateSubject } from "@/hooks/api/debate.api";
+import { getPublicWiki, type PublicWikiResponse } from "@/hooks/api/wiki.api";
 
 const categoryOptions: { label: string; value: DebateSubject | "all" }[] = [
   { label: "전체", value: "all" },
@@ -29,13 +30,17 @@ function WikiDiscussListForDoc({ slug }: { slug: string }) {
   const [items, setItems] = useState<DebateListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [wikiInfo, setWikiInfo] = useState<PublicWikiResponse | null>(null);
 
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError(null);
-    getDebatesByWiki(slug)
-      .then((list) => {
+    Promise.all([
+      getDebatesByWiki(slug),
+      getPublicWiki(slug).catch(() => null),
+    ])
+      .then(([list, wiki]) => {
         if (!active) return;
         // 서버가 이미 정렬해 주더라도, 안전하게 OPEN -> VOTE -> CLOSE, updateAt 내림차순으로 보정
         const order: DebateStatus[] = ["OPEN", "VOTE", "CLOSE"];
@@ -47,6 +52,7 @@ function WikiDiscussListForDoc({ slug }: { slug: string }) {
           return bt - at;
         });
         setItems(sorted);
+        if (wiki) setWikiInfo(wiki);
       })
       .catch((e) => {
         if (active) setError(e instanceof Error ? e.message : "목록을 불러오지 못했습니다.");
@@ -78,29 +84,56 @@ function WikiDiscussListForDoc({ slug }: { slug: string }) {
   }, [items, q, category, status, sortBy]);
 
   const docTitle = useMemo(() => {
+    if (wikiInfo?.title) return wikiInfo.title;
     try {
       const decoded = decodeURIComponent(slug);
       return decoded.replace(/-/g, ' ');
     } catch {
       return slug;
     }
-  }, [slug]);
+  }, [slug, wikiInfo]);
+
+  // wikiPageClass -> route segment
+  const categorySegment = useMemo(() => {
+    const klass = wikiInfo?.wikiPageClass;
+    switch (klass) {
+      case "ARTIST": return "artist";
+      case "GEAR": return "equipment";
+      case "ALBUM": return "lp";
+      case "OTHER": return "other";
+      default: return null;
+    }
+  }, [wikiInfo]);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-2 flex items-center justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold">위키 토론</h1>
-          <div className="text-base font-medium">
-            문서: <Link href={`/wiki/${slug}`} className="text-violet-600 hover:underline">{docTitle}</Link>
+          <div className="mt-2 text-sm text-gray-600">
+            <span className="inline-flex items-center gap-2">
+              <span className="inline-block rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">문서</span>
+              <Link
+                href={categorySegment ? `/wiki/${categorySegment}/${slug}` : `/wiki/${slug}`}
+                className="font-medium text-violet-600 hover:underline truncate"
+              >
+                {docTitle}
+              </Link>
+              {wikiInfo && (
+                <span className="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                  {wikiInfo.wikiPageClass}
+                </span>
+              )}
+            </span>
           </div>
         </div>
         <Button onClick={() => router.push(`/wiki/${encodeURIComponent(slug)}/discuss/new`)}>새 토론 개설</Button>
       </div>
+      <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">문서의 토론을 확인하고, 새로운 토론을 개설할 수 있습니다.</p>
 
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="md:w-1/2">
-          <Input placeholder="제목 검색" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Input placeholder="제목 검색" value={q} onChange={(e) => setQ(e.target.value)} className="h-11" />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1 rounded-full bg-gray-100 p-1">
@@ -120,7 +153,7 @@ function WikiDiscussListForDoc({ slug }: { slug: string }) {
             </button>
           </div>
           <select
-            className="rounded-md border px-3 py-2"
+            className="rounded-md border px-3 h-10 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400"
             value={category}
             onChange={(e) => setCategory(e.target.value as DebateSubject | 'all')}
           >
@@ -129,7 +162,7 @@ function WikiDiscussListForDoc({ slug }: { slug: string }) {
             ))}
           </select>
           <select
-            className="rounded-md border px-3 py-2"
+            className="rounded-md border px-3 h-10 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400"
             value={status}
             onChange={(e) => setStatus(e.target.value as DebateStatus | 'all')}
           >
@@ -150,7 +183,7 @@ function WikiDiscussListForDoc({ slug }: { slug: string }) {
         {error && <div className="rounded-lg border p-8 text-center text-red-500">{error}</div>}
         {loading && <div className="rounded-lg border p-8 text-center text-gray-500">불러오는 중...</div>}
         {!loading && filtered.map((t) => (
-          <div key={t.debateId} className="block rounded-lg border p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+          <div key={t.debateId} className="block rounded-lg border p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-shadow hover:shadow-sm">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0 cursor-pointer" onClick={() => router.push(`/wiki/${encodeURIComponent(slug)}/discuss/${t.debateId}`)}>
                 <div className="flex flex-wrap items-center gap-2">

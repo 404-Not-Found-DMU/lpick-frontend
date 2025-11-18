@@ -18,6 +18,7 @@ import { useDebateSocket } from "@/hooks/ws/useDebateSocket";
 import { useUserStore } from "@/store/userStore";
 import { User } from "lucide-react";
 import Image from "next/image";
+import { getPublicWiki, type PublicWikiResponse } from "@/hooks/api/wiki.api";
 
 export default function DiscussionDetailPageForDoc() {
   const router = useRouter();
@@ -32,6 +33,8 @@ export default function DiscussionDetailPageForDoc() {
   const [selectedOption, setSelectedOption] = useState<"AGREE" | "DISAGREE" | "ABSTAIN" | "">("");
   // 답변 대상
   const [replyTo, setReplyTo] = useState<DebateChatItem | null>(null);
+  const [wikiInfo, setWikiInfo] = useState<PublicWikiResponse | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<boolean>(false);
 
   useEffect(() => {
     let active = true;
@@ -39,14 +42,16 @@ export default function DiscussionDetailPageForDoc() {
       try {
         setLoading(true);
         setError(null);
-        const [list, chatList] = await Promise.all([
+        const [list, chatList, wiki] = await Promise.all([
           getDebatesByWiki(slug),
           getDebateChatList(id),
+          getPublicWiki(slug).catch(() => null),
         ]);
         if (!active) return;
         const found = list.find((d) => d.debateId === id) ?? null;
         setThread(found);
         setChats(chatList);
+        if (wiki) setWikiInfo(wiki);
         if (found && found.status !== 'OPEN') {
           try {
             const res = await getDebateBallot(id);
@@ -120,8 +125,13 @@ export default function DiscussionDetailPageForDoc() {
                 {thread.status === "OPEN" ? "진행중" : thread.status === "VOTE" ? "투표중" : "종료됨"}
               </Badge>
             )}
-            {thread && <span>개설자 {thread.debateWriter}</span>}
-            {thread && <span>개설 {new Date(thread.createdAt).toLocaleString()}</span>}
+            {thread && <span className="text-gray-500">개설자 {thread.debateWriter}</span>}
+            {thread && <span className="text-gray-500">개설 {new Date(thread.createdAt).toLocaleString()}</span>}
+            {wikiInfo && (
+              <span className="truncate">
+                · 문서 {wikiInfo.title} <span className="text-gray-400">({wikiInfo.wikiPageClass})</span>
+              </span>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -133,12 +143,18 @@ export default function DiscussionDetailPageForDoc() {
                 return;
               }
               try {
+                setUpdatingStatus(true);
                 await updateDebateStatus(id, "VOTE");
+                // Optimistic UI update: 바로 투표 UI가 보이도록 상태 갱신
+                setThread((prev) => (prev ? { ...prev, status: "VOTE" } : prev));
+                // 새로고침은 백그라운드 동기화 용도로 유지
                 router.refresh();
               } catch {
                 alert("투표 시작에 실패했습니다.");
+              } finally {
+                setUpdatingStatus(false);
               }
-            }} disabled={!isLoggedIn}>투표 시작</Button>
+            }} disabled={!isLoggedIn || updatingStatus}>투표 시작</Button>
           )}
           {thread && thread.status !== "CLOSE" && (
             <Button variant="danger" onClick={async () => {
@@ -148,12 +164,24 @@ export default function DiscussionDetailPageForDoc() {
                 return;
               }
               try {
+                setUpdatingStatus(true);
                 await updateDebateStatus(id, "CLOSE");
+                // Optimistic UI update
+                setThread((prev) => (prev ? { ...prev, status: "CLOSE" } : prev));
+                // 종료 시 결과를 즉시 불러와 표시
+                try {
+                  const res = await getDebateBallot(id);
+                  setBallot(res);
+                } catch {
+                  // ignore
+                }
                 router.refresh();
               } catch {
                 alert("토론 종료에 실패했습니다.");
+              } finally {
+                setUpdatingStatus(false);
               }
-            }} disabled={!isLoggedIn}>토론 종료</Button>
+            }} disabled={!isLoggedIn || updatingStatus}>토론 종료</Button>
           )}
         </div>
       </div>
@@ -233,10 +261,10 @@ export default function DiscussionDetailPageForDoc() {
 
       <Card>
         <CardHeader>
-          <CardTitle>채팅 {chats.length}</CardTitle>
+          <CardTitle>채팅 <span className="text-sm text-gray-500">{chats.length}</span></CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-5">
             {chats.map((op) => {
               const isMine = currentUserId ? op.userId === currentUserId : false;
               const parent = op.isAnswerTo ? chats.find((c) => c.chatId === op.isAnswerTo) ?? null : null;
@@ -260,7 +288,7 @@ export default function DiscussionDetailPageForDoc() {
                     </div>
                     <div className="min-w-0">
                     <div
-                      className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
+                      className={`rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm ${
                         isMine
                           ? "bg-violet-500 text-white rounded-br-md"
                           : "bg-gray-100 text-gray-900 rounded-bl-md dark:bg-gray-800 dark:text-gray-100"
@@ -289,7 +317,7 @@ export default function DiscussionDetailPageForDoc() {
                       </div>
                       <div className={`mt-1 flex items-center gap-2 text-xs ${isMine ? "justify-end text-violet-600/80" : "justify-start text-gray-500"}`}>
                         <span className="text-sm font-medium">{op.userNickname}</span>
-                        <span>{new Date(op.createdAt).toLocaleTimeString()}</span>
+                        <span className="text-[11px] opacity-80">{new Date(op.createdAt).toLocaleTimeString()}</span>
                         <button
                           type="button"
                           className={`underline offset-2 ${isMine ? "text-violet-100/90 hover:text-white" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}

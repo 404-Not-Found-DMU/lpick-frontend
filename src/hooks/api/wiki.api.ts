@@ -147,6 +147,19 @@ export async function getWikiRevision(id: string, version: string): Promise<Revi
     }
 }
 
+// ===== Public Wiki (for displaying title/category without auth) =====
+export interface PublicWikiResponse {
+    wikiId: string;
+    title: string;
+    wikiPageClass: WikiPageClass;
+}
+
+export async function getPublicWiki(wikiId: string): Promise<PublicWikiResponse> {
+    return fetcher<PublicWikiResponse>(`/api/v1/public/wiki/${encodeURIComponent(wikiId)}`, {
+        method: 'GET',
+    });
+}
+
 // ===== Bookmark APIs =====
 export interface WikiBookmarkStatusResponse {
     wikiBookmarkId?: string;
