@@ -18,7 +18,7 @@ export default function ReviewSection({ wikiId, className = "", pageSize = 10 }:
 	const [serverPage, setServerPage] = useState<WikiReviewsPage | null>(null)
 	const [allItems, setAllItems] = useState<ReviewItem[]>([])
 	const [page, setPage] = useState<number>(1)
-	const [loading, setLoading] = useState<boolean>(false)
+	const [, setLoading] = useState<boolean>(false)
 
 	useEffect(() => {
 		let active = true
@@ -38,7 +38,7 @@ export default function ReviewSection({ wikiId, className = "", pageSize = 10 }:
 					createdAt: it.createdAt,
 				}))
 				setAllItems(mapped)
-			} catch (e) {
+			} catch {
 				if (!active) return
 				setServerPage(null)
 				setAllItems([])

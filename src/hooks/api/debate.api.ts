@@ -30,6 +30,7 @@ export interface DebateChatItem {
     chatId: string;
     userId: string;
     userNickname: string;
+    profile?: string | null;
     content: string;
     createdAt: string;
     isBlind: boolean;

@@ -12,7 +12,7 @@ import { fetcher } from '@/hooks/api/fetchers';
 
 // API 경로
 const API_PREFIX = '/api/v1/public/data';
-  
+
 // 반환 타입
 interface SearchResult {
   id: string;
@@ -37,6 +37,7 @@ const Header = () => {
   const NAV_ITEMS = [
     { href: '/wiki', label: '위키' },
     { href: '/community', label: '커뮤니티' },
+    
     { href: '/lplayer', label: 'LPlayer' },
   ];
 

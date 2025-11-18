@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button, Input, Badge } from "@/components";
 import { getDebatesByWiki, type DebateListItem, type DebateStatus, type DebateSubject } from "@/hooks/api/debate.api";
 
@@ -181,8 +181,8 @@ function WikiDiscussListForDoc({ slug }: { slug: string }) {
   );
 }
 
-export default function WikiDiscussListPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default function WikiDiscussListPage() {
+  const { slug } = useParams<{ slug: string }>();
   return (
     <Suspense fallback={<div className="container mx-auto px-4 py-8">로딩 중...</div>}>
       <WikiDiscussListForDoc slug={slug} />
