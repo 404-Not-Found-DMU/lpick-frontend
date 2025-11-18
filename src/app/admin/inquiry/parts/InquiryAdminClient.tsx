@@ -36,6 +36,10 @@ export default function InquiryAdminClient() {
           // 데이터베이스 중복 데이터 에러인 경우
           if (err.message.includes('More than one row with the given identifier')) {
             errorMessage = '데이터베이스에 중복된 답변 데이터가 있습니다. 백엔드 관리자에게 문의해주세요.'
+          } 
+          // NullPointerException - answer가 null인 경우
+          else if (err.message.includes('Cannot invoke') && err.message.includes('because "answer" is null')) {
+            errorMessage = '백엔드에서 답변 데이터 처리 중 오류가 발생했습니다. 백엔드 개발자에게 문의해주세요. (answer가 null인 상태에서 getId() 호출)'
           } else {
             errorMessage = err.message
           }
