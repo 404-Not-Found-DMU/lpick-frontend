@@ -1,6 +1,7 @@
 import { fetcher } from './fetchers';
 
 export type WikiPageClass = 'ARTIST' | 'GEAR' | 'ALBUM' | 'OTHER';
+export type WikiPageClassOrAll = WikiPageClass | 'ALL';
 
 export interface PopularWikiItem {
     id: string;
@@ -12,7 +13,7 @@ export interface PopularWikiItem {
  * 인기 위키 항목 조회 (최근 1시간 기준 조회수)
  * GET /api/v1/public/popular/wiki?type={ARTIST|GEAR|ALBUM|OTHER}&size={n}
  */
-export async function getPopularWiki(params: { type: WikiPageClass; size?: number }): Promise<PopularWikiItem[]> {
+export async function getPopularWiki(params: { type: WikiPageClassOrAll; size?: number }): Promise<PopularWikiItem[]> {
     const q = new URLSearchParams();
     q.set('type', params.type);
     if (params.size !== undefined) {
