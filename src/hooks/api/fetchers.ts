@@ -1,4 +1,28 @@
 // fetch 사용을 위한 코드
+
+// 로그아웃 상태 추적 (로그아웃 후 자동 토큰 갱신 방지)
+// localStorage와 메모리 상태를 동시에 사용하여 페이지 리로드 후에도 유지
+const getLoggedOutState = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('lpick_logged_out') === 'true';
+};
+
+let isLoggedOut = getLoggedOutState();
+
+// 로그아웃 상태 설정 함수 (로그아웃 시 호출)
+export const setLoggedOutState = (loggedOut: boolean) => {
+    console.log('[DEBUG] setLoggedOutState 호출:', loggedOut, '호출 스택:', new Error().stack);
+    isLoggedOut = loggedOut;
+    
+    if (typeof window !== 'undefined') {
+        if (loggedOut) {
+            localStorage.setItem('lpick_logged_out', 'true');
+        } else {
+            localStorage.removeItem('lpick_logged_out');
+        }
+    }
+};
+
 export async function fetcher<T>(
     path: string,
     options: RequestInit = {}
@@ -10,6 +34,9 @@ export async function fetcher<T>(
     const baseUrl = base.replace(/\/$/, '');
     const normalizedPath = path.startsWith('http') ? path : `${path.startsWith('/') ? path : `/${path}`}`;
     const fullUrl = normalizedPath.startsWith('http') ? normalizedPath : `${baseUrl}${normalizedPath}`;
+
+    // 로그아웃 API 호출 감지
+    const isLogoutRequest = path.includes('/auth/logout') && options.method === 'POST';
 
     // 헤더 구성: 기본 캐시 무효화, Content-Type은 body 있을 때만 설정
     const baseHeaders: Record<string, string> = {
@@ -65,8 +92,9 @@ export async function fetcher<T>(
         throw new Error('인증이 필요합니다.');
     }
 
-    // 401 에러 시 토큰 갱신 시도
-    if (res.status === 401) {
+    // 401 에러 시 토큰 갱신 시도 (로그아웃 상태가 아닐 때만)
+    if (res.status === 401 && !isLoggedOut) {
+        console.log('[DEBUG] 401 에러 발생, 토큰 갱신 시도, 경로:', path, 'isLoggedOut:', isLoggedOut);
         try {
             // 토큰 갱신 시도
             const refreshUrl = `${baseUrl}/api/v1/auth/refresh`;
@@ -145,6 +173,13 @@ export async function fetcher<T>(
     }
 
     const ct = res.headers.get('content-type')?.toLowerCase() ?? '';
+    
+    // 로그아웃 API 성공 시 로그아웃 상태 설정
+    if (isLogoutRequest && res.ok) {
+        console.log('[DEBUG] 로그아웃 API 성공, 로그아웃 상태 설정');
+        setLoggedOutState(true);
+    }
+    
     if (ct.includes('application/json')) {
         return res.json();
     } else {

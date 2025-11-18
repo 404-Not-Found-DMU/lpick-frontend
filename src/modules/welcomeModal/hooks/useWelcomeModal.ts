@@ -19,30 +19,24 @@ import {
  */
 export const useWelcomeModal = (): UseWelcomeModalReturn => {
   const router = useRouter();
-  const { userInfo, isLoading, getUserInfo } = useUserStore();
+  const { userInfo, isLoading } = useUserStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [hasTriedRefresh, setHasTriedRefresh] = useState(false);
 
   useEffect(() => {
-    // 로딩이 완료되고 사용자 정보가 있을 때 LPTI 상태 확인
-    if (!isLoading && userInfo) {
-      // 사용자 정보가 불완전하고 아직 재시도하지 않은 경우에만 다시 로딩
-      if (!userInfo.nickname && !hasTriedRefresh) {
-        setHasTriedRefresh(true);
-        getUserInfo();
-        return;
-      }
-      
-      // 유효한 사용자 정보가 있을 때만 모달 표시 여부 결정
-      if (userInfo.nickname) {
-        const hasLPTI = checkUserHasLPTI(userInfo);
-        setIsModalOpen(!hasLPTI);
-      }
-    } else if (!isLoading && !userInfo) {
-      // 로그인하지 않은 상태
+    // 로딩 중이면 대기
+    if (isLoading) {
+      return;
+    }
+
+    // 사용자 정보가 있고 닉네임이 있을 때만 모달 표시 여부 결정
+    if (userInfo && userInfo.nickname) {
+      const hasLPTI = checkUserHasLPTI(userInfo);
+      setIsModalOpen(!hasLPTI);
+    } else {
+      // 사용자 정보가 없거나 불완전한 경우 모달 표시하지 않음
       setIsModalOpen(false);
     }
-  }, [userInfo, isLoading, getUserInfo, hasTriedRefresh]);
+  }, [userInfo, isLoading]);
 
   // LPTI 존재 여부 검사 함수
   const checkUserHasLPTI = (user: UserInfo & { lpti?: string | { code: string } }): boolean => {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { fetcher } from '@/hooks/api/fetchers';
 import { useUserStore } from '@/store/userStore';
+import { setLoggedOutState } from '@/hooks/api/fetchers';
 
 /**
  * 계정 삭제 API
@@ -37,6 +38,9 @@ export const useAccountDelete = () => {
     setIsLoading(true);
 
     try {
+      // 계정 삭제 상태 설정 (자동 토큰 갱신 방지)
+      setLoggedOutState(true);
+      
       // 백엔드 계정 삭제 API 호출 (쿠키도 함께 삭제됨)
       await deleteAccount(userInfo.oauthId);
       

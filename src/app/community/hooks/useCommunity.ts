@@ -1,7 +1,8 @@
 'use client';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { SortOption, CommunityFilters, BoardType } from '../types/community.types';
+import { SortOption, CommunityFilters, BoardType, TagType } from '../types/community.types';
+import { BoardType as ApiBoardType } from '@/shared/types/api.types';
 import { POSTS_PER_PAGE } from '../constants';
 import { useArticles } from './useArticles';
 import { usePopularArticles } from './usePopularArticles';
@@ -58,15 +59,15 @@ export const useCommunity = () => {
     };
 
     // articleType에 따라 게시판 타입 변환
-    const getBoardDisplayName = (articleType: BoardType): string => {
+    const getBoardDisplayName = (articleType: ApiBoardType): string => {
       switch (articleType) {
-        case 'FREE':
+        case ApiBoardType.FREE:
           return '자유게시판';
-        case 'ALBUM':
+        case ApiBoardType.ALBUM:
           return '음반';
-        case 'ARTIST':
+        case ApiBoardType.ARTIST:
           return '아티스트';
-        case 'GEAR':
+        case ApiBoardType.GEAR:
           return '장비';
         default:
           return '자유게시판';

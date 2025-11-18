@@ -6,7 +6,7 @@ export const useLogout = () => {
 
   const handleLogout = async () => {
     try {
-      // 백엔드 로그아웃 API 호출 (쿠키 삭제)
+      // 백엔드 로그아웃 API 호출 (쿠키 삭제 + 로그아웃 상태 자동 설정)
       await logout();
       
       // 프론트엔드 상태 초기화
