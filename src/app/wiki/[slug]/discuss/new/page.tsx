@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from "@/components";
-import { Textarea } from "@/components/textarea";
 import { createDebate, type DebateSubject } from "@/hooks/api/debate.api";
 import { getWikiRevisions, type RevisionItem, getPublicWiki, type PublicWikiResponse } from "@/hooks/api/wiki.api";
 
@@ -19,7 +18,6 @@ function NewDiscussionInnerForDoc() {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState<DebateSubject>("DETAIL");
   const [revisionId, setRevisionId] = useState<string>("");
-  const [content, setContent] = useState(""); // 서버 스펙 상 본문은 요구하지 않지만, 기획에 따라 메모용 보관 가능. 현재 전송 안 함.
   const [submitting, setSubmitting] = useState(false);
   const [revisions, setRevisions] = useState<RevisionItem[]>([]);
   const [wikiInfo, setWikiInfo] = useState<PublicWikiResponse | null>(null);
@@ -160,10 +158,7 @@ function NewDiscussionInnerForDoc() {
               </div>
             </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium">개설 글</label>
-              <Textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="의견을 입력하세요" className="min-h-[140px]" />
-            </div>
+            
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => router.back()} className="h-10">
