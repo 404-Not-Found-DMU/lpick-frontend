@@ -1,7 +1,8 @@
 import InquiryDetailClient from '../parts/InquiryDetailClient'
 
-export default function InquiryDetailPage({ params }: { params: { id: string } }) {
-  const questionId = decodeURIComponent(params.id)
+export default async function InquiryDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const questionId = decodeURIComponent(id)
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-6 md:px-8 py-10">

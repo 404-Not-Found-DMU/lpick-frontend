@@ -84,7 +84,23 @@ export async function fetcher<T>(
     }
 
     if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status} - ${res.statusText}`);
+        // 서버 응답 본문을 확인하여 더 자세한 에러 메시지 추출
+        let errorMessage = `HTTP error! status: ${res.status} - ${res.statusText}`;
+        try {
+            const errorData = await res.clone().json();
+            if (errorData && typeof errorData === 'object') {
+                if (errorData.message) {
+                    errorMessage = errorData.message;
+                } else if (errorData.error) {
+                    errorMessage = errorData.error;
+                } else if (typeof errorData === 'string') {
+                    errorMessage = errorData;
+                }
+            }
+        } catch {
+            // JSON 파싱 실패 시 원본 에러 메시지 사용
+        }
+        throw new Error(errorMessage);
     }
 
     return res.json();

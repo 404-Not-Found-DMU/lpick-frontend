@@ -23,13 +23,32 @@ export interface InquirySummary {
 }
 
 export interface InquiryListResponse {
-  content: InquirySummary[]
   totalPages: number
   totalElements: number
-  number: number
+  pageable: {
+    pageNumber: number
+    pageSize: number
+    offset: number
+    unpaged: boolean
+    paged: boolean
+    sort: {
+      unsorted: boolean
+      sorted: boolean
+      empty: boolean
+    }
+  }
+  numberOfElements: number
   size: number
+  content: InquirySummary[]
+  number: number
+  sort: {
+    unsorted: boolean
+    sorted: boolean
+    empty: boolean
+  }
   first: boolean
   last: boolean
+  empty: boolean
 }
 
 export interface InquiryDetail extends InquirySummary {
@@ -52,7 +71,14 @@ export async function fetchInquiryList(params: InquiryListParams = {}): Promise<
 }
 
 export async function fetchInquiryDetail(questionId: string): Promise<InquiryDetail> {
-  return fetcher(`/api/v1/question/${questionId}`)
+  const url = `/api/v1/question/${questionId}`
+  return fetcher<InquiryDetail>(url, {
+    method: 'GET',
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+    },
+  })
 }
 
 export interface CreateInquiryPayload {
@@ -76,9 +102,13 @@ export interface InquiryAnswerPayload {
 }
 
 export async function createInquiryAnswer(questionId: string, payload: InquiryAnswerPayload) {
-  return fetcher(`/api/v1/question/${questionId}`, {
+  const url = `/api/v1/question/${questionId}`
+  return fetcher(url, {
     method: 'POST',
     body: JSON.stringify(payload),
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
 }
 

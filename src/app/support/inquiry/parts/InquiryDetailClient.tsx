@@ -104,14 +104,17 @@ export default function InquiryDetailClient({ questionId }: { questionId: string
         </div>
         <div className="px-6 py-6">
           <div className="min-h-[220px] rounded-md bg-gray-50 dark:bg-gray-900/20 p-6">
-            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">{detail.content}</p>
+            <div 
+              className="text-gray-700 dark:text-gray-300 prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: detail.content || '' }}
+            />
           </div>
         </div>
       </article>
 
       {viewType === 'answer' && (
         <article className="rounded-2xl border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
-          {detail.answerInfo ? (
+          {detail.answerInfo && detail.answerInfo.answerId ? (
             <>
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-green-50/60 dark:bg-green-900/20">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -128,7 +131,10 @@ export default function InquiryDetailClient({ questionId }: { questionId: string
               </div>
               <div className="px-6 py-6">
                 <div className="min-h-[160px] rounded-md bg-gray-50 dark:bg-gray-900/20 p-6">
-                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">{detail.answerInfo.content}</p>
+                  <div 
+                    className="text-gray-700 dark:text-gray-300 prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: detail.answerInfo.content || '' }}
+                  />
                 </div>
               </div>
             </>

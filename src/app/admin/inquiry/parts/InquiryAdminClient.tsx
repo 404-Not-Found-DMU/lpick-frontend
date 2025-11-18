@@ -6,7 +6,7 @@ import FilterBar from '../../components/FilterBar'
 import Paginator from '../../components/Paginator'
 import ConfirmModal from '../../components/ConfirmModal'
 import { ChevronDown } from 'lucide-react'
-import { fetchInquiryList, deleteInquiryQuestion, type InquirySummary } from '@/app/support/inquiry/api'
+import { fetchInquiryList, fetchInquiryDetail, deleteInquiryQuestion, deleteInquiryAnswer, type InquirySummary } from '@/app/support/inquiry/api'
 
 type AdminStatus = '전체' | '대기' | '완료'
 
@@ -31,10 +31,18 @@ export default function InquiryAdminClient() {
         setTotal(res.totalElements ?? 0)
       } catch (err) {
         if (!active) return
-        setError(err instanceof Error ? err.message : '문의 목록을 불러오지 못했습니다.')
+        let errorMessage = '문의 목록을 불러오지 못했습니다.'
+        if (err instanceof Error) {
+          // 데이터베이스 중복 데이터 에러인 경우
+          if (err.message.includes('More than one row with the given identifier')) {
+            errorMessage = '데이터베이스에 중복된 답변 데이터가 있습니다. 백엔드 관리자에게 문의해주세요.'
+          } else {
+            errorMessage = err.message
+          }
+        }
+        setError(errorMessage)
         setItems([])
         setTotal(0)
-      } finally {
       }
     }
     load()
@@ -99,7 +107,10 @@ export default function InquiryAdminClient() {
         }
       />
       {error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+        <div className="rounded-md border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+          <p className="font-medium">오류가 발생했습니다</p>
+          <p className="mt-1 text-xs opacity-90">{error}</p>
+        </div>
       ) : null}
       <DataTable<InquirySummary & { rowNumber: number; statusLabel: string }>
         columns={[
@@ -134,22 +145,59 @@ export default function InquiryAdminClient() {
 
       <ConfirmModal
         open={confirm.open}
-        title="삭제하시겠습니까?"
-        message="삭제 후에는 되돌릴 수 없습니다."
+        title="문의사항 삭제"
+        message="이 문의사항을 삭제하시겠습니까? 삭제 후에는 되돌릴 수 없습니다."
         onClose={() => setConfirm({ open: false })}
         onConfirm={async () => {
-          if (!confirm.id) return
+          if (!confirm.id) {
+            setConfirm({ open: false })
+            return
+          }
           try {
+            // 삭제 전에 상세 정보를 가져와서 답변 정보 확인 (목록의 answerInfo가 불완전할 수 있음)
+            let answerId: string | undefined
+            try {
+              const detail = await fetchInquiryDetail(confirm.id)
+              answerId = detail.answerInfo?.answerId
+            } catch (detailErr) {
+              // 상세 정보를 가져오지 못한 경우 목록 정보로 확인
+              const targetItem = items.find(item => item.questionId === confirm.id)
+              answerId = targetItem?.answerInfo?.answerId
+            }
+            
+            // 답변이 있는 경우 먼저 답변 삭제
+            if (answerId) {
+              try {
+                await deleteInquiryAnswer(answerId)
+              } catch (answerErr) {
+                const answerErrorMsg = answerErr instanceof Error ? answerErr.message : '답변 삭제 중 오류가 발생했습니다.'
+                alert(`답변 삭제 실패: ${answerErrorMsg}\n문의를 삭제하려면 먼저 답변을 삭제해야 합니다.`)
+                setConfirm({ open: false })
+                return
+              }
+            }
+            
+            // 문의 삭제
             await deleteInquiryQuestion(confirm.id)
             setConfirm({ open: false })
-            setPage(1)
-            await fetchInquiryList({ keyword: q, page: 1, size: pageSize }).then((res) => {
-              setItems(res.content ?? [])
-              setTotal(res.totalElements ?? 0)
-              setPage(1)
-            })
+            // 삭제 후 목록 새로고침
+            const res = await fetchInquiryList({ keyword: q, page: page, size: pageSize })
+            setItems(res.content ?? [])
+            setTotal(res.totalElements ?? 0)
+            // 현재 페이지에 데이터가 없으면 이전 페이지로 이동
+            if (res.content.length === 0 && page > 1) {
+              setPage(page - 1)
+            }
           } catch (err) {
-            alert(err instanceof Error ? err.message : '삭제 중 오류가 발생했습니다.')
+            const errorMessage = err instanceof Error ? err.message : '삭제 중 오류가 발생했습니다.'
+            // 백엔드 에러 메시지가 있는 경우 더 명확하게 표시
+            if (errorMessage.includes('TransientObjectException') || errorMessage.includes('Hibernate')) {
+              alert('문의 삭제 중 백엔드 오류가 발생했습니다. 상세 페이지에서 답변을 먼저 삭제한 후 문의를 삭제해주세요.')
+            } else {
+              alert(`문의 삭제 실패: ${errorMessage}`)
+            }
+            // 에러 발생 시에도 모달은 닫기
+            setConfirm({ open: false })
           }
         }}
       />

@@ -28,14 +28,18 @@ export default function InquiryAdminDetailClient({ questionId }: { questionId: s
     try {
       const res = await fetchInquiryDetail(questionId)
       setDetail(res)
-      if (res.answerInfo) {
+      if (res.answerInfo && res.answerInfo.answerId) {
         setForm({
           title: res.answerInfo.title ?? '',
           content: res.answerInfo.content ?? '',
           author: res.answerInfo.author ?? '운영팀',
         })
       } else {
-        setForm((prev) => ({ ...prev, content: '', title: '' }))
+        setForm({
+          title: res.title ?? '',
+          content: '',
+          author: '운영팀',
+        })
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '문의 상세를 불러오지 못했습니다.')
@@ -54,26 +58,70 @@ export default function InquiryAdminDetailClient({ questionId }: { questionId: s
       alert('답변 제목과 내용을 입력해 주세요.')
       return
     }
-    try {
-      setSubmitting(true)
-      if (detail?.answerInfo?.answerId) {
+    // 답변이 이미 있는 경우 새 답변 작성 방지 (수정만 가능)
+    if (detail?.answerInfo?.answerId) {
+      // 기존 답변 수정
+      try {
+        setSubmitting(true)
         await updateInquiryAnswer(detail.answerInfo.answerId, form)
         setSuccessMsg('답변이 수정되었습니다.')
-      } else {
+        await load()
+      } catch (err) {
+        alert(err instanceof Error ? err.message : '답변 수정 중 오류가 발생했습니다.')
+      } finally {
+        setSubmitting(false)
+      }
+    } else {
+      // 새 답변 작성
+      try {
+        setSubmitting(true)
         await createInquiryAnswer(questionId, form)
         setSuccessMsg('답변이 등록되었습니다.')
+        
+        // 답변 생성 후 여러 번 재조회 시도 (백엔드 처리 시간 고려)
+        const maxRetries = 3
+        let retryCount = 0
+        let foundAnswer = false
+        
+        while (retryCount < maxRetries && !foundAnswer) {
+          const delay = retryCount === 0 ? 500 : 1000
+          await new Promise(resolve => setTimeout(resolve, delay))
+          
+          const currentDetail = await fetchInquiryDetail(questionId)
+          
+          if (currentDetail.answerInfo && currentDetail.answerInfo.answerId) {
+            setDetail(currentDetail)
+            setForm({
+              title: currentDetail.answerInfo.title ?? '',
+              content: currentDetail.answerInfo.content ?? '',
+              author: currentDetail.answerInfo.author ?? '운영팀',
+            })
+            foundAnswer = true
+            break
+          }
+          
+          retryCount++
+        }
+        
+        if (!foundAnswer) {
+          // 마지막으로 한 번 더 로드
+          await load()
+        }
+      } catch (err) {
+        alert(err instanceof Error ? err.message : '답변 등록 중 오류가 발생했습니다.')
+      } finally {
+        setSubmitting(false)
       }
-      await load()
-    } catch (err) {
-      alert(err instanceof Error ? err.message : '답변 저장 중 오류가 발생했습니다.')
-    } finally {
-      setSubmitting(false)
     }
   }
 
   const handleDeleteAnswer = async () => {
-    if (!detail?.answerInfo?.answerId) return
-    if (!confirm('등록된 답변을 삭제하시겠습니까?')) return
+    if (!detail?.answerInfo?.answerId) {
+      return
+    }
+    if (!confirm('등록된 답변을 삭제하시겠습니까?')) {
+      return
+    }
     try {
       setSubmitting(true)
       await deleteInquiryAnswer(detail.answerInfo.answerId)
@@ -87,21 +135,45 @@ export default function InquiryAdminDetailClient({ questionId }: { questionId: s
   }
 
   const handleDeleteQuestion = async () => {
-    if (!confirm('이 문의를 삭제하시겠습니까?')) return
+    if (!confirm('이 문의를 삭제하시겠습니까? 삭제 후에는 되돌릴 수 없습니다.')) {
+      return
+    }
     try {
       setSubmitting(true)
+      
+      // 답변이 있는 경우 먼저 답변 삭제
+      if (detail?.answerInfo?.answerId) {
+        try {
+          await deleteInquiryAnswer(detail.answerInfo.answerId)
+          // 답변 삭제 후 상세 정보 다시 로드
+          await load()
+        } catch (answerErr) {
+          const answerErrorMsg = answerErr instanceof Error ? answerErr.message : '답변 삭제 중 오류가 발생했습니다.'
+          alert(`답변 삭제 실패: ${answerErrorMsg}\n문의를 삭제하려면 먼저 답변을 삭제해야 합니다.`)
+          setSubmitting(false)
+          return
+        }
+      }
+      
+      // 문의 삭제
       await deleteInquiryQuestion(questionId)
       alert('문의가 삭제되었습니다.')
       router.push('/admin/inquiry')
     } catch (err) {
-      alert(err instanceof Error ? err.message : '문의 삭제 중 오류가 발생했습니다.')
+      const errorMessage = err instanceof Error ? err.message : '문의 삭제 중 오류가 발생했습니다.'
+      // 백엔드 에러 메시지가 있는 경우 더 명확하게 표시
+      if (errorMessage.includes('TransientObjectException') || errorMessage.includes('Hibernate')) {
+        alert('문의 삭제 중 백엔드 오류가 발생했습니다. 답변이 있는 경우 먼저 답변을 삭제한 후 문의를 삭제해주세요.')
+      } else {
+        alert(`문의 삭제 실패: ${errorMessage}`)
+      }
     } finally {
       setSubmitting(false)
     }
   }
 
   const questionDate = detail ? formatDate(detail.createdAt) : '-'
-  const answerDate = detail?.answerInfo ? formatDate(detail.answerInfo.createdAt) : '-'
+  const answerDate = detail?.answerInfo?.createdAt ? formatDate(detail.answerInfo.createdAt) : '-'
 
   if (loading) {
     return <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-10 text-center">불러오는 중입니다...</div>
@@ -134,16 +206,22 @@ export default function InquiryAdminDetailClient({ questionId }: { questionId: s
           <MessageSquare className="h-5 w-5 text-blue-500" />
           {detail.title}
         </h3>
-        <div className="mt-4 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{detail.content}</div>
+        <div 
+          className="mt-4 text-sm text-gray-700 dark:text-gray-300 prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: detail.content || '' }}
+        />
       </article>
 
-  {detail.answerInfo ? (
+  {detail.answerInfo && detail.answerInfo.answerId ? (
       <article className="rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-900/20 p-6 shadow-sm">
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
           <span className="inline-flex items-center gap-1"><Reply className="h-4 w-4 text-green-600" /> {detail.answerInfo.title}</span>
           <span className="inline-flex items-center gap-1"><CalendarClock className="h-4 w-4" /> {answerDate}</span>
         </div>
-        <div className="mt-4 whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-100">{detail.answerInfo.content}</div>
+        <div 
+          className="mt-4 text-sm text-gray-800 dark:text-gray-100 prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: detail.answerInfo.content || '' }}
+        />
       </article>
   ) : (
       <article className="rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 text-sm text-gray-500 dark:text-gray-300">
@@ -152,7 +230,14 @@ export default function InquiryAdminDetailClient({ questionId }: { questionId: s
   )}
 
       <section className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-6 shadow-sm space-y-4">
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">답변 작성</h4>
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          {detail.answerInfo && detail.answerInfo.answerId ? '답변 수정' : '답변 작성'}
+        </h4>
+        {detail.answerInfo && detail.answerInfo.answerId ? (
+          <div className="rounded-md border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+            이미 답변이 등록되어 있습니다. 답변은 하나만 등록할 수 있으며, 기존 답변을 수정하거나 삭제할 수 있습니다.
+          </div>
+        ) : null}
         <div className="grid gap-4">
           <div className="grid gap-2">
             <label className="text-xs font-medium text-gray-600 dark:text-gray-300">답변 제목</label>
@@ -184,24 +269,35 @@ export default function InquiryAdminDetailClient({ questionId }: { questionId: s
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 justify-end">
-          {detail.answerInfo ? (
+          {detail.answerInfo && detail.answerInfo.answerId ? (
+            <>
+              <button
+                type="button"
+                onClick={handleDeleteAnswer}
+                disabled={submitting}
+                className="rounded-md border border-red-200 text-red-600 px-4 py-2 text-sm hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+              >
+                답변 삭제
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={submitting}
+                className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+              >
+                {submitting ? '저장 중...' : '답변 수정'}
+              </button>
+            </>
+          ) : (
             <button
               type="button"
-              onClick={handleDeleteAnswer}
+              onClick={handleSave}
               disabled={submitting}
-              className="rounded-md border border-red-200 text-red-600 px-4 py-2 text-sm hover:bg-red-50 disabled:opacity-50"
+              className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
             >
-              답변 삭제
+              {submitting ? '저장 중...' : '답변 등록'}
             </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={submitting}
-            className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
-          >
-            {submitting ? '저장 중...' : detail.answerInfo ? '답변 수정' : '답변 등록'}
-          </button>
+          )}
           <button
             type="button"
             onClick={handleDeleteQuestion}
