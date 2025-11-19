@@ -7,8 +7,6 @@ import {
   Edit,
   History,
   MessageSquare,
-  Star,
-  Share2,
   Bookmark,
   ChevronRight,
   ChevronDown,
@@ -101,14 +99,6 @@ export default function WikiViewPage() {
                     토론
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm" className="h-8">
-                  <Star className="w-4 h-4 mr-2" />
-                  평가
-                </Button>
-                <Button variant="outline" size="sm" className="h-8">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  공유
-                </Button>
                 <Button variant="outline" size="sm" className="h-8">
                   <Bookmark className="w-4 h-4 mr-2" />
                   북마크

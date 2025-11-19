@@ -6,7 +6,7 @@ import WikiLayout from "@/app/wiki/components/WikiLayout"
 import BlocksWithToc from "@/app/wiki/components/BlocksWithToc"
 import RevisionHistoryDialog from "@/app/wiki/components/RevisionHistoryDialog"
 import { Button } from "@/components/Button"
-import { Edit, History, MessageSquare, Star, Share2, Bookmark } from "lucide-react"
+import { Edit, History, MessageSquare, Bookmark } from "lucide-react"
 import { useWikiDocument } from "@/app/wiki/components/useWikiDocument"
 import { useWikiBookmark } from "@/app/wiki/components/useWikiBookmark"
 import { CATEGORY_META } from "@/app/wiki/components/categoryMeta"
@@ -56,14 +56,6 @@ export function WikiCategoryPage({ defaultCategory }: { defaultCategory: WikiCat
               토론
             </Button>
           </Link>
-          <Button variant="outline" size="sm" className="h-8">
-            <Star className="w-4 h-4 mr-2" />
-            평가
-          </Button>
-          <Button variant="outline" size="sm" className="h-8">
-            <Share2 className="w-4 h-4 mr-2" />
-            공유
-          </Button>
           <Button variant="outline" size="sm" className="h-8" onClick={handleToggleBookmark} disabled={bookmarkPending} aria-pressed={!!bookmarkId}>
             <Bookmark className="w-4 h-4 mr-2" fill={bookmarkId ? "currentColor" : "none"} />
             {bookmarkId ? "북마크 해제" : "북마크"}
