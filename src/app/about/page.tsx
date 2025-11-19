@@ -141,7 +141,7 @@ export default function AboutPage() {
                   단순한 게시판을 넘어, 주제별 실시간 토론(Debate) 기능을 통해 깊이 있는 대화를 나눌 수 있습니다.
                 </p>
                 <p className="text-sm text-emerald-700 dark:text-emerald-400 italic">
-                  "이 앰프와 매칭되는 스피커는?"
+                  &quot;이 앰프와 매칭되는 스피커는?&quot;
                 </p>
               </CardContent>
             </Card>
@@ -172,8 +172,8 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 text-center">
           <Quote className="w-10 h-10 text-violet-300 mx-auto mb-6" />
           <h3 className="text-2xl md:text-3xl font-serif italic text-gray-800 dark:text-gray-200 mb-8 max-w-4xl mx-auto">
-            "음악은 시간의 예술이며, LP는 그 시간을 가장 아름답게 기록하는 매체입니다.<br />
-            LPick은 그 기록을 영원히 기억하고 공유하는 공간입니다."
+            &ldquo;음악은 시간의 예술이며, LP는 그 시간을 가장 아름답게 기록하는 매체입니다.<br />
+            LPick은 그 기록을 영원히 기억하고 공유하는 공간입니다.&rdquo;
           </h3>
           <div className="flex justify-center gap-8 text-sm text-gray-500">
              <span>Since 2024</span>

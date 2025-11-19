@@ -97,7 +97,7 @@ export default function WikiViewPage() {
             {/* 문서 헤더 */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
               <div className="flex items-center mb-2">
-                <Badge className="bg-violet-500/10 text-violet-500 font-normal mr-2">{wikiMeta.category}</Badge>
+                <Badge className="bg-violet-600 text-white dark:bg-violet-500 dark:text-white font-normal mr-2">{wikiMeta.category}</Badge>
                 <span className="text-sm text-gray-500 dark:text-gray-400">최근 수정: {wikiMeta.lastUpdated}</span>
               </div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{wikiMeta.title}</h1>

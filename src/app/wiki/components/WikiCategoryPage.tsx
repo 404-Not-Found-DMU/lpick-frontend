@@ -89,7 +89,7 @@ export function WikiCategoryPage({ defaultCategory }: { defaultCategory: WikiCat
           category={category}
           categoryData={categoryData as CategoryData}
           linkColorClass={meta.linkColorClass}
-          showIndex={false}
+          showIndex={true}
         />
       )}
       {loading && (
