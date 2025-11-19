@@ -15,6 +15,9 @@ import {
   FileText,
   Clock,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { fetcher } from "@/hooks/api/fetchers"
+import { useToast } from "@/components/Toast/ToastProvider"
 import { LivePreview } from "@/app/wiki/edit/components/preview/LivePreview"
 import RecentUpdatedCard from "../components/RecentUpdatedCard"
 import { getDummyData } from "@/lib/dummy/wiki"
@@ -22,6 +25,9 @@ import type { WikiCategory } from "@/types/hierarchical.editor.types"
 
 export default function WikiViewPage() {
   const [showTableOfContents, setShowTableOfContents] = useState(true)
+  const router = useRouter()
+  const [randomLoading, setRandomLoading] = useState(false)
+  const { push } = useToast()
 
   // 데모 사용 플래그가 꺼져 있으면 안내
   const demoEnabled = process.env.NEXT_PUBLIC_WIKI_DUMMY === 'true'
@@ -71,6 +77,18 @@ export default function WikiViewPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+
+      {randomLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex items-center space-x-3">
+            <span className="text-2xl animate-bounce" aria-hidden="true">🧭</span>
+            <div className="text-gray-800 dark:text-gray-100">
+              <div className="font-semibold">새로운 문서를 찾아 항해중입니다</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">잠시만 기다려주세요... ✨</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="container px-4 py-8 mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -147,6 +165,47 @@ export default function WikiViewPage() {
 
           {/* 사이드바 */}
           <div className="w-full lg:w-1/4">
+            <Button
+              className="w-full mb-6"
+              onClick={async () => {
+                try {
+                  setRandomLoading(true)
+                  const request = () => fetcher<{ wikiId?: string; wikiPageClass?: string }>('/api/v1/public/wiki/random')
+
+                  let json: { wikiId?: string; wikiPageClass?: string } | null = null
+                  try {
+                    json = await request()
+                  } catch {}
+
+                  if (!json || !json.wikiId) {
+                    try {
+                      json = await request()
+                    } catch {}
+                  }
+
+                  if (json?.wikiId) {
+                    const klass = (json.wikiPageClass ?? '').toUpperCase()
+                    const segment =
+                      klass === 'ARTIST' ? 'artist' :
+                      klass === 'ALBUM' ? 'lp' :
+                      klass === 'GEAR' ? 'equipment' : 'other'
+                    router.push(`/wiki/${segment}/${encodeURIComponent(json.wikiId)}`)
+                    return
+                  }
+
+                  // 실패 처리
+                  setRandomLoading(false)
+                  push('랜덤 문서 이동 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error')
+                  router.back()
+                } catch {
+                  setRandomLoading(false)
+                  push('랜덤 문서 이동 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error')
+                  router.back()
+                }
+              }}
+            >
+              랜덤 문서 이동
+            </Button>
             {/* 문서 정보 */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
