@@ -169,6 +169,7 @@ export interface ChildComment {
   parentCommentId: string;
   oauthId: string;
   author: string;
+  authorProfile?: string;
   liked: boolean;
   likeCount: number;
 }
