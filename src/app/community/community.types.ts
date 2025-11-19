@@ -177,21 +177,17 @@ export const BadgeTypeMapping = {
 
 // API 댓글 타입을 UI 댓글 타입으로 변환하는 함수들
 export const convertApiCommentToUiComment = (apiComment: CommentListItem | ChildComment, articleId: string): Comment => {
-  // commentId에서 숫자 부분만 추출하여 사용 (디버깅 용이)
+  // commentId에서 고유한 숫자 ID 생성 (충돌 방지)
   const generateSimpleId = (commentId: string) => {
-    // UUID나 긴 문자열의 마지막 몇 자리만 사용
-    const match = commentId.match(/\d+/g);
-    if (match && match.length > 0) {
-      return parseInt(match[match.length - 1]);
-    }
-    // 숫자가 없으면 해시 생성
+    // 전체 commentId를 기반으로 해시 생성하여 고유성 보장
     let hash = 0;
     for (let i = 0; i < commentId.length; i++) {
       const char = commentId.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // 32비트 정수로 변환
     }
-    return Math.abs(hash);
+    // 양수로 변환하고 애매함 방지를 위해 최소값 보장
+    return Math.abs(hash) + 1;
   };
 
   // ISO 날짜를 YYYY-MM-DD 형식으로 변환

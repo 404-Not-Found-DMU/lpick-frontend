@@ -54,8 +54,8 @@ export const CommentSection = ({
     if (sortBy === 'popular') {
       return b.likes - a.likes; // 좋아요 많은 순
     } else {
-      // 최신순 - 날짜로 정렬 (임시로 id로 정렬)
-      return b.id - a.id;
+      // 최신순 - 오래된 댓글이 위로, 최신 댓글이 아래로
+      return a.id - b.id;
     }
   });
 

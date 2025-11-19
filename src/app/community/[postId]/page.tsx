@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PostContent, CommentSection, NotFound, Sidebar } from './components';
 import { usePostDetail } from './hooks/usePostDetail';
 import { useUserStore } from '@/store/userStore';
@@ -10,6 +10,11 @@ const PostDetailPage = () => {
   const params = useParams();
   const articleId = params.postId as string; // URL의 postId를 articleId로 사용
   const [isMounted, setIsMounted] = useState(false);
+  
+  // 로컬 상태로 좋아요/북마크 상태 관리 (optimistic update)
+  const [localIsLiked, setLocalIsLiked] = useState(false);
+  const [localIsBookmarked, setLocalIsBookmarked] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   
   // 사용자 정보 가져오기
   const { userInfo } = useUserStore();
@@ -21,12 +26,11 @@ const PostDetailPage = () => {
     remainingComments,
     newComment,
     setNewComment,
-    isLiked,
-    isBookmarked,
-    loading,
+    isLiked: serverIsLiked,
+    isBookmarked: serverIsBookmarked,
     error,
-    handleLike,
-    handleBookmark,
+    handleLike: serverHandleLike,
+    handleBookmark: serverHandleBookmark,
     handleCommentSubmit,
     handleCommentLike,
     handleReplySubmit,
@@ -42,12 +46,66 @@ const PostDetailPage = () => {
     return post.oauthId === userInfo.oauthId;
   }, [post, userInfo]);
 
+  // 서버 상태가 변경되면 로컬 상태도 동기화 (초기에만)
+  const [hasInitialized, setHasInitialized] = useState(false);
+  
+  useEffect(() => {
+    if (!hasInitialized && (serverIsLiked !== undefined && serverIsBookmarked !== undefined)) {
+      setLocalIsLiked(serverIsLiked);
+      setLocalIsBookmarked(serverIsBookmarked);
+      setHasInitialized(true);
+      setIsInitialLoading(false); // 초기 로딩 완료
+    }
+  }, [serverIsLiked, serverIsBookmarked, hasInitialized]);
+
+  // 완전히 독립적인 좋아요 핸들러 (서버 상태와 무관)
+  const handleOptimisticLike = useCallback(async () => {
+    if (!userInfo) {
+      // 로그인하지 않은 경우 로그인 페이지로 이동하거나 안내 메시지
+      return;
+    }
+    
+    // 즉시 UI 업데이트
+    const newLikedState = !localIsLiked;
+    setLocalIsLiked(newLikedState);
+    
+    // 백그라운드에서 실제 API 호출 (UI와 독립적)
+    try {
+      await serverHandleLike();
+      console.log('좋아요 API 성공');
+    } catch (error) {
+      console.error('좋아요 API 실패:', error);
+      // 실패해도 UI는 그대로 유지
+    }
+  }, [userInfo, localIsLiked, serverHandleLike]);
+
+  // 완전히 독립적인 북마크 핸들러 (서버 상태와 무관)
+  const handleOptimisticBookmark = useCallback(async () => {
+    if (!userInfo) {
+      // 로그인하지 않은 경우 로그인 페이지로 이동하거나 안내 메시지
+      return;
+    }
+    
+    // 즉시 UI 업데이트
+    const newBookmarkedState = !localIsBookmarked;
+    setLocalIsBookmarked(newBookmarkedState);
+    
+    // 백그라운드에서 실제 API 호출 (UI와 독립적)
+    try {
+      await serverHandleBookmark();
+      console.log('북마크 API 성공');
+    } catch (error) {
+      console.error('북마크 API 실패:', error);
+      // 실패해도 UI는 그대로 유지
+    }
+  }, [userInfo, localIsBookmarked, serverHandleBookmark]);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // 마운트되기 전까지는 동일한 로딩 UI 표시
-  if (!isMounted || loading) {
+  // 마운트되기 전과 초기 로딩만 로딩 UI 표시
+  if (!isMounted || isInitialLoading) {
     return (
       <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900">
         <div className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center">
@@ -98,10 +156,10 @@ const PostDetailPage = () => {
           <div className="w-full max-w-2xl flex-1">
             <PostContent
               post={post}
-              isLiked={isLiked}
-              isBookmarked={isBookmarked}
-              onLike={handleLike}
-              onBookmark={handleBookmark}
+              isLiked={localIsLiked}
+              isBookmarked={localIsBookmarked}
+              onLike={handleOptimisticLike}
+              onBookmark={handleOptimisticBookmark}
               onEdit={handleEdit}
               onDelete={handleDelete}
               canEdit={canEdit} // 실제 권한 체크

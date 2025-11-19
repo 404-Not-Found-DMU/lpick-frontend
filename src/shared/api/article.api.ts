@@ -59,6 +59,18 @@ export const getArticle = async (articleId: string): Promise<ArticleDetail> => {
   }
 };
 
+// 조회수 증가 API
+export const incrementViewCount = async (articleId: string): Promise<void> => {
+  try {
+    await fetcher<void>(`/api/v1/public/community/article/${articleId}/view`, {
+      method: 'POST'
+    });
+  } catch (error) {
+    console.error(`Failed to increment view count for article ${articleId}:`, error);
+    // 조회수 증가 실패는 사용자 경험에 영향주지 않도록 조용히 무시
+  }
+};
+
 // 게시글 생성
 export const createArticle = async (data: CreateArticleRequest): Promise<void> => {
   try {

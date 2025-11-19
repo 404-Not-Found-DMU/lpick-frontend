@@ -87,12 +87,10 @@ export const useArticleManager = () => {
  * 게시글 상호작용 훅 (좋아요, 북마크)
  */
 export const useArticleInteractions = () => {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 좋아요 토글
+  // 좋아요 토글 (로딩 상태 없이 백그라운드 실행)
   const toggleLike = useCallback(async (articleId: string, isLiked: boolean) => {
-    setLoading(true);
     setError(null);
     
     try {
@@ -107,14 +105,11 @@ export const useArticleInteractions = () => {
       setError(errorMessage);
       console.error('Error toggling like:', err);
       return false;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
-  // 북마크 토글
+  // 북마크 토글 (로딩 상태 없이 백그라운드 실행)
   const toggleBookmark = useCallback(async (articleId: string, isBookmarked: boolean) => {
-    setLoading(true);
     setError(null);
     
     try {
@@ -129,13 +124,10 @@ export const useArticleInteractions = () => {
       setError(errorMessage);
       console.error('Error toggling bookmark:', err);
       return false;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
   return {
-    loading,
     error,
     toggleLike,
     toggleBookmark

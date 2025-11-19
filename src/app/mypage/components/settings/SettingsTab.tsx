@@ -1,21 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
-  Key,
-  Mail,
-  Trash2,
   Settings as SettingsIcon,
-  ChevronRight,
-  User,
-  Lock,
-  Brain,
   Bell,
   Eye,
   Loader2,
 } from 'lucide-react';
-import { useAccountDelete } from '../../hooks/useAccountDelete';
-import { useUserStore } from '@/store/userStore';
 import { useUserSettings } from '@/shared/hooks';
 import { UserPrivacySettings, UserNotificationSettings } from '@/shared/types';
 
@@ -33,15 +24,7 @@ interface SettingCardProps {
   children: React.ReactNode;
 }
 
-interface MenuButtonProps {
-  icon: React.ElementType;
-  title: string;
-  subtitle?: string;
-  onClick?: () => void;
-  danger?: boolean;
-}
-
-const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, label, description }) => (
+const ToggleSwitch: React.FC<ToggleSwitchProps> = React.memo(({ checked, onChange, label, description }) => (
   <div className="flex items-center justify-between py-3">
     <div className="flex-1">
       <span className="font-medium text-gray-700 dark:text-gray-300">{label}</span>
@@ -54,115 +37,139 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, label, d
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
         checked ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'
       }`}
-      aria-label={`${label} ${checked ? '켜짐' : '꺼짐'}`}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
           checked ? 'translate-x-6' : 'translate-x-1'
         }`}
       />
     </button>
   </div>
-);
+));
 
-const SettingCard: React.FC<SettingCardProps> = ({ icon: Icon, title, description, children }) => (
+ToggleSwitch.displayName = 'ToggleSwitch';
+
+const SettingCard: React.FC<SettingCardProps> = React.memo(({ icon: Icon, title, description, children }) => (
   <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
     <div className="mb-4 flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/20">
         <Icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
       </div>
       <div>
-        <h4 className="font-semibold text-gray-900 dark:text-white">{title}</h4>
-        {description && <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>}
+        <h3 className="font-semibold text-gray-900 dark:text-white">{title}</h3>
+        {description && (
+          <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
+        )}
       </div>
     </div>
     {children}
   </div>
-);
+));
 
-const MenuButton: React.FC<MenuButtonProps> = ({
-  icon: Icon,
-  title,
-  subtitle,
-  onClick,
-  danger = false,
-}) => (
-  <button
-    onClick={onClick}
-    className={`flex w-full items-center justify-between rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 ${
-      danger ? 'hover:bg-red-50 dark:hover:bg-red-900/20' : ''
-    }`}
-  >
-    <div className="flex items-center gap-3">
-      <Icon className={`h-5 w-5 ${danger ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`} />
-      <div className="text-left">
-        <div
-          className={`font-medium ${danger ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}
-        >
-          {title}
-        </div>
-        {subtitle && <div className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</div>}
-      </div>
-    </div>
-    <ChevronRight
-      className={`h-4 w-4 ${danger ? 'text-red-600 dark:text-red-400' : 'text-gray-400'}`}
-    />
-  </button>
-);
+SettingCard.displayName = 'SettingCard';
 
 const SettingsTab: React.FC = () => {
-  const { handleDeleteAccount, isLoading: isDeleting } = useAccountDelete();
-  const { userInfo } = useUserStore();
   const { settings, loading, error, updateSettings } = useUserSettings();
+  
+  // 로컬 상태로 즉시 UI 업데이트
+  const [localPrivacy, setLocalPrivacy] = useState<UserPrivacySettings | null>(null);
+  const [localNotification, setLocalNotification] = useState<UserNotificationSettings | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // LPTI 유효성 체크 함수
-  const hasValidLPTI = () => {
-    if (!userInfo?.lpti) return false;
-    
-    if (typeof userInfo.lpti === 'string') {
-      return userInfo.lpti.trim() !== '';
+  // 설정 로드 시 로컬 상태 동기화
+  useEffect(() => {
+    if (settings && !isInitialized) {
+      setLocalPrivacy(settings.privacy);
+      setLocalNotification(settings.notification);
+      setIsInitialized(true);
     }
-    
-    if (typeof userInfo.lpti === 'object') {
-      return !!(userInfo.lpti.code && userInfo.lpti.code.trim() !== '');
-    }
-    
-    return false;
-  };
+  }, [settings, isInitialized]);
 
   // 프라이버시 설정 업데이트
-  const updatePrivacy = async (key: keyof UserPrivacySettings, value: boolean) => {
-    if (!settings) return;
+  const updatePrivacy = useCallback(async (key: keyof UserPrivacySettings, value: boolean) => {
+    if (!settings || !localPrivacy) return;
     
+    // 1. 즉시 로컬 상태 업데이트 (UI 즉시 반영)
+    const newPrivacy = { ...localPrivacy, [key]: value };
+    setLocalPrivacy(newPrivacy);
+    
+    // 2. 백그라운드에서 API 호출
     try {
-      // 부분 업데이트: 해당 프라이버시 설정만 전송
       await updateSettings({
-        privacy: {
-          ...settings.privacy,
-          [key]: value,
-        }
+        privacy: newPrivacy,
+        theme: settings.theme,
+        notification: settings.notification
       });
     } catch (err) {
       console.error('프라이버시 설정 업데이트 실패:', err);
+      // 실패 시 로컬 상태 되돌리기
+      setLocalPrivacy(localPrivacy);
     }
-  };
+  }, [settings, localPrivacy, updateSettings]);
 
   // 알림 설정 업데이트
-  const updateNotification = async (key: keyof UserNotificationSettings, value: boolean) => {
-    if (!settings) return;
+  const updateNotification = useCallback(async (key: keyof UserNotificationSettings, value: boolean) => {
+    if (!settings || !localNotification) return;
     
+    // 1. 즉시 로컬 상태 업데이트 (UI 즉시 반영)
+    const newNotification = { ...localNotification, [key]: value };
+    setLocalNotification(newNotification);
+    
+    // 2. 백그라운드에서 API 호출
     try {
-      // 부분 업데이트: 해당 알림 설정만 전송
       await updateSettings({
-        notification: {
-          ...settings.notification,
-          [key]: value,
-        }
+        privacy: settings.privacy,
+        theme: settings.theme,
+        notification: newNotification
       });
     } catch (err) {
       console.error('알림 설정 업데이트 실패:', err);
+      // 실패 시 로컬 상태 되돌리기
+      setLocalNotification(localNotification);
     }
-  };
+  }, [settings, localNotification, updateSettings]);
+
+  // 개별 토글 컴포넌트로 최적화
+  const PrivacyToggle = React.memo(({ privacyKey, label, description }: {
+    privacyKey: keyof UserPrivacySettings;
+    label: string;
+    description?: string;
+  }) => {
+    const handleChange = useCallback((value: boolean) => {
+      updatePrivacy(privacyKey, value);
+    }, [privacyKey]);
+
+    return (
+      <ToggleSwitch
+        checked={displayPrivacy[privacyKey]}
+        onChange={handleChange}
+        label={label}
+        description={description}
+      />
+    );
+  });
+
+  const NotificationToggle = React.memo(({ notificationKey, label, description }: {
+    notificationKey: keyof UserNotificationSettings;
+    label: string;
+    description?: string;
+  }) => {
+    const handleChange = useCallback((value: boolean) => {
+      updateNotification(notificationKey, value);
+    }, [notificationKey]);
+
+    return (
+      <ToggleSwitch
+        checked={displayNotification[notificationKey]}
+        onChange={handleChange}
+        label={label}
+        description={description}
+      />
+    );
+  });
+
+  PrivacyToggle.displayName = 'PrivacyToggle';
+  NotificationToggle.displayName = 'NotificationToggle';
 
   // 프라이버시 설정 항목들
   const privacyItems = [
@@ -212,15 +219,8 @@ const SettingsTab: React.FC = () => {
     },
   ];
 
-  const accountMenuItems = [
-    { icon: User, title: '프로필 정보 수정', subtitle: '이름, 프로필 사진 등' },
-    { icon: Key, title: '비밀번호 변경', subtitle: '새로운 비밀번호로 변경' },
-    { icon: Mail, title: '이메일 변경', subtitle: '계정 이메일 주소 변경' },
-    { icon: Lock, title: '2단계 인증', subtitle: '보안 강화를 위한 2FA 설정' },
-  ];
-
   // 로딩 상태
-  if (loading) {
+  if (loading && !isInitialized) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
@@ -230,13 +230,28 @@ const SettingsTab: React.FC = () => {
   }
 
   // 에러 상태
-  if (error) {
+  if (error && !isInitialized) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-900/20">
         <div className="text-red-600 dark:text-red-400">설정을 불러올 수 없습니다: {error}</div>
       </div>
     );
   }
+
+  // 초기화되지 않은 경우 기본값으로 렌더링
+  const displayPrivacy = localPrivacy || {
+    allowViewActCount: false,
+    allowViewRecentAct: false,
+    allowViewGear: false,
+    allowViewCollection: false
+  };
+
+  const displayNotification = localNotification || {
+    isAlarmWikiEdit: false,
+    isAlarmNewDebateAnswer: false,
+    isAlarmCommented: false,
+    isAlarmEvent: false
+  };
 
   return (
     <div className="space-y-6">
@@ -261,10 +276,9 @@ const SettingsTab: React.FC = () => {
       >
         <div className="space-y-1">
           {privacyItems.map(({ key, label, description }) => (
-            <ToggleSwitch
+            <PrivacyToggle
               key={key}
-              checked={settings?.privacy[key] || false}
-              onChange={(value) => updatePrivacy(key, value)}
+              privacyKey={key}
               label={label}
               description={description}
             />
@@ -280,84 +294,13 @@ const SettingsTab: React.FC = () => {
       >
         <div className="space-y-1">
           {notificationItems.map(({ key, label, description }) => (
-            <ToggleSwitch
+            <NotificationToggle
               key={key}
-              checked={settings?.notification[key] || false}
-              onChange={(value) => updateNotification(key, value)}
+              notificationKey={key}
               label={label}
               description={description}
             />
           ))}
-        </div>
-      </SettingCard>
-
-      {/* LPTI Information */}
-      <SettingCard
-        icon={Brain}
-        title="내 LPTI"
-        description="나의 LP 성향 유형"
-      >
-        <div className="space-y-4">
-          {hasValidLPTI() ? (
-            <div className="rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 p-4 dark:from-purple-900/20 dark:to-pink-900/20">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg">
-                  {typeof userInfo!.lpti === 'string' ? userInfo!.lpti : userInfo!.lpti!.code}
-                </div>
-                <div>
-                  <h5 className="font-semibold text-gray-900 dark:text-white">
-                    {typeof userInfo!.lpti === 'string' 
-                      ? userInfo!.lpti 
-                      : (userInfo!.lpti!.nickname || userInfo!.lpti!.code)
-                    }
-                  </h5>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    LP 성향 유형
-                  </p>
-                </div>
-              </div>
-              {typeof userInfo!.lpti === 'object' && userInfo!.lpti.summary && (
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {userInfo!.lpti.summary}
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <Brain className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600 dark:text-gray-400 mb-2">
-                아직 LPTI 검사를 받지 않았습니다
-              </p>
-              <button 
-                onClick={() => window.location.href = '/lpti'}
-                className="text-purple-600 hover:text-purple-700 font-medium text-sm transition-colors"
-              >
-                LPTI 검사 받기
-              </button>
-            </div>
-          )}
-        </div>
-      </SettingCard>
-
-      {/* Account Management */}
-      <SettingCard
-        icon={User}
-        title="계정 관리"
-        description="계정 정보를 변경하거나 계정을 삭제할 수 있습니다"
-      >
-        <div className="space-y-1">
-          {accountMenuItems.map((item, index) => (
-            <MenuButton key={index} {...item} />
-          ))}
-          <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
-            <MenuButton
-              icon={Trash2}
-              title="계정 삭제"
-              subtitle={isDeleting ? "삭제 중..." : "계정을 영구적으로 삭제합니다"}
-              onClick={handleDeleteAccount}
-              danger
-            />
-          </div>
         </div>
       </SettingCard>
     </div>

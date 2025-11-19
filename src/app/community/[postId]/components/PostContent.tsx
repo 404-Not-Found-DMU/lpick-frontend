@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 import { Post } from '../../community.types';
+import React, { useCallback } from 'react';
 
 interface PostContentProps {
   post: Post;
@@ -18,7 +19,71 @@ interface PostContentProps {
   canEdit?: boolean;
 }
 
-export const PostContent = ({
+// 좋아요 버튼 컴포넌트 (메모이제이션)
+const LikeButton = React.memo(({ isLiked, onLike }: { isLiked: boolean; onLike: () => void }) => {
+  const handleClick = useCallback(() => {
+    onLike();
+  }, [onLike]);
+
+  return (
+    <button
+      onClick={handleClick}
+      className="group flex items-center gap-2 transition-transform hover:scale-110"
+    >
+      <div
+        className={`rounded-full p-1.5 transition-colors sm:p-2 ${
+          isLiked ? 'text-red-500' : 'text-gray-700 hover:text-red-500 dark:text-gray-300'
+        }`}
+      >
+        <Heart
+          className={`h-5 w-5 sm:h-6 sm:w-6 ${isLiked ? 'fill-current' : ''} transition-all`}
+        />
+      </div>
+    </button>
+  );
+});
+
+LikeButton.displayName = 'LikeButton';
+
+// 북마크 버튼 컴포넌트 (메모이제이션)
+const BookmarkButton = React.memo(({ isBookmarked, onBookmark }: { isBookmarked: boolean; onBookmark: () => void }) => {
+  const handleClick = useCallback(() => {
+    onBookmark();
+  }, [onBookmark]);
+
+  return (
+    <button onClick={handleClick} className="group transition-transform hover:scale-110">
+      <div
+        className={`rounded-full p-2 transition-colors ${
+          isBookmarked
+            ? 'text-yellow-500'
+            : 'text-gray-700 hover:text-yellow-500 dark:text-gray-300'
+        }`}
+      >
+        <Bookmark
+          className={`h-6 w-6 ${isBookmarked ? 'fill-current' : ''} transition-all`}
+        />
+      </div>
+    </button>
+  );
+});
+
+BookmarkButton.displayName = 'BookmarkButton';
+
+// 댓글 버튼 컴포넌트 (메모이제이션)
+const CommentButton = React.memo(() => {
+  return (
+    <button className="group transition-transform hover:scale-110">
+      <div className="rounded-full p-1.5 text-gray-700 transition-colors hover:text-blue-500 dark:text-gray-300 sm:p-2">
+        <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
+      </div>
+    </button>
+  );
+});
+
+CommentButton.displayName = 'CommentButton';
+
+export const PostContent = React.memo(({
   post,
   isLiked,
   isBookmarked,
@@ -118,43 +183,9 @@ export const PostContent = ({
       <div className="p-4 sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* 좋아요 버튼 - Instagram 스타일 */}
-            <button
-              onClick={onLike}
-              className="group flex items-center gap-2 transition-transform hover:scale-110"
-            >
-              <div
-                className={`rounded-full p-1.5 transition-colors sm:p-2 ${
-                  isLiked ? 'text-red-500' : 'text-gray-700 hover:text-red-500 dark:text-gray-300'
-                }`}
-              >
-                <Heart
-                  className={`h-5 w-5 sm:h-6 sm:w-6 ${isLiked ? 'fill-current' : ''} transition-all`}
-                />
-              </div>
-            </button>
-
-            {/* 댓글 버튼 */}
-            <button className="group transition-transform hover:scale-110">
-              <div className="rounded-full p-1.5 text-gray-700 transition-colors hover:text-blue-500 dark:text-gray-300 sm:p-2">
-                <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
-              </div>
-            </button>
-
-            {/* 북마크 버튼 */}
-            <button onClick={onBookmark} className="group transition-transform hover:scale-110">
-              <div
-                className={`rounded-full p-2 transition-colors ${
-                  isBookmarked
-                    ? 'text-yellow-500'
-                    : 'text-gray-700 hover:text-yellow-500 dark:text-gray-300'
-                }`}
-              >
-                <Bookmark
-                  className={`h-6 w-6 ${isBookmarked ? 'fill-current' : ''} transition-all`}
-                />
-              </div>
-            </button>
+            <LikeButton isLiked={isLiked} onLike={onLike} />
+            <CommentButton />
+            <BookmarkButton isBookmarked={isBookmarked} onBookmark={onBookmark} />
           </div>
         </div>
 
@@ -256,4 +287,6 @@ export const PostContent = ({
       </div>
     </div>
   );
-};
+});
+
+PostContent.displayName = 'PostContent';
