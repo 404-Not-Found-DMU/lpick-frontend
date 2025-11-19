@@ -1,9 +1,13 @@
 "use client"
 import React from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { Info, FileText } from 'lucide-react'
 import RecentUpdatedCard from './RecentUpdatedCard'
+import { Button } from '@/components/Button'
+import { fetcher } from '@/hooks/api/fetchers'
+import { useToast } from '@/components/Toast/ToastProvider'
 
 type RelatedPage = { title: string; slug: string }
 
@@ -34,10 +38,61 @@ export default function WikiLayout({
   children,
   showDocInfo = true,
   showRelatedPages = true,
-  badgeClassName,
 }: WikiLayoutProps) {
+  const router = useRouter()
+  const [randomLoading, setRandomLoading] = React.useState(false)
+  const { push } = useToast()
+
+  const handleGoRandom = React.useCallback(async () => {
+    try {
+      setRandomLoading(true)
+      const request = () => fetcher<{ wikiId?: string; wikiPageClass?: string }>('/api/v1/public/wiki/random')
+
+      let json: { wikiId?: string; wikiPageClass?: string } | null = null
+      try {
+        json = await request()
+      } catch {}
+
+      if (!json || !json.wikiId) {
+        try {
+          json = await request()
+        } catch {}
+      }
+
+      if (json?.wikiId) {
+        const klass = (json.wikiPageClass ?? '').toUpperCase()
+        const segment =
+          klass === 'ARTIST' ? 'artist' :
+          klass === 'ALBUM' ? 'lp' :
+          klass === 'GEAR' ? 'equipment' : 'other'
+        router.push(`/wiki/${segment}/${encodeURIComponent(json.wikiId)}`)
+        return
+      }
+
+      // 실패 처리
+      setRandomLoading(false)
+      push('랜덤 문서 이동 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error')
+      router.back()
+    } catch {
+      setRandomLoading(false)
+      push('랜덤 문서 이동 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error')
+      router.back()
+    }
+  }, [router, push])
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {randomLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex items-center space-x-3">
+            <span className="text-2xl animate-bounce" aria-hidden="true">🧭</span>
+            <div className="text-gray-800 dark:text-gray-100">
+              <div className="font-semibold">새로운 문서를 찾아 항해중입니다</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">잠시만 기다려주세요... ✨</div>
+            </div>
+          </div>
+        </div>
+      )}
       <main className="container px-4 py-8 mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* 메인 콘텐츠 */}
@@ -45,7 +100,7 @@ export default function WikiLayout({
             {/* 문서 헤더 */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
               <div className="flex items-center mb-2">
-                <Badge className={`${badgeClassName ?? 'bg-violet-500/10 text-violet-500'} font-normal mr-2`}>{category}</Badge>
+                <Badge className={`bg-violet-600 text-white dark:bg-violet-500 dark:text-white'} font-normal mr-2`}>{category}</Badge>
                 <span className="text-sm text-gray-500 dark:text-gray-400">최근 수정: {lastUpdated}</span>
               </div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{title}</h1>
@@ -58,6 +113,9 @@ export default function WikiLayout({
 
           {/* 사이드바 */}
           <div className="w-full lg:w-1/4">
+            <Button className="w-full mb-6" onClick={handleGoRandom}>
+              랜덤 문서 이동
+            </Button>
             {/* 문서 정보 */}
             {showDocInfo && (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">

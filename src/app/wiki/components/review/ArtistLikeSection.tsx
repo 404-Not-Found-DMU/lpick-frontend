@@ -1,6 +1,8 @@
 "use client"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { Heart } from "lucide-react"
+import { useWikiLike } from "@/app/wiki/components/useWikiLike"
+import { useToast } from "@/components/Toast/ToastProvider"
 
 type ArtistLikeSectionProps = {
 	wikiId: string
@@ -8,9 +10,16 @@ type ArtistLikeSectionProps = {
 	className?: string
 }
 
-export default function ArtistLikeSection({ initialCount = 0, className = "" }: ArtistLikeSectionProps) {
-	const [liked, setLiked] = useState<boolean>(false)
+export default function ArtistLikeSection({ wikiId, initialCount = 0, className = "" }: ArtistLikeSectionProps) {
+	const { liked, pending, initialized, toggle } = useWikiLike(wikiId)
 	const [count, setCount] = useState<number>(initialCount)
+	const { push } = useToast()
+
+	// 초기 liked 상태에 따라 표시 카운트를 보정할 수 있도록 선택적으로 사용
+	useEffect(() => {
+		// 서버에서 별도 likeCount를 내려주지 않으므로,
+		// count는 초기값을 기준으로 토글 시에만 증감 처리
+	}, [initialized])
 
 	const label = useMemo(() => (liked ? "좋아요 취소" : "좋아요"), [liked])
 
@@ -32,9 +41,15 @@ export default function ArtistLikeSection({ initialCount = 0, className = "" }: 
 							: "bg-gray-50 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
 					}`}
 					aria-pressed={liked}
-					onClick={() => {
-						setLiked((prev) => !prev)
-						setCount((c) => (liked ? Math.max(0, c - 1) : c + 1))
+					disabled={pending || !initialized}
+					onClick={async () => {
+						const before = liked
+						try {
+							await toggle()
+							setCount((c) => (before ? Math.max(0, c - 1) : c + 1))
+						} catch {
+							push('좋아요 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error')
+						}
 					}}
 				>
 					<Heart className={`w-4 h-4 ${liked ? "fill-red-500 text-red-500" : ""}`} />

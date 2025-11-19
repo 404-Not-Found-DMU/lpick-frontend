@@ -70,7 +70,7 @@ export default async function WikiViewPage(ctx: { params: Promise<{ slug: string
         views={wikiMeta.views}
         contributors={wikiMeta.contributors}
         bookmarks={wikiMeta.bookmarks}
-        relatedPages={[]}
+          relatedPages={wikiMeta.relatedPages}
         showDocInfo={false}
         showRelatedPages={false}
         headerActions={<ActionButtons slug={slug} />}

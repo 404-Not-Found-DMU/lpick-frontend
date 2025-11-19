@@ -23,16 +23,9 @@ export default function ContentWithToc({ content }: { content: string }) {
   const collectedRef = useRef<Map<string, HeadingItem>>(new Map())
   const containerRef = useRef<HTMLDivElement | null>(null)
 
-  // initialize open from localStorage and viewport
+  // 항상 열림 상태로 초기화
   useEffect(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('wiki_toc_open') : null
-    if (saved === 'true' || saved === 'false') {
-      setOpen(saved === 'true')
-      return
-    }
-    if (typeof window !== 'undefined') {
-      setOpen(window.innerWidth >= 1024)
-    }
+    setOpen(true)
   }, [])
 
   useEffect(() => {
@@ -122,10 +115,7 @@ export default function ContentWithToc({ content }: { content: string }) {
   return (
     <>
       <nav aria-label="목차" className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-        <div
-          className="flex items-center justify-between cursor-pointer"
-          onClick={() => setOpen((v) => !v)}
-        >
+        <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">목차</h2>
           {open ? (
             <ChevronUp className="w-5 h-5 text-gray-500 dark:text-gray-400" />

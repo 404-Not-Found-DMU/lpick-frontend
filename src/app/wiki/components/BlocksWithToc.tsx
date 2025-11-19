@@ -62,7 +62,7 @@ export default function BlocksWithToc({
                 return (
                   <li key={block.id} className={indentClass}>
                     <a href={`#${block.id}`} className={`${linkColorClass} hover:underline`}>
-                      <span className="mr-1">{label}</span> {block.title}
+                      <span className="mr-1">{label}.</span> {block.title}
                     </a>
                   </li>
                 )
