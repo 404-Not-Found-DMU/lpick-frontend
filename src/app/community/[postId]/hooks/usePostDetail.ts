@@ -29,8 +29,7 @@ export const usePostDetail = (articleId: string) => {
   const {
     article,
     loading: articleLoading,
-    error: articleError,
-    refresh: refreshArticle
+    error: articleError
   } = useArticle(articleId);
 
   // Hook들을 항상 호출 (조건부 호출 금지)
@@ -42,12 +41,10 @@ export const usePostDetail = (articleId: string) => {
 
   // 로그인 상태에 따라 기능 제한
   const {
-    loading: interactionLoading,
     error: interactionError,
     toggleLike,
     toggleBookmark
   } = isAuthenticated ? articleInteractions : {
-    loading: false,
     error: null,
     toggleLike: async () => false,
     toggleBookmark: async () => false
@@ -129,14 +126,14 @@ export const usePostDetail = (articleId: string) => {
       bookmarkCount: article.bookmarkCount,
       liked: article.liked,
       bookmarked: article.bookmarked,
-      views: 0, // 조회수 정보 필요
+      views: article.viewCount || 0, // API에서 받은 조회수 사용
       image: '', // 이미지 정보 필요
     };
   }, [article]);
 
   const isLiked = article?.liked || false;
   const isBookmarked = article?.bookmarked || false;
-  const loading = articleLoading || interactionLoading || managerLoading;
+  const loading = articleLoading || managerLoading;
 
   useEffect(() => {
     setIsMounted(true);
@@ -199,20 +196,16 @@ export const usePostDetail = (articleId: string) => {
   const handleLike = useCallback(async () => {
     if (!article) return;
     
-    const success = await toggleLike(article.articleId, isLiked);
-    if (success) {
-      refreshArticle(); // 게시글 데이터 새로고침
-    }
-  }, [article, isLiked, toggleLike, refreshArticle]);
+    // 단순히 API만 호출 (UI 업데이트는 상위 컴포넌트에서 처리)
+    return await toggleLike(article.articleId, article.liked || false);
+  }, [article, toggleLike]);
 
   const handleBookmark = useCallback(async () => {
     if (!article) return;
     
-    const success = await toggleBookmark(article.articleId, isBookmarked);
-    if (success) {
-      refreshArticle(); // 게시글 데이터 새로고침
-    }
-  }, [article, isBookmarked, toggleBookmark, refreshArticle]);
+    // 단순히 API만 호출 (UI 업데이트는 상위 컴포넌트에서 처리)  
+    return await toggleBookmark(article.articleId, article.bookmarked || false);
+  }, [article, toggleBookmark]);
 
   const handleCommentSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,14 +228,24 @@ export const usePostDetail = (articleId: string) => {
   const handleCommentLike = useCallback(async (commentId: number): Promise<boolean> => {
     console.log('댓글 좋아요 클릭:', commentId);
     
+    // ID 생성 함수 (community.types.ts의 generateSimpleId와 동일한 로직)
+    const generateIdFromString = (str: string) => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // 32비트 정수로 변환
+      }
+      return Math.abs(hash) + 1;
+    };
+    
     // UI commentId로부터 실제 API commentId 찾기
     let realCommentId: string | undefined;
     
     // 모든 API 댓글과 자식 댓글을 확인
     apiComments?.forEach(comment => {
       // 부모 댓글 확인
-      const match = comment.commentId.match(/\d+/g);
-      const parentUiId = match && match.length > 0 ? parseInt(match[match.length - 1]) : 0;
+      const parentUiId = generateIdFromString(comment.commentId);
       
       if (parentUiId === commentId) {
         realCommentId = comment.commentId;
@@ -251,8 +254,7 @@ export const usePostDetail = (articleId: string) => {
       
       // 자식 댓글들 확인
       comment.childsCommentList?.forEach((child: ChildComment) => {
-        const childMatch = child.commentId.match(/\d+/g);
-        const childUiId = childMatch && childMatch.length > 0 ? parseInt(childMatch[childMatch.length - 1]) : 0;
+        const childUiId = generateIdFromString(child.commentId);
         
         if (childUiId === commentId) {
           realCommentId = child.commentId;
@@ -338,13 +340,23 @@ export const usePostDetail = (articleId: string) => {
   ): Promise<boolean> => {
     if (!replyText.trim() || !articleId) return false;
 
-    // UI commentId로부터 실제 API commentId 찾기
+    // UI commentId로부터 실제 API commentId 찾기 (generateSimpleId와 동일한 로직 사용)
     let realParentCommentId: string | undefined;
     
     // 부모 댓글의 실제 ID 찾기
     apiComments?.forEach(comment => {
-      const match = comment.commentId.match(/\d+/g);
-      const parentUiId = match && match.length > 0 ? parseInt(match[match.length - 1]) : 0;
+      // generateSimpleId와 동일한 해시 기반 ID 생성
+      const generateSimpleId = (commentId: string) => {
+        let hash = 0;
+        for (let i = 0; i < commentId.length; i++) {
+          const char = commentId.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash; // 32비트 정수로 변환
+        }
+        return Math.abs(hash) + 1;
+      };
+      
+      const parentUiId = generateSimpleId(comment.commentId);
       
       if (parentUiId === parentCommentId) {
         realParentCommentId = comment.commentId;

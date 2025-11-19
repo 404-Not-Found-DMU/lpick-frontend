@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { X, Search, Plus, Upload, Disc3, Speaker, Headphones } from 'lucide-react';
 import { useGearSearch } from '../../hooks/useGearSearch';
 import { useAddGear, useCreateTempGear } from '../../hooks/useUserGear';
@@ -368,11 +369,13 @@ const GearAddModal: React.FC<GearAddModalProps> = ({
                       >
                         <div className="flex items-center space-x-3">
                           {gear.img ? (
-                            <img
+                            <Image
                               src={gear.img}
                               alt={gear.name}
+                              width={48}
+                              height={48}
                               className="w-12 h-12 object-cover rounded-lg"
-                              onError={(e) => {
+                              onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                                 (e.target as HTMLImageElement).style.display = 'none';
                               }}
                             />

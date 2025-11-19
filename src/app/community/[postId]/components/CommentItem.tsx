@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Heart, Reply, MoreHorizontal } from 'lucide-react';
+import { Heart, Reply } from 'lucide-react';
 import { Comment } from '../../community.types';
 
 interface CommentItemProps {
@@ -107,11 +107,6 @@ export const CommentItem = ({ comment, onLike, onReply, isReply = false }: Comme
                 </span>
               )}
               <span className="text-xs text-gray-500 dark:text-gray-400">{comment.date}</span>
-              {!isReply && (
-                <button className="rounded-full p-1 opacity-0 transition-opacity hover:bg-gray-200 group-hover:opacity-100 dark:hover:bg-gray-600">
-                  <MoreHorizontal className="h-3 w-3 text-gray-500" />
-                </button>
-              )}
             </div>
 
             {/* 댓글 내용 */}

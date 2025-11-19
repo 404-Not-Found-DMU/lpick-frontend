@@ -55,17 +55,20 @@ export const CommentList = ({ comments, onCommentLike, onReply }: CommentListPro
       {topLevelComments.map((comment) => (
         <div key={comment.id}>
           <CommentItem comment={comment} onLike={onCommentLike} onReply={onReply} />
-          {/* 답글들 렌더링 (depth 1만) */}
+          {/* 답글들 렌더링 (depth 1만) - 깔끔한 ㄴ 모양 리팩토링 */}
           {repliesMap[comment.id] && (
-            <div className="ml-12 divide-y divide-gray-50 border-l-2 border-violet-100 dark:divide-gray-600 dark:border-violet-800/30">
+            <div className="ml-8 mb-2 border-l-2 border-gray-200 pl-6 dark:border-gray-600">
               {repliesMap[comment.id].map((reply) => (
-                <CommentItem
-                  key={reply.id}
-                  comment={reply}
-                  onLike={onCommentLike}
-                  onReply={onReply}
-                  isReply={true}
-                />
+                <div key={reply.id} className="relative">
+                  {/* ㄴ 모양 연결선 */}
+                  <div className="absolute -left-6 top-6 h-0 w-4 border-t-2 border-gray-200 dark:border-gray-600"></div>
+                  <CommentItem
+                    comment={reply}
+                    onLike={onCommentLike}
+                    onReply={onReply}
+                    isReply={true}
+                  />
+                </div>
               ))}
             </div>
           )}

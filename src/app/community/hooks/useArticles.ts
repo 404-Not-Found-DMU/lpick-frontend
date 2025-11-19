@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   getArticles, 
   getArticle,
+  incrementViewCount,
   getMyArticles,
   getLikedArticles
 } from '@/shared/api';
@@ -97,8 +98,17 @@ export const useArticle = (articleId: string | null) => {
     setError(null);
     
     try {
-      const response = await getArticle(id);
-      setArticle(response);
+      // 게시글 데이터 조회와 조회수 증가를 병렬로 실행
+      const [articleResponse] = await Promise.allSettled([
+        getArticle(id),
+        incrementViewCount(id) // 조회수 증가 (다소 시간 걸릴 수 있지만 UI는 블록하지 않음)
+      ]);
+      
+      if (articleResponse.status === 'fulfilled') {
+        setArticle(articleResponse.value);
+      } else {
+        throw articleResponse.reason;
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch article';
       setError(errorMessage);

@@ -104,6 +104,7 @@ export interface ArticleDetail {
   likeCount: number;
   commentCount: number;
   bookmarkCount: number;
+  viewCount: number;
   oauthId: string;
   author: string;
   liked: boolean;
