@@ -2,11 +2,49 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Bookmark, FileText, Music, Calendar, Heart, Eye, User, MessageCircle, Loader2 } from 'lucide-react';
+import { Bookmark, FileText, Calendar, Heart, Eye, MessageCircle, Loader2, Disc, Guitar, User } from 'lucide-react';
 import { useArticleBookmarks, useBookmarkedWikis } from '@/shared/hooks';
+import { CATEGORY_META } from '@/app/wiki/components/categoryMeta';
+import type { WikiCategory } from '@/types/hierarchical.editor.types';
 
 const BookmarkTab = () => {
   const [selectedFilter, setSelectedFilter] = useState('전체');
+
+  // 북마크 타입 정의
+  type PostBookmark = {
+    articleId: string;
+    title: string;
+    author: string;
+    createdAt: string;
+    likeCount: number;
+    commentCount: number;
+    viewCount: number;
+    content: string;
+    type: 'post';
+    category: string;
+    id: string;
+  };
+
+  type WikiBookmark = {
+    wikiId: string;
+    wikiPageClass: string;
+    title: string;
+    author: string;
+    createdAt: string;
+    likeCount: number;
+    viewCount: number;
+    content: string;
+    category: string;
+    type: 'wiki';
+    id: string;
+  };
+
+  type Bookmark = PostBookmark | WikiBookmark;
+
+  // 타입 가드 함수
+  const isWikiBookmark = (bookmark: Bookmark): bookmark is WikiBookmark => {
+    return bookmark.type === 'wiki';
+  };
 
   // API 훅 사용
   const { 
@@ -21,8 +59,50 @@ const BookmarkTab = () => {
     error: wikiError 
   } = useBookmarkedWikis({ page: 1, size: 20 });
 
+  // 위키 URL 생성 함수
+  const getWikiUrl = (wikiPageId: string, wikiPageClass: string): string => {
+    // API 값을 라우팅 경로로 매핑
+    const classToRoute: Record<string, WikiCategory> = {
+      'GEAR': 'equipment',
+      'ALBUM': 'lp', 
+      'ARTIST': 'artist',
+      'OTHER': 'other',
+      // 소문자 버전도 지원 (안전장치)
+      'gear': 'equipment',
+      'album': 'lp',
+      'artist': 'artist', 
+      'lp': 'lp',
+      'equipment': 'equipment',
+      'other': 'other'
+    };
+    
+    const route = classToRoute[wikiPageClass] || 'other';
+    return `/wiki/${route}/${wikiPageId}`;
+  };
+
+  // 위키 카테고리 표시명 가져오기 (CATEGORY_META 활용)
+  const getWikiCategoryDisplayName = (wikiPageClass: string): string => {
+    // API 값을 WikiCategory로 변환
+    const classToCategory: Record<string, WikiCategory> = {
+      'GEAR': 'equipment',
+      'ALBUM': 'lp',
+      'ARTIST': 'artist', 
+      'OTHER': 'other',
+      // 소문자 버전도 지원
+      'gear': 'equipment',
+      'album': 'lp',
+      'artist': 'artist',
+      'lp': 'lp', 
+      'equipment': 'equipment',
+      'other': 'other'
+    };
+    
+    const category = classToCategory[wikiPageClass] || 'other';
+    return CATEGORY_META[category]?.label || '기타';
+  };
+
   // 통합된 북마크 데이터와 필터링
-  const allBookmarks = useMemo(() => {
+  const allBookmarks = useMemo((): Bookmark[] => {
     const articles = articleBookmarks.map((article, index) => {
       // 실제 articleId가 있으면 사용, 없으면 임시 방안으로 index 기반 ID 생성
       // TODO: API에서 실제 articleId를 제공하면 이 로직을 수정해야 함
@@ -50,6 +130,7 @@ const BookmarkTab = () => {
 
     const wikis = wikiBookmarks.map((wiki) => ({
       wikiId: wiki.wikiPageId,
+      wikiPageClass: wiki.wikiPageClass,
       title: wiki.wikiTitle,
       author: '', // API에서 제공되지 않음
       createdAt: '', // API에서 제공되지 않음
@@ -88,47 +169,72 @@ const BookmarkTab = () => {
     }
   };
 
-  // 게시글 카테고리 설정 (게시글 탭과 동일)
-  const categoryConfig = {
-    '자유게시판': {
-      icon: MessageCircle,
-      color: 'text-green-600 dark:text-green-400',
-      bg: 'bg-green-100 dark:bg-green-900/20',
-    },
-    '장비': {
-      icon: Heart,
-      color: 'text-pink-600 dark:text-pink-400',
-      bg: 'bg-pink-100 dark:bg-pink-900/20',
-    },
-    '음반': {
-      icon: FileText,
-      color: 'text-purple-600 dark:text-purple-400',
-      bg: 'bg-purple-100 dark:bg-purple-900/20',
-    },
-    '아티스트': {
-      icon: User,
-      color: 'text-blue-600 dark:text-blue-400',
-      bg: 'bg-blue-100 dark:bg-blue-900/20',
-    },
-    '게시글': {
-      icon: FileText,
-      color: 'text-indigo-600 dark:text-indigo-400',
-      bg: 'bg-indigo-100 dark:bg-indigo-900/20',
-    },
+  // 위키 카테고리별 아이콘 가져오기
+  const getWikiCategoryIcon = (wikiPageClass: string) => {
+    // API 값을 WikiCategory로 변환
+    const classToCategory: Record<string, WikiCategory> = {
+      'GEAR': 'equipment',
+      'ALBUM': 'lp',
+      'ARTIST': 'artist', 
+      'OTHER': 'other',
+      // 소문자 버전도 지원
+      'gear': 'equipment',
+      'album': 'lp',
+      'artist': 'artist',
+      'lp': 'lp', 
+      'equipment': 'equipment',
+      'other': 'other'
+    };
+    
+    const category = classToCategory[wikiPageClass] || 'other';
+    
+    // 위키에서 사용하는 동일한 아이콘 매핑
+    switch (category) {
+      case 'lp':
+        return <Disc className="h-5 w-5 text-violet-600 dark:text-violet-400" />;
+      case 'equipment':
+        return <Guitar className="h-5 w-5 text-green-600 dark:text-green-400" />;
+      case 'artist':
+        return <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />;
+      case 'other':
+      default:
+        return <FileText className="h-5 w-5 text-orange-600 dark:text-orange-400" />;
+    }
   };
 
-  const getCategoryIcon = (category: string) => {
-    const config = categoryConfig[category as keyof typeof categoryConfig];
-    if (!config) return <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
-
-    const Icon = config.icon;
-    return <Icon className={`h-5 w-5 ${config.color}`} />;
+  // 위키 카테고리별 배경색 가져오기
+  const getWikiCategoryBg = (wikiPageClass: string): string => {
+    const classToCategory: Record<string, WikiCategory> = {
+      'GEAR': 'equipment',
+      'ALBUM': 'lp',
+      'ARTIST': 'artist', 
+      'OTHER': 'other',
+      'gear': 'equipment',
+      'album': 'lp',
+      'artist': 'artist',
+      'lp': 'lp', 
+      'equipment': 'equipment',
+      'other': 'other'
+    };
+    
+    const category = classToCategory[wikiPageClass] || 'other';
+    
+    // 위키에서 사용하는 색상과 매칭
+    switch (category) {
+      case 'lp':
+        return 'bg-violet-100 dark:bg-violet-900/20';
+      case 'equipment':
+        return 'bg-green-100 dark:bg-green-900/20';
+      case 'artist':
+        return 'bg-purple-100 dark:bg-purple-900/20';
+      case 'other':
+      default:
+        return 'bg-orange-100 dark:bg-orange-900/20';
+    }
   };
-
-  const getCategoryBg = (category: string) => {
-    const config = categoryConfig[category as keyof typeof categoryConfig];
-    return config?.bg || 'bg-gray-100 dark:bg-gray-900/20';
-  };
+  const getPostCategoryIcon = () => (
+    <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+  );
 
   const loading = articleLoading || wikiLoading;
   const error = articleError || wikiError;
@@ -200,20 +306,24 @@ const BookmarkTab = () => {
               {filteredBookmarks.map((bookmark) => (
                 <Link
                   key={`${bookmark.type}-${bookmark.id}`}
-                  href={bookmark.type === 'post' ? `/community/${bookmark.id}` : `/wiki/${bookmark.id}`}
+                  href={
+                    bookmark.type === 'post' 
+                      ? `/community/${bookmark.id}` 
+                      : getWikiUrl(bookmark.id, isWikiBookmark(bookmark) ? bookmark.wikiPageClass : 'other')
+                  }
                   className="group block rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:border-amber-200 hover:bg-gradient-to-br hover:from-amber-50/50 hover:to-orange-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-amber-700 cursor-pointer"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex flex-1 items-start gap-4">
                       <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${
                         bookmark.type === 'post' 
-                          ? getCategoryBg('게시글') 
-                          : 'bg-violet-100 dark:bg-violet-900/20'
+                          ? 'bg-indigo-100 dark:bg-indigo-900/20' 
+                          : isWikiBookmark(bookmark) ? getWikiCategoryBg(bookmark.wikiPageClass) : 'bg-gray-100 dark:bg-gray-900/20'
                       } shadow-sm`}>
                         {bookmark.type === 'post' ? (
-                          getCategoryIcon('게시글')
+                          getPostCategoryIcon()
                         ) : (
-                          <Music className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                          isWikiBookmark(bookmark) ? getWikiCategoryIcon(bookmark.wikiPageClass) : getWikiCategoryIcon('other')
                         )}
                       </div>
 
@@ -225,7 +335,9 @@ const BookmarkTab = () => {
                           {bookmark.type === 'wiki' && bookmark.category && (
                             <>
                               <span className="text-xs text-gray-400">•</span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">{bookmark.category}</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {getWikiCategoryDisplayName(bookmark.category)}
+                              </span>
                             </>
                           )}
                           {bookmark.author && (
@@ -262,12 +374,12 @@ const BookmarkTab = () => {
                                 <MessageCircle className="h-4 w-4" />
                                 <span className="text-sm font-medium">{bookmark.commentCount || 0}</span>
                               </div>
+                              <div className="flex items-center gap-1 text-gray-500">
+                                <Eye className="h-4 w-4" />
+                                <span className="text-sm font-medium">{bookmark.viewCount || 0}</span>
+                              </div>
                             </>
                           )}
-                          <div className="flex items-center gap-1 text-gray-500">
-                            <Eye className="h-4 w-4" />
-                            <span className="text-sm font-medium">{bookmark.viewCount || 0}</span>
-                          </div>
                         </div>
                       </div>
                     </div>
