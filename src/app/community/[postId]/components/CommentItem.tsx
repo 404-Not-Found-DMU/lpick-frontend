@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Heart, Reply, User } from 'lucide-react';
 import Image from 'next/image';
 import { Comment } from '../../community.types';
+import { useUserStore } from '@/store/userStore';
 
 interface CommentItemProps {
   comment: Comment;
@@ -32,6 +33,7 @@ const renderContentWithMentions = (content: string) => {
 };
 
 export const CommentItem = ({ comment, onLike, onReply, isReply = false }: CommentItemProps) => {
+  const { userInfo } = useUserStore();
   const [isLiked, setIsLiked] = useState(comment.liked || false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyText, setReplyText] = useState('');
@@ -157,9 +159,22 @@ export const CommentItem = ({ comment, onLike, onReply, isReply = false }: Comme
             {showReplyForm && (
               <div className="mt-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
                 <form onSubmit={handleReplySubmit} className="flex gap-3">
-                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-xs font-bold text-white">
-                    U
-                  </div>
+                  {/* 사용자 프로필 아바타 */}
+                  {userInfo?.profile ? (
+                    <div className="flex-shrink-0 overflow-hidden rounded-full h-7 w-7">
+                      <Image
+                        src={userInfo.profile}
+                        alt={`${userInfo.nickname}님의 프로필`}
+                        width={28}
+                        height={28}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border-2 border-violet-300 bg-gray-100 dark:border-violet-700 dark:bg-gray-800">
+                      <User className="h-3 w-3 text-violet-300 dark:text-violet-700" />
+                    </div>
+                  )}
                   <div className="flex-1">
                     <input
                       type="text"
