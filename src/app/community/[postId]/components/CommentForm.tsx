@@ -1,4 +1,6 @@
-import { Send } from 'lucide-react';
+import { Send, User } from 'lucide-react';
+import Image from 'next/image';
+import { useUserStore } from '@/store/userStore';
 
 interface CommentFormProps {
   newComment: string;
@@ -7,14 +9,28 @@ interface CommentFormProps {
 }
 
 export const CommentForm = ({ newComment, onCommentChange, onCommentSubmit }: CommentFormProps) => {
+  const { userInfo } = useUserStore();
+
   return (
-    <div className="border-b border-gray-100 p-4 dark:border-gray-700 sm:p-6">
+    <div className="border-b border-gray-100 p-4 dark:border-gray-700 sm:p-4">
       <form onSubmit={onCommentSubmit}>
         <div className="flex items-center gap-3 sm:gap-4">
           {/* 사용자 아바타 */}
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-xs font-bold text-white sm:h-10 sm:w-10 sm:text-sm">
-            U
-          </div>
+          {userInfo?.profile ? (
+            <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-full sm:h-10 sm:w-10">
+              <Image
+                src={userInfo.profile}
+                alt={`${userInfo.nickname}님의 프로필`}
+                width={40}
+                height={40}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-violet-300 bg-gray-100 dark:border-violet-700 dark:bg-gray-800 sm:h-10 sm:w-10">
+              <User className="h-3 w-3 text-violet-300 dark:text-violet-700 sm:h-4 sm:w-4" />
+            </div>
+          )}
 
           {/* 댓글 입력 영역 */}
           <div className="flex-1">

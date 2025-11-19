@@ -182,6 +182,7 @@ export interface CommentListItem {
   articleId: string;
   oauthId: string;
   author: string;
+  authorProfile?: string;
   liked: boolean;
   likeCount: number;
   childsCommentList: ChildComment[];
