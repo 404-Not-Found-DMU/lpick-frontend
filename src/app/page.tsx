@@ -9,6 +9,8 @@ import { Badge } from "@/components/Badge"
 import { WelcomeModal, useWelcomeModal } from "@/modules/welcomeModal"
 import { fetcher } from "@/hooks/api/fetchers"
 import { getPopularWiki, type PopularWikiItem } from "@/hooks/api"
+import { usePopularArticles } from "@/app/community/hooks/usePopularArticles"
+import { getCategoryColor } from "@/app/community/utils"
 import RecentUpdatedCard from "@/app/wiki/components/RecentUpdatedCard"
 
 type RecommendAlbum = {
@@ -110,6 +112,12 @@ export default function HomePage() {
   const [loadingChart, setLoadingChart] = useState<boolean>(true)
   const [chartError, setChartError] = useState<string | null>(null)
 
+  // 인기 게시글 데이터 가져오기
+  const { 
+    articles: popularArticles, 
+    loading: articlesLoading, 
+  } = usePopularArticles()
+
   type ChartRow = { id: string; rank: number; title: string; subtitle: string }
   type ChartState = { ALBUM: ChartRow[]; GEAR: ChartRow[]; ARTIST: ChartRow[] }
   const [chartData, setChartData] = useState<ChartState>({
@@ -201,50 +209,20 @@ export default function HomePage() {
     return () => { active = false }
   }, [])
 
-  
-
-  const hotPosts = [
-    {
-      id: 1,
-      category: "구매후기",
-      title: "처음 구매한 LP 턴테이블 후기입니다!",
-      author: "음악애호가",
-      time: "1시간 전",
-      likes: 24,
-      comments: 8,
-      views: 156,
-    },
-    {
-      id: 2,
-      category: "질문답변",
-      title: "오래 고민한 장비 선택에 대한 조언을 구합니다",
-      author: "초보자",
-      time: "2시간 전",
-      likes: 18,
-      comments: 12,
-      views: 203,
-    },
-    {
-      id: 3,
-      category: "자유게시판",
-      title: "LP 레코드 관리 팁 공유합니다",
-      author: "레코드매니아",
-      time: "3시간 전",
-      likes: 31,
-      comments: 15,
-      views: 287,
-    },
-    {
-      id: 4,
-      category: "구매정보",
-      title: "Pink Floyd - The Dark Side of the Moon 리뷰",
-      author: "클래식록팬",
-      time: "4시간 전",
-      likes: 42,
-      comments: 23,
-      views: 398,
-    },
-  ]
+  // 게시글 시간 포맷 함수
+  const formatTimeAgo = (dateString: string) => {
+    const now = new Date()
+    const postDate = new Date(dateString)
+    const diffInMinutes = Math.floor((now.getTime() - postDate.getTime()) / (1000 * 60))
+    
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes}분 전`
+    } else if (diffInMinutes < 1440) {
+      return `${Math.floor(diffInMinutes / 60)}시간 전`
+    } else {
+      return `${Math.floor(diffInMinutes / 1440)}일 전`
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -531,48 +509,74 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {hotPosts.map((post) => (
-              <Card
-                key={post.id}
-                className="hover:shadow-md transition-shadow border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <Badge
-                      variant="outline"
-                      className="text-violet-500 dark:text-violet-400 border-violet-300 dark:border-violet-600"
-                    >
-                      {post.category}
-                    </Badge>
-                    <span className="text-sm text-gray-400 dark:text-gray-500">{post.time}</span>
-                  </div>
-                  <Link href={`/community/${post.id}`} className="block">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 hover:text-violet-500 dark:hover:text-violet-400 line-clamp-2">
-                      {post.title}
-                    </h3>
-                  </Link>
-                  <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                    <span>{post.author}</span>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-1">
-                        <Heart className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                        <span>{post.likes}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <MessageCircle className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                        <span>{post.comments}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Eye className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                        <span>{post.views}</span>
+          {articlesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[...Array(4)].map((_, index) => (
+                <Card
+                  key={index}
+                  className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                >
+                  <CardContent className="p-6">
+                    <div className="animate-pulse">
+                      <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-3"></div>
+                      <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : popularArticles.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {popularArticles.slice(0, 4).map((article) => (
+                <Card
+                  key={article.articleId}
+                  className="hover:shadow-md transition-shadow border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <Badge
+                        className={getCategoryColor(article.articleType)}
+                      >
+                        {article.articleType}
+                      </Badge>
+                      <span className="text-sm text-gray-400 dark:text-gray-500">
+                        {formatTimeAgo(article.createdAt)}
+                      </span>
+                    </div>
+                    <Link href={`/community/${article.articleId}`} className="block">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 hover:text-violet-500 dark:hover:text-violet-400 line-clamp-2">
+                        {article.title}
+                      </h3>
+                    </Link>
+                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                      <span>{article.author}</span>
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-1">
+                          <Heart className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                          <span>{article.likeCount}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <MessageCircle className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                          <span>{article.commentCount}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Eye className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                          <span>{article.viewCount}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-dashed border-gray-300 dark:border-gray-600">
+              <CardContent className="py-12 text-center">
+                <p className="text-gray-500 dark:text-gray-400">아직 인기 게시글이 없습니다.</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </section>
 
