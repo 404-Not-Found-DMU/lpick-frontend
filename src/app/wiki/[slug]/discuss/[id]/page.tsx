@@ -13,6 +13,8 @@ import {
   type DebateBallotResult,
   type DebateListItem,
   type DebateChatItem,
+  getDebateBallotHistory,
+  type BallotValue,
 } from "@/hooks/api/debate.api";
 import { useDebateSocket } from "@/hooks/ws/useDebateSocket";
 import { useUserStore } from "@/store/userStore";
@@ -31,6 +33,7 @@ export default function DiscussionDetailPageForDoc() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOption, setSelectedOption] = useState<"AGREE" | "DISAGREE" | "ABSTAIN" | "">("");
+  const [alreadyVoted, setAlreadyVoted] = useState<boolean>(false);
   // 답변 대상
   const [replyTo, setReplyTo] = useState<DebateChatItem | null>(null);
   const [wikiInfo, setWikiInfo] = useState<PublicWikiResponse | null>(null);
@@ -60,8 +63,27 @@ export default function DiscussionDetailPageForDoc() {
           } catch {
             setBallot(null);
           }
+          // 투표중 상태라면 내 투표 여부/값 확인
+          if (found && found.status === 'VOTE') {
+            try {
+              const hist = await getDebateBallotHistory(id);
+              if (!active) return;
+              setAlreadyVoted(!!hist?.voted);
+              if (hist?.voted && hist?.votedBallotValue) {
+                setSelectedOption(hist.votedBallotValue as BallotValue);
+              } else {
+                setSelectedOption("");
+              }
+            } catch {
+              // 무시: 비로그인/오류 등
+              setAlreadyVoted(false);
+            }
+          } else {
+            setAlreadyVoted(false);
+          }
         } else {
           setBallot(null);
+          setAlreadyVoted(false);
         }
       } catch (e) {
         if (active) setError(e instanceof Error ? e.message : "불러오기에 실패했습니다.");
@@ -194,6 +216,11 @@ export default function DiscussionDetailPageForDoc() {
           <CardContent>
             {thread.status === "VOTE" && (
               <div className="space-y-4">
+                {alreadyVoted && selectedOption && (
+                  <div className="rounded-md bg-violet-50 px-3 py-2 text-sm text-violet-700 dark:bg-violet-900/20 dark:text-violet-200">
+                    내 투표: {selectedOption === "AGREE" ? "찬성" : selectedOption === "DISAGREE" ? "반대" : "기권"}
+                  </div>
+                )}
                 <div className="space-y-3">
                   {["AGREE", "DISAGREE", "ABSTAIN"].map((opt) => (
                     <label key={opt} className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -203,6 +230,7 @@ export default function DiscussionDetailPageForDoc() {
                         className="h-4 w-4"
                         checked={selectedOption === opt}
                         onChange={() => setSelectedOption(opt as typeof selectedOption)}
+                        disabled={alreadyVoted}
                       />
                       <span className="text-sm">
                         {opt === "AGREE" ? "찬성" : opt === "DISAGREE" ? "반대" : "기권"}
@@ -216,12 +244,13 @@ export default function DiscussionDetailPageForDoc() {
                         if (!selectedOption) return;
                         try {
                           await postDebateBallot(id, selectedOption);
+                          setAlreadyVoted(true);
                           router.refresh();
                         } catch {
                           alert("투표에 실패했습니다.");
                         }
                       }}
-                      disabled={!selectedOption}
+                      disabled={!selectedOption || alreadyVoted}
                     >
                       투표하기
                     </Button>

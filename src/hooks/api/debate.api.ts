@@ -98,4 +98,16 @@ export async function postDebateBallot(debateId: string, ballotValue: BallotValu
     return res as unknown as 'SUCCESS' | string;
 }
 
+// Get my ballot history/status for a debate
+export interface DebateBallotHistory {
+    votedBallotValue?: BallotValue;
+    voted: boolean;
+}
+
+export async function getDebateBallotHistory(debateId: string): Promise<DebateBallotHistory> {
+    return fetcher<DebateBallotHistory>(`/api/v1/debate/${encodeURIComponent(debateId)}/ballot/history`, {
+        method: 'GET',
+    });
+}
+
 
