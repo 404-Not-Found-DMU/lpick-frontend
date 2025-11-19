@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Heart, Reply } from 'lucide-react';
+import { Heart, Reply, User } from 'lucide-react';
+import Image from 'next/image';
 import { Comment } from '../../community.types';
 
 interface CommentItemProps {
@@ -81,15 +82,25 @@ export const CommentItem = ({ comment, onLike, onReply, isReply = false }: Comme
       >
         <div className="flex gap-3">
           {/* 프로필 아바타 */}
-          <div
-            className={`flex flex-shrink-0 items-center justify-center rounded-full font-bold text-white ${
-              isReply
-                ? 'h-7 w-7 bg-gradient-to-r from-emerald-500 to-teal-500 text-xs'
-                : 'h-9 w-9 bg-gradient-to-r from-blue-500 to-cyan-500 text-sm'
-            }`}
-          >
-            {comment.author.charAt(0)}
-          </div>
+          {comment.authorProfile ? (
+            <div className={`flex-shrink-0 overflow-hidden rounded-full ${isReply ? 'h-7 w-7' : 'h-9 w-9'}`}>
+              <Image
+                src={comment.authorProfile}
+                alt={`${comment.author}님의 프로필`}
+                width={isReply ? 28 : 36}
+                height={isReply ? 28 : 36}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <div
+              className={`flex flex-shrink-0 items-center justify-center rounded-full border-2 border-violet-300 bg-gray-100 dark:border-violet-700 dark:bg-gray-800 ${
+                isReply ? 'h-7 w-7' : 'h-9 w-9'
+              }`}
+            >
+              <User className={`text-violet-300 dark:text-violet-700 ${isReply ? 'h-3 w-3' : 'h-4 w-4'}`} />
+            </div>
+          )}
 
           <div className="min-w-0 flex-1">
             {/* 댓글 헤더 */}

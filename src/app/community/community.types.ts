@@ -65,6 +65,7 @@ export interface Post {
   oauthId?: string;
   date: string;
   views?: number;
+  viewCount?: number; // API에서 제공하는 조회수
   likes: number;
   likeCount?: number;
   comments: number;
@@ -81,6 +82,7 @@ export interface Comment {
   id: number;
   postId: number;
   author: string;
+  authorProfile?: string;
   content: string;
   date: string;
   likes: number;
@@ -203,6 +205,7 @@ export const convertApiCommentToUiComment = (apiComment: CommentListItem | Child
     id: generateSimpleId(apiComment.commentId),
     postId: generateSimpleId(articleId),
     author: apiComment.author,
+    authorProfile: apiComment.authorProfile,
     content: apiComment.content,
     date: formatDate(apiComment.createdAt),
     likes: apiComment.likeCount,

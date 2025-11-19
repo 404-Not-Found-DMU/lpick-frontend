@@ -16,7 +16,7 @@ const Sidebar = ({ post }: SidebarProps) => {
       {/* 작성자 정보 */}
       <div className="rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800">
         <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">작성자 정보</h3>
-        <div className="mb-6 flex items-center gap-4">
+        <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700">
             <span className="text-lg font-semibold text-gray-600 dark:text-gray-300">
               {post.author.charAt(0)}
@@ -32,10 +32,6 @@ const Sidebar = ({ post }: SidebarProps) => {
             <p className="text-sm text-gray-500 dark:text-gray-400">2023년 1월 15일 가입</p>
           </div>
         </div>
-        <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
-          <MessageSquare className="h-4 w-4" />
-          작성자의 게시글 보기
-        </button>
       </div>
 
       {/* 인기 게시글 */}

@@ -89,7 +89,8 @@ export const useCommunity = () => {
       comments: article.commentCount,
       commentCount: article.commentCount,
       bookmarkCount: article.bookmarkCount,
-      views: 0, // 조회수 정보 필요
+      views: article.viewCount, // API에서 제공하는 viewCount 사용
+      viewCount: article.viewCount, // API 필드 직접 매핑
       image: '', // 이미지 정보 필요
     };
   }, []);

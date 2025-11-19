@@ -90,10 +90,10 @@ export const PostCard = ({ post }: PostCardProps) => {
                 <MessageSquare className="h-3 w-3" />
                 <span>{post.commentCount || post.comments || 0}</span>
               </div>
-              {post.views !== undefined && (
+              {(post.viewCount !== undefined || post.views !== undefined) && (
                 <div className="hidden items-center gap-0.5 sm:flex">
                   <Eye className="h-3 w-3" />
-                  <span>{formatViews(post.views)}</span>
+                  <span>{formatViews(post.viewCount ?? post.views ?? 0)}</span>
                 </div>
               )}
               {post.bookmarkCount !== undefined && (
