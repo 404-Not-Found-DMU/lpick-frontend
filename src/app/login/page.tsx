@@ -71,31 +71,7 @@ const LoginPage = () => {
                 />
               </div>
 
-              {/* 통계 정보 */}
-              <div className="animate-slide-up delay-400 order-4 flex items-center justify-center space-x-3 sm:space-x-4 md:space-x-6 lg:justify-start">
-                <div className="text-center">
-                  <div className="text-lg font-bold text-lavender-500 dark:text-lavender-400 sm:text-xl lg:text-2xl">
-                    10K+
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 sm:text-sm">LP 정보</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-indigo-500 dark:text-indigo-400 sm:text-xl lg:text-2xl">
-                    5K+
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 sm:text-sm">
-                    활성 사용자
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-purple-500 dark:text-purple-400 sm:text-xl lg:text-2xl">
-                    50K+
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 sm:text-sm">
-                    커뮤니티 글
-                  </div>
-                </div>
-              </div>
+              {/* 통계 정보 제거됨 */}
             </div>
 
             {/* 오른쪽 섹션: 데스크탑 전용 로그인 카드 */}
