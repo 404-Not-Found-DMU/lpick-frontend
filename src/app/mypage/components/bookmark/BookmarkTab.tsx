@@ -196,106 +196,96 @@ const BookmarkTab = () => {
               <p className="text-gray-600 dark:text-gray-400">{error}</p>
             </div>
           ) : filteredBookmarks.length > 0 ? (
-            filteredBookmarks.map((bookmark) => (
-              <Link
-                key={`${bookmark.type}-${bookmark.id}`}
-                href={bookmark.type === 'post' ? `/community/${bookmark.id}` : `/wiki/${bookmark.id}`}
-                className="group block rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:border-amber-200 hover:bg-gradient-to-br hover:from-amber-50/50 hover:to-orange-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-amber-700 cursor-pointer"
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${
-                    bookmark.type === 'post' 
-                      ? getCategoryBg('게시글') 
-                      : 'bg-violet-100 dark:bg-violet-900/20'
-                  } shadow-sm`}>
-                    {bookmark.type === 'post' ? (
-                      getCategoryIcon('게시글')
-                    ) : (
-                      <Music className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className={`text-xs font-medium uppercase ${
-                        bookmark.type === 'post'
-                          ? 'text-indigo-600 dark:text-indigo-400'
-                          : 'text-violet-600 dark:text-violet-400'
-                      }`}>
-                        {bookmark.type === 'post' ? '게시글' : '위키'}
-                      </span>
-                      {bookmark.type === 'wiki' && bookmark.category && (
-                        <>
-                          <span className="text-xs text-gray-400">•</span>
-                          <span className="text-xs text-gray-500">{bookmark.category}</span>
-                        </>
-                      )}
-                      {bookmark.createdAt && (
-                        <>
-                          <span className="text-xs text-gray-400">•</span>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Calendar className="h-3 w-3" />
-                            {formatDate(bookmark.createdAt)}
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    <h4 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-400">
-                      {bookmark.title}
-                    </h4>
-
-                    {(bookmark.content || bookmark.author) && (
-                      <div className="mb-3">
-                        {bookmark.content && (
-                          <p className="mb-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
-                            {bookmark.content}
-                          </p>
-                        )}
-                        {bookmark.author && (
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <User className="h-4 w-4" />
-                            <span>{bookmark.author}</span>
-                          </div>
+            <div className="space-y-4">
+              {filteredBookmarks.map((bookmark) => (
+                <Link
+                  key={`${bookmark.type}-${bookmark.id}`}
+                  href={bookmark.type === 'post' ? `/community/${bookmark.id}` : `/wiki/${bookmark.id}`}
+                  className="group block rounded-2xl border border-gray-100 p-5 transition-all duration-300 hover:border-amber-200 hover:bg-gradient-to-br hover:from-amber-50/50 hover:to-orange-50/50 hover:shadow-lg dark:border-gray-800 dark:hover:border-amber-700 cursor-pointer"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex flex-1 items-start gap-4">
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${
+                        bookmark.type === 'post' 
+                          ? getCategoryBg('게시글') 
+                          : 'bg-violet-100 dark:bg-violet-900/20'
+                      } shadow-sm`}>
+                        {bookmark.type === 'post' ? (
+                          getCategoryIcon('게시글')
+                        ) : (
+                          <Music className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                         )}
                       </div>
-                    )}
 
-                    <div className="flex items-center gap-4">
-                      {bookmark.type === 'post' && (
-                        <>
-                          <div className="flex items-center gap-1 text-red-500">
-                            <Heart className="h-4 w-4 fill-current" />
-                            <span className="text-sm font-medium">{bookmark.likeCount || 0}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-2 flex items-center gap-2">
+                          <span className={`text-xs font-medium uppercase text-amber-600 dark:text-amber-400`}>
+                            {bookmark.type === 'post' ? '게시글' : '위키'}
+                          </span>
+                          {bookmark.type === 'wiki' && bookmark.category && (
+                            <>
+                              <span className="text-xs text-gray-400">•</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{bookmark.category}</span>
+                            </>
+                          )}
+                          {bookmark.author && (
+                            <>
+                              <span className="text-xs text-gray-400">•</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {bookmark.author}
+                              </span>
+                            </>
+                          )}
+                          {bookmark.createdAt && (
+                            <>
+                              <span className="text-xs text-gray-400">•</span>
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                <Calendar className="h-3 w-3" />
+                                {formatDate(bookmark.createdAt)}
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        <h4 className="mb-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-400">
+                          {bookmark.title}
+                        </h4>
+
+                        <div className="flex items-center gap-4">
+                          {bookmark.type === 'post' && (
+                            <>
+                              <div className="flex items-center gap-1 text-red-500">
+                                <Heart className="h-4 w-4 fill-current" />
+                                <span className="text-sm font-medium">{bookmark.likeCount || 0}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-blue-500">
+                                <MessageCircle className="h-4 w-4" />
+                                <span className="text-sm font-medium">{bookmark.commentCount || 0}</span>
+                              </div>
+                            </>
+                          )}
+                          <div className="flex items-center gap-1 text-gray-500">
+                            <Eye className="h-4 w-4" />
+                            <span className="text-sm font-medium">{bookmark.viewCount || 0}</span>
                           </div>
-                          <div className="flex items-center gap-1 text-blue-500">
-                            <MessageCircle className="h-4 w-4" />
-                            <span className="text-sm font-medium">{bookmark.commentCount || 0}</span>
-                          </div>
-                        </>
-                      )}
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <Eye className="h-4 w-4" />
-                        <span className="text-sm font-medium">{bookmark.viewCount || 0}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))
+                </Link>
+              ))}
+            </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className="py-12 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
                 <Bookmark className="h-8 w-8 text-gray-400" />
               </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                  {selectedFilter}에 해당하는 북마크가 없습니다
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  마음에 드는 게시글이나 위키 콘텐츠를 북마크해보세요
-                </p>
-              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                {selectedFilter}에 해당하는 북마크가 없습니다
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                마음에 드는 게시글이나 위키 콘텐츠를 북마크해보세요
+              </p>
             </div>
           )}
         </div>

@@ -204,4 +204,33 @@ export async function removeWikiBookmark(wikiId: string): Promise<'SUCCESS' | un
     }
 }
 
+// ===== Like APIs =====
+export interface WikiLikeStatusResponse {
+    wikiLikeId?: string;
+    liked: boolean;
+}
+
+// 좋아요 여부 조회
+export async function getWikiLikeStatus(wikiId: string): Promise<WikiLikeStatusResponse> {
+    return fetcher<WikiLikeStatusResponse>(`/api/v1/wiki/${encodeURIComponent(wikiId)}/like`, {
+        method: 'GET',
+    });
+}
+
+// 좋아요 추가
+export async function likeWiki(wikiId: string): Promise<'SUCCESS' | unknown> {
+    const res = await fetcher<unknown>(`/api/v1/wiki/${encodeURIComponent(wikiId)}/like`, {
+        method: 'POST',
+    });
+    return (res as 'SUCCESS') ?? 'SUCCESS';
+}
+
+// 좋아요 삭제
+export async function unlikeWiki(wikiId: string): Promise<'SUCCESS' | unknown> {
+    const res = await fetcher<unknown>(`/api/v1/wiki/${encodeURIComponent(wikiId)}/like`, {
+        method: 'DELETE',
+    });
+    return (res as 'SUCCESS') ?? 'SUCCESS';
+}
+
 
